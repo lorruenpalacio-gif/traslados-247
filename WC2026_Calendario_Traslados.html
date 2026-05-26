@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC2026 · Traslados</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cdm: #F97316; --cdm-light: #FFF7ED; --cdm-border: #FB923C;
+  --gdl: #22C55E; --gdl-light: #F0FDF4; --gdl-border: #4ADE80;
+  --mty: #3B82F6; --mty-light: #EFF6FF; --mty-border: #60A5FA;
+  --ny:  #A855F7; --ny-light:  #FAF5FF; --ny-border:  #C084FC;
+
+  --status-pending:   #F59E0B;
+  --status-confirmed: #22C55E;
+  --status-operating: #3B82F6;
+  --status-completed: #6B7280;
+  --status-cancelled: #EF4444;
+
+  --sidebar-w: 220px;
+  --bg: #F1F5F9;
+  --sidebar-bg: #1C1C1E;
+  --header-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --border: #E2E8F0;
+  --text: #0F172A;
+  --muted: #94A3B8;
+  --accent: #D4AF37;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+
+/* ── TOP HEADER ── */
+.top-header {
+  background: var(--sidebar-bg);
+  display: flex; align-items: stretch;
+  height: 88px; flex-shrink: 0;
+}
+.logo-area {
+  width: var(--sidebar-w);
+  display: flex; align-items: center; gap: 10px;
+  padding: 0 16px;
+  border-right: 1px solid #333;
+  flex-shrink: 0;
+}
+.logo-icon { font-size: 28px; }
+.logo-text { color: #fff; }
+.logo-text .wc { font-family: 'Bebas Neue'; font-size: 13px; letter-spacing: 2px; color: var(--accent); }
+.logo-text .year { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 1px; color: #fff; line-height: 1; }
+.logo-text .org { font-size: 10px; color: #aaa; margin-top: 1px; }
+
+.header-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 2px;
+}
+.header-center .month-title {
+  font-family: 'Bebas Neue'; font-size: 40px; letter-spacing: 4px; color: #fff; line-height: 1;
+}
+.header-center .sub { font-size: 11px; color: var(--accent); letter-spacing: 3px; font-weight: 500; }
+
+.header-actions {
+  width: var(--sidebar-w);
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 10px; padding: 0 16px;
+  border-left: 1px solid #333;
+  flex-shrink: 0;
+}
+.hbtn {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #333; border: none; color: #fff;
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.hbtn.primary { background: var(--accent); color: #000; font-size: 20px; font-weight: 700; }
+.hbtn:active { opacity: .7; }
+
+/* ── WEEKDAY BAR ── */
+.weekday-bar {
+  display: flex; flex-shrink: 0;
+  margin-left: var(--sidebar-w);
+  background: var(--sidebar-bg);
+  border-top: 1px solid #333;
+}
+.wd-cell {
+  flex: 1; text-align: center;
+  font-size: 11px; font-weight: 600; letter-spacing: 1px;
+  color: #aaa; padding: 8px 0;
+  border-right: 1px solid #2A2A2A;
+}
+.wd-cell:last-child { border-right: none; }
+
+/* ── MAIN LAYOUT ── */
+.main { display: flex; flex: 1; overflow: hidden; }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--sidebar-bg);
+  overflow-y: auto; padding: 12px 0 20px;
+  border-right: 1px solid #2A2A2A;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+.sb-section { padding: 0 14px; margin-bottom: 18px; }
+.sb-title {
+  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  color: #666; text-transform: uppercase;
+  margin-bottom: 8px; padding-bottom: 6px;
+  border-bottom: 1px solid #2A2A2A;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border-radius: 8px;
+  cursor: pointer; margin-bottom: 2px;
+  font-size: 12px; color: #ccc;
+  transition: background .15s;
+  position: relative;
+}
+.sb-item:hover { background: #2A2A2A; }
+.sb-item.active { background: #333; color: #fff; }
+.sb-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.sb-dot.cdm { background: var(--cdm); }
+.sb-dot.gdl { background: var(--gdl); }
+.sb-dot.mty { background: var(--mty); }
+.sb-dot.ny  { background: var(--ny);  }
+
+.sb-item .sb-count {
+  margin-left: auto; font-size: 10px; font-weight: 700;
+  background: #444; color: #fff; border-radius: 10px;
+  padding: 1px 6px; min-width: 20px; text-align: center;
+}
+
+/* Service type lines */
+.svc-line { width: 24px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+
+/* Proyectos */
+.proj-item {
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 6px;
+  cursor: pointer; font-size: 11px; color: #bbb;
+  transition: background .15s; margin-bottom: 1px;
+}
+.proj-item:hover { background: #2A2A2A; color: #fff; }
+.proj-item.active { background: #333; color: #fff; }
+.proj-code { margin-left: auto; font-size: 10px; color: #666; }
+
+/* ── CALENDAR AREA ── */
+.cal-area { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.cal-grid {
+  flex: 1; overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(110px, 1fr);
+  gap: 1px; background: var(--border);
+  padding: 1px;
+}
+.cal-grid::-webkit-scrollbar { width: 6px; }
+.cal-grid::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+.cal-day {
+  background: var(--card-bg);
+  padding: 8px 6px 6px;
+  cursor: pointer;
+  position: relative;
+  transition: background .1s;
+  min-height: 0;
+  overflow: hidden;
+}
+.cal-day:hover { background: #F8FAFC; }
+.cal-day.other-month { background: #F8FAFC; }
+.cal-day.other-month .day-num { color: #CBD5E1; }
+.cal-day.today { background: #FFFBEB; }
+.cal-day.today .day-num { color: #D97706; font-weight: 700; }
+
+.day-num {
+  font-size: 16px; font-weight: 600;
+  color: var(--text); line-height: 1;
+  margin-bottom: 6px;
+}
+
+.event-block {
+  border-radius: 5px; padding: 3px 6px;
+  margin-bottom: 3px; border-left: 3px solid;
+  font-size: 10px; line-height: 1.3;
+  overflow: hidden;
+  cursor: pointer;
+}
+.event-block .ev-time { font-weight: 700; }
+.event-block .ev-route { color: #555; }
+.event-block .ev-code { font-weight: 600; margin-top: 1px; }
+
+.ev-cdm { background: var(--cdm-light); border-color: var(--cdm); }
+.ev-gdl { background: var(--gdl-light); border-color: var(--gdl); }
+.ev-mty { background: var(--mty-light); border-color: var(--mty); }
+.ev-ny  { background: var(--ny-light);  border-color: var(--ny);  }
+
+.ev-fullday {
+  border-radius: 5px; padding: 4px 6px;
+  margin-bottom: 3px; font-size: 10px;
+  font-weight: 700; text-align: center;
+  border: 2px solid;
+}
+.ev-fullday.cdm { background: var(--cdm-light); border-color: var(--cdm); color: var(--cdm); }
+.ev-fullday.gdl { background: var(--gdl-light); border-color: var(--gdl); color: var(--gdl); }
+.ev-fullday.mty { background: var(--mty-light); border-color: var(--mty); color: var(--mty); }
+.ev-fullday.ny  { background: var(--ny-light);  border-color: var(--ny);  color: var(--ny);  }
+
+.more-badge {
+  font-size: 9px; color: var(--muted); font-weight: 600;
+  padding: 1px 4px; cursor: pointer;
+}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar {
+  background: var(--sidebar-bg);
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  gap: 1px; border-top: 1px solid #2A2A2A;
+  flex-shrink: 0; padding: 10px 16px; gap: 0;
+}
+.bb-section { padding: 0 12px; }
+.bb-section:not(:last-child) { border-right: 1px solid #2A2A2A; }
+.bb-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #666; text-transform: uppercase; margin-bottom: 6px; }
+.bb-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.bb-title-row .bb-title { margin-bottom: 0; }
+.bb-edit-btn { background: none; border: 1px solid #444; border-radius: 5px; color: #aaa; font-size: 10px; padding: 1px 6px; cursor: pointer; }
+.bb-edit-btn:hover { background: #333; color: #fff; }
+/* bb modal form */
+.bb-item-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.bb-item-row input { flex: 1; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family:'Inter',sans-serif; font-size:12px; outline:none; }
+.bb-item-row input:focus { border-color:#0F172A; }
+.bb-item-del { background:none; border:1px solid #fca5a5; color:#ef4444; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; white-space:nowrap; }
+.bb-add-row { width:100%; padding:9px; background:#F1F5F9; border:1.5px dashed #CBD5E1; border-radius:8px; font-size:12px; font-weight:600; color:#64748B; cursor:pointer; margin-top:4px; }
+.bb-save-btn { width:100%; padding:11px; background:#0F172A; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; }
+.bb-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #aaa; margin-bottom: 3px; }
+.bb-val { font-weight: 700; color: #fff; }
+.bb-val.orange { color: var(--status-pending); }
+.bb-val.blue   { color: var(--status-operating); }
+.bb-val.green  { color: var(--status-confirmed); }
+.bb-val.red    { color: var(--status-cancelled); }
+
+/* ── MODAL ── */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.6); z-index: 500;
+  align-items: center; justify-content: center;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 16px;
+  width: min(560px, 92vw); max-height: 85vh;
+  overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+  animation: popIn .2s ease;
+}
+@keyframes popIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-head {
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  position: sticky; top: 0; background: #fff; z-index: 1;
+  border-radius: 16px 16px 0 0;
+}
+.modal-head h3 { font-family: 'Bebas Neue'; font-size: 22px; letter-spacing: 2px; }
+.modal-close { background: none; border: none; font-size: 20px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 6px; }
+.modal-close:hover { background: var(--bg); }
+.modal-body { padding: 16px 20px 20px; }
+
+.t-card {
+  border-radius: 10px; padding: 12px 14px;
+  margin-bottom: 10px; border-left: 4px solid;
+  position: relative;
+}
+.t-card.cdm { background: var(--cdm-light); border-color: var(--cdm); }
+.t-card.gdl { background: var(--gdl-light); border-color: var(--gdl); }
+.t-card.mty { background: var(--mty-light); border-color: var(--mty); }
+.t-card.ny  { background: var(--ny-light);  border-color: var(--ny);  }
+
+.t-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.t-client { font-weight: 700; font-size: 14px; }
+.t-time-badge {
+  background: rgba(0,0,0,.08); border-radius: 6px;
+  padding: 3px 8px; font-size: 11px; font-weight: 700;
+  white-space: nowrap;
+}
+.t-row { font-size: 12px; color: #444; display: flex; gap: 6px; align-items: flex-start; margin-top: 4px; }
+.t-icon { flex-shrink: 0; }
+.t-meta { display: flex; gap: 10px; margin-top: 8px; }
+.t-chip {
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; background: rgba(0,0,0,.07);
+}
+.t-status-chip {
+  font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 20px; color: #fff;
+}
+.sc-pending   { background: var(--status-pending); }
+.sc-confirmed { background: var(--status-confirmed); }
+.sc-operating { background: var(--status-operating); }
+.sc-completed { background: var(--status-completed); }
+.sc-cancelled { background: var(--status-cancelled); }
+.t-del { background: none; border: 1px solid #ddd; border-radius: 6px; padding: 2px 8px; font-size: 10px; color: #ef4444; cursor: pointer; }
+.t-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,.08); }
+.t-btn { background: none; border: 1px solid rgba(0,0,0,.15); border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: background .12s; }
+.t-btn:hover { background: rgba(0,0,0,.06); }
+.t-btn.edit  { color: #1d4ed8; border-color: #93c5fd; }
+.t-btn.dup   { color: #15803d; border-color: #86efac; }
+.t-btn.del   { color: #ef4444; border-color: #fca5a5; }
+
+/* form */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-full { grid-column: 1/-1; }
+.f-group { display: flex; flex-direction: column; gap: 4px; }
+.f-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+.f-input {
+  padding: 9px 11px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: 'Inter', sans-serif;
+  font-size: 13px; outline: none; background: #fff; color: var(--text);
+}
+.f-input:focus { border-color: #0F172A; }
+.f-save {
+  width: 100%; padding: 12px; background: #0F172A; color: #fff;
+  border: none; border-radius: 10px; font-weight: 700; font-size: 14px;
+  cursor: pointer; margin-top: 14px; letter-spacing: .5px;
+}
+.f-save:active { opacity: .8; }
+.f-cancel { width: 100%; padding: 10px; background: none; color: var(--muted); border: none; font-size: 13px; cursor: pointer; margin-top: 6px; }
+
+/* ── PASSENGERS ── */
+.pax-section { grid-column: 1/-1; }
+.pax-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.pax-row {
+  display: flex; align-items: center; gap: 6px;
+  background: #F8FAFC; border-radius: 8px; padding: 6px 8px;
+  border: 1px solid var(--border);
+}
+.pax-num {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: #0F172A; color: #fff; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.pax-input {
+  flex: 1; border: none; background: transparent;
+  font-family: 'Inter', sans-serif; font-size: 13px; outline: none; color: var(--text);
+}
+.pax-del {
+  background: none; border: none; color: #EF4444;
+  font-size: 16px; cursor: pointer; padding: 0 4px; line-height: 1;
+  flex-shrink: 0;
+}
+.pax-add-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 12px; background: #F1F5F9; border: 1.5px dashed #CBD5E1;
+  border-radius: 8px; font-size: 12px; font-weight: 600; color: #64748B;
+  cursor: pointer; width: 100%; justify-content: center;
+  transition: all .15s;
+}
+.pax-add-btn:hover { background: #E2E8F0; border-color: #94A3B8; color: #334155; }
+
+/* In day modal: passenger list */
+.t-pax-list { margin-top: 6px; display: flex; flex-direction: column; gap: 3px; }
+.t-pax-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #334155;
+}
+.t-pax-badge {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(0,0,0,.1); font-size: 9px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+
+.add-btn-modal {
+  width: 100%; padding: 12px; background: #0F172A; color: #fff;
+  border: none; border-radius: 10px; font-family: 'Bebas Neue';
+  font-size: 18px; letter-spacing: 2px; cursor: pointer; margin-top: 4px;
+}
+
+.empty-msg { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0; }
+
+/* search overlay */
+.search-bar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 600;
+  background: rgba(0,0,0,.85); padding: 16px 20px;
+  display: none; gap: 10px; align-items: center;
+}
+.search-bar.open { display: flex; }
+.search-bar input {
+  flex: 1; padding: 10px 14px; border-radius: 10px; border: none;
+  font-size: 15px; outline: none;
+}
+.search-close { background: #444; border: none; color: #fff; border-radius: 8px; padding: 10px 14px; cursor: pointer; font-size: 14px; }
+.search-results {
+  position: fixed; top: 60px; left: 20px; right: 20px; z-index: 600;
+  background: #fff; border-radius: 12px; max-height: 60vh; overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,.3); display: none;
+}
+.search-results.open { display: block; }
+.sr-item {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; font-size: 13px;
+}
+.sr-item:hover { background: var(--bg); }
+.sr-item:last-child { border-bottom: none; }
+.sr-date { font-size: 10px; color: var(--muted); font-weight: 600; }
+
+/* filter chip bar below weekdays */
+.filter-bar {
+  background: #F8FAFC; border-bottom: 1px solid var(--border);
+  display: flex; gap: 6px; padding: 6px 10px;
+  overflow-x: auto; flex-shrink: 0;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.f-chip {
+  padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; border: 1.5px solid transparent;
+  cursor: pointer; white-space: nowrap; background: #fff;
+  border-color: var(--border); color: var(--muted);
+  transition: all .15s;
+}
+.f-chip.active-cdm { background: var(--cdm-light); border-color: var(--cdm); color: var(--cdm); }
+.f-chip.active-gdl { background: var(--gdl-light); border-color: var(--gdl); color: var(--gdl); }
+.f-chip.active-mty { background: var(--mty-light); border-color: var(--mty); color: var(--mty); }
+.f-chip.active-ny  { background: var(--ny-light);  border-color: var(--ny);  color: var(--ny);  }
+.f-chip.active-all { background: #0F172A; border-color: #0F172A; color: #fff; }
+
+/* status dots in sidebar */
+.status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<!-- SEARCH -->
+<div class="search-bar" id="searchBar">
+  <input type="text" id="searchInput" placeholder="Buscar cliente, proyecto, ciudad..." oninput="doSearch()">
+  <button class="search-close" onclick="closeSearch()">✕</button>
+</div>
+<div class="search-results" id="searchResults"></div>
+
+<!-- TOP HEADER -->
+<div class="top-header">
+  <div class="logo-area">
+    <div class="logo-icon">🏆</div>
+    <div class="logo-text">
+      <div class="wc">FIFA WORLD CUP</div>
+      <div class="year" id="headerYear">2026</div>
+      <div class="org">24/7 World Concierge</div>
+    </div>
+  </div>
+  <div class="header-center">
+    <div class="month-title" id="headerMonth">JUNIO 2026</div>
+    <div class="sub">MUNDIAL FIFA 2026</div>
+  </div>
+  <div class="header-actions">
+    <button class="hbtn" onclick="prevMonth()" title="Mes anterior">‹</button>
+    <button class="hbtn" onclick="nextMonth()" title="Mes siguiente">›</button>
+    <button class="hbtn" onclick="openSearch()">🔍</button>
+    <button class="hbtn" onclick="openFilter()">⚙</button>
+    <button class="hbtn primary" onclick="openAddModal()">＋</button>
+  </div>
+</div>
+
+<!-- WEEKDAY BAR -->
+<div class="weekday-bar" id="weekdayBar">
+  <div class="wd-cell">LUNES</div>
+  <div class="wd-cell">MARTES</div>
+  <div class="wd-cell">MIÉRCOLES</div>
+  <div class="wd-cell">JUEVES</div>
+  <div class="wd-cell">VIERNES</div>
+  <div class="wd-cell">SÁBADO</div>
+  <div class="wd-cell">DOMINGO</div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <div class="sb-section">
+      <div class="sb-title">Ciudades</div>
+      <div class="sb-item" onclick="setFilter('all')" id="sb-all"><span style="font-size:14px">🌐</span> Todas las ciudades <span class="sb-count" id="cnt-all">0</span></div>
+      <div class="sb-item" onclick="setFilter('cdm')" id="sb-cdm"><div class="sb-dot cdm"></div> Ciudad de México <span class="sb-count" id="cnt-cdm">0</span></div>
+      <div class="sb-item" onclick="setFilter('gdl')" id="sb-gdl"><div class="sb-dot gdl"></div> Guadalajara <span class="sb-count" id="cnt-gdl">0</span></div>
+      <div class="sb-item" onclick="setFilter('mty')" id="sb-mty"><div class="sb-dot mty"></div> Monterrey <span class="sb-count" id="cnt-mty">0</span></div>
+      <div class="sb-item" onclick="setFilter('ny')"  id="sb-ny" ><div class="sb-dot ny"></div>  New York <span class="sb-count" id="cnt-ny">0</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Tipo de Servicio</div>
+      <div class="sb-item" onclick="setTypeFilter('arrival')"><div class="svc-line" style="background:#F97316;"></div> Arrival (Llegada)</div>
+      <div class="sb-item" onclick="setTypeFilter('departure')"><div class="svc-line" style="background:#22C55E;"></div> Departure (Salida)</div>
+      <div class="sb-item" onclick="setTypeFilter('fullday')"><div class="svc-line" style="background:#EF4444; height:4px;"></div> Full Day / Disponibilidad</div>
+      <div class="sb-item" onclick="setTypeFilter('transfer')"><div class="svc-line" style="background:#3B82F6;"></div> Traslado / Actividad</div>
+      <div class="sb-item" onclick="setTypeFilter('vip')"><div class="svc-line" style="background:#A855F7;"></div> VIP / Especial</div>
+      <div class="sb-item" onclick="setTypeFilter('all')"><span style="font-size:12px">↺</span> Ver todos</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Estado</div>
+      <div class="sb-item" onclick="setStatusFilter('pending')"><div class="status-dot" style="background:#F59E0B"></div> Pendiente <span class="sb-count" id="cnt-pending" style="background:#F59E0B">0</span></div>
+      <div class="sb-item" onclick="setStatusFilter('confirmed')"><div class="status-dot" style="background:#22C55E"></div> Confirmado <span class="sb-count" id="cnt-confirmed" style="background:#22C55E">0</span></div>
+      <div class="sb-item" onclick="setStatusFilter('operating')"><div class="status-dot" style="background:#3B82F6"></div> En Operación <span class="sb-count" id="cnt-operating" style="background:#3B82F6">0</span></div>
+      <div class="sb-item" onclick="setStatusFilter('completed')"><div class="status-dot" style="background:#6B7280"></div> Completado <span class="sb-count" id="cnt-completed" style="background:#6B7280">0</span></div>
+      <div class="sb-item" onclick="setStatusFilter('cancelled')"><div class="status-dot" style="background:#EF4444"></div> Cancelado <span class="sb-count" id="cnt-cancelled" style="background:#EF4444">0</span></div>
+      <div class="sb-item" onclick="setStatusFilter('all')"><span style="font-size:12px">↺</span> Ver todos</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Vistas Rápidas</div>
+      <div class="sb-item active" onclick="setView('month')">📅 Vista Mensual</div>
+      <div class="sb-item" onclick="goToday()">📍 Hoy</div>
+      <div class="sb-item" onclick="setView('7days')">📋 Próximos 7 días</div>
+      <div class="sb-item" onclick="setFilter('cdm')">🏙 CDMX</div>
+      <div class="sb-item" onclick="setFilter('gdl')">🌳 Guadalajara</div>
+      <div class="sb-item" onclick="setFilter('mty')">⛰ Monterrey</div>
+      <div class="sb-item" onclick="setFilter('ny')">🗽 New York</div>
+      <div class="sb-item" onclick="setStatusFilter('pending')">⏳ Pendientes</div>
+      <div class="sb-item" onclick="setStatusFilter('confirmed')">✅ Por Confirmar</div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Proyectos</div>
+      <div class="proj-item" onclick="setProjFilter('ADI')"><div class="sb-dot" style="background:#F97316"></div> Adidas <span class="proj-code">AD-001</span></div>
+      <div class="proj-item" onclick="setProjFilter('FIFA')"><div class="sb-dot" style="background:#22C55E"></div> FIFA (General) <span class="proj-code">FIFA-001</span></div>
+      <div class="proj-item" onclick="setProjFilter('CC')"><div class="sb-dot" style="background:#3B82F6"></div> Coca-Cola <span class="proj-code">CC-001</span></div>
+      <div class="proj-item" onclick="setProjFilter('VI')"><div class="sb-dot" style="background:#A855F7"></div> Visa <span class="proj-code">VI-001</span></div>
+      <div class="proj-item" onclick="setProjFilter('MB')"><div class="sb-dot" style="background:#EF4444"></div> Media / Broadcast <span class="proj-code">MB-001</span></div>
+      <div class="proj-item" onclick="setProjFilter('')"><div class="sb-dot" style="background:#6B7280"></div> Otros / Varios <span class="proj-code">OT-001</span></div>
+    </div>
+
+    <div class="sb-section">
+      <div class="sb-title">Proveedores</div>
+      <div class="sb-item" id="sbp-0" onclick="setProviderFilter('Jacob')"><span style="font-size:13px">🚗</span> Jacob <span class="sb-count" id="cnt-prov-0">0</span></div>
+      <div class="sb-item" id="sbp-1" onclick="setProviderFilter('Salva')"><span style="font-size:13px">🚗</span> Salva <span class="sb-count" id="cnt-prov-1">0</span></div>
+      <div class="sb-item" id="sbp-2" onclick="setProviderFilter('Global')"><span style="font-size:13px">🚗</span> Global <span class="sb-count" id="cnt-prov-2">0</span></div>
+      <div class="sb-item" id="sbp-3" onclick="setProviderFilter('Sprinter Margarita')"><span style="font-size:13px">🚗</span> Sprinter Margarita <span class="sb-count" id="cnt-prov-3">0</span></div>
+      <div class="sb-item" id="sbp-4" onclick="setProviderFilter('Juan José')"><span style="font-size:13px">🚗</span> Juan José <span class="sb-count" id="cnt-prov-4">0</span></div>
+      <div class="sb-item" id="sbp-5" onclick="setProviderFilter('Drivania')"><span style="font-size:13px">🚗</span> Drivania <span class="sb-count" id="cnt-prov-5">0</span></div>
+      <div class="sb-item" id="sbp-6" onclick="setProviderFilter('Paula (APCO)')"><span style="font-size:13px">🚗</span> Paula (APCO) <span class="sb-count" id="cnt-prov-6">0</span></div>
+      <div class="sb-item" id="sbp-all" onclick="setProviderFilter('')"><span style="font-size:12px">↺</span> Ver todos</div>
+    </div>
+
+  </div>
+
+  <!-- CALENDAR AREA -->
+  <div class="cal-area">
+    <!-- Filter chips -->
+    <div class="filter-bar" id="filterBar">
+      <div class="f-chip active-all" onclick="setFilter('all')" id="chip-all">Todos</div>
+      <div class="f-chip" onclick="setFilter('cdm')" id="chip-cdm">🟠 Cd. México</div>
+      <div class="f-chip" onclick="setFilter('gdl')" id="chip-gdl">🟢 Guadalajara</div>
+      <div class="f-chip" onclick="setFilter('mty')" id="chip-mty">🔵 Monterrey</div>
+      <div class="f-chip" onclick="setFilter('ny')"  id="chip-ny">🟣 New York</div>
+      <div class="f-chip" onclick="setStatusFilter('pending')" id="chip-pending">⏳ Pendientes</div>
+      <div class="f-chip" onclick="setStatusFilter('confirmed')" id="chip-confirmed">✅ Confirmados</div>
+      <div class="f-chip" onclick="setProviderFilter('Jacob')" id="chip-prov-0">🚗 Jacob</div>
+      <div class="f-chip" onclick="setProviderFilter('Salva')" id="chip-prov-1">🚗 Salva</div>
+      <div class="f-chip" onclick="setProviderFilter('Global')" id="chip-prov-2">🚗 Global</div>
+      <div class="f-chip" onclick="setProviderFilter('Sprinter Margarita')" id="chip-prov-3">🚗 Sprinter Margarita</div>
+      <div class="f-chip" onclick="setProviderFilter('Juan José')" id="chip-prov-4">🚗 Juan José</div>
+      <div class="f-chip" onclick="setProviderFilter('Drivania')" id="chip-prov-5">🚗 Drivania</div>
+      <div class="f-chip" onclick="setProviderFilter('Paula (APCO)')" id="chip-prov-6">🚗 Paula (APCO)</div>
+      <div class="f-chip" onclick="clearFilters()" id="chip-clear" style="display:none">✕ Limpiar</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bb-section">
+    <div class="bb-title-row">
+      <span class="bb-title">Proveedores</span>
+      <button class="bb-edit-btn" onclick="openBBModal('providers')">✏️</button>
+    </div>
+    <div id="bb-providers-display"></div>
+  </div>
+  <div class="bb-section">
+    <div class="bb-title-row">
+      <span class="bb-title">Notas Importantes</span>
+      <button class="bb-edit-btn" onclick="openBBModal('notes')">✏️</button>
+    </div>
+    <div id="bb-notes-display"></div>
+  </div>
+  <div class="bb-section">
+    <div class="bb-title-row">
+      <span class="bb-title">Contactos Clave</span>
+      <button class="bb-edit-btn" onclick="openBBModal('contacts')">✏️</button>
+    </div>
+    <div id="bb-contacts-display"></div>
+  </div>
+  <div class="bb-section">
+    <div class="bb-title">Resumen del Mes</div>
+    <div class="bb-row"><span>Total de Servicios</span><span class="bb-val" id="bb-total">0</span></div>
+    <div class="bb-row"><span>Confirmados</span><span class="bb-val green" id="bb-confirmed">0</span></div>
+    <div class="bb-row"><span>Pendientes</span><span class="bb-val orange" id="bb-pending">0</span></div>
+    <div class="bb-row"><span>En Operación</span><span class="bb-val blue" id="bb-operating">0</span></div>
+    <div class="bb-row"><span>Completados</span><span class="bb-val" id="bb-completed">0</span></div>
+    <div class="bb-row"><span>Cancelados</span><span class="bb-val red" id="bb-cancelled">0</span></div>
+  </div>
+  <div class="bb-section">
+    <div class="bb-title">Por Ciudad (mes)</div>
+    <div class="bb-row"><span>🟠 Cd. México</span><span class="bb-val" id="bb-cdm">0</span></div>
+    <div class="bb-row"><span>🟢 Guadalajara</span><span class="bb-val" id="bb-gdl">0</span></div>
+    <div class="bb-row"><span>🔵 Monterrey</span><span class="bb-val" id="bb-mty">0</span></div>
+    <div class="bb-row"><span>🟣 New York</span><span class="bb-val" id="bb-ny">0</span></div>
+  </div>
+</div>
+
+<!-- BB EDIT MODAL -->
+<div class="overlay" id="bbModal" onclick="handleOverlay(event,'bbModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="bbModalTitle">Editar</h3>
+      <button class="modal-close" onclick="closeModal('bbModal')">✕</button>
+    </div>
+    <div class="modal-body" id="bbModalBody"></div>
+  </div>
+</div>
+
+<!-- DAY MODAL -->
+<div class="overlay" id="dayModal" onclick="handleOverlay(event,'dayModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="dayModalTitle">—</h3>
+      <button class="modal-close" onclick="closeModal('dayModal')">✕</button>
+    </div>
+    <div class="modal-body" id="dayModalBody"></div>
+  </div>
+</div>
+
+<!-- ADD MODAL -->
+<div class="overlay" id="addModal" onclick="handleOverlay(event,'addModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="addModalTitle">NUEVO TRASLADO</h3>
+      <button class="modal-close" onclick="closeModal('addModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="f-group form-full">
+          <div class="f-label">Fecha</div>
+          <input class="f-input" type="date" id="f-date">
+        </div>
+        <div class="f-group">
+          <div class="f-label">Hora Pickup</div>
+          <input class="f-input" type="time" id="f-time">
+        </div>
+        <div class="f-group">
+          <div class="f-label">Ciudad</div>
+          <select class="f-input" id="f-city">
+            <option value="cdm">Ciudad de México</option>
+            <option value="gdl">Guadalajara</option>
+            <option value="mty">Monterrey</option>
+            <option value="ny">New York</option>
+          </select>
+        </div>
+
+        <div class="f-group pax-section" style="grid-column:1/-1">
+          <div class="f-label">Pasajeros / PAX <span id="pax-counter" style="color:#94A3B8;font-weight:400">(1)</span></div>
+          <div class="pax-list" id="pax-list">
+            <div class="pax-row">
+              <div class="pax-num">1</div>
+              <input class="pax-input" type="text" placeholder="Nombre del pasajero" data-pax>
+              <button type="button" class="pax-del" onclick="removePax(this)" style="visibility:hidden">×</button>
+            </div>
+          </div>
+          <button type="button" class="pax-add-btn" onclick="addPax()">＋ Agregar pasajero</button>
+        </div>
+        <div class="f-group form-full">
+          <div class="f-label">Origen (Pickup)</div>
+          <input class="f-input" type="text" id="f-from" placeholder="Aeropuerto T1, Hotel Camino Real...">
+        </div>
+        <div class="f-group form-full">
+          <div class="f-label">Destino (Drop-off)</div>
+          <input class="f-input" type="text" id="f-to" placeholder="Hotel, Estadio Azteca...">
+        </div>
+        <div class="f-group">
+          <div class="f-label">Proveedor</div>
+          <select class="f-input" id="f-provider">
+            <option value="">— Seleccionar —</option>
+            <option value="Jacob">Jacob</option>
+            <option value="Salva">Salva</option>
+            <option value="Global">Global</option>
+            <option value="Sprinter Margarita">Sprinter Margarita</option>
+            <option value="Juan José">Juan José</option>
+            <option value="Drivania">Drivania</option>
+            <option value="Paula (APCO)">Paula (APCO)</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <div class="f-label">Vehículo</div>
+          <input class="f-input" type="text" id="f-vehicle" placeholder="Sedan, Van, SUV...">
+        </div>
+        <div class="f-group">
+          <div class="f-label">Tipo de Servicio</div>
+          <select class="f-input" id="f-type">
+            <option value="transfer">Traslado / Actividad</option>
+            <option value="arrival">Arrival (Llegada)</option>
+            <option value="departure">Departure (Salida)</option>
+            <option value="fullday">Full Day / Disponibilidad</option>
+            <option value="vip">VIP / Especial</option>
+          </select>
+        </div>
+        <div class="f-group">
+          <div class="f-label">Estado</div>
+          <select class="f-input" id="f-status">
+            <option value="pending">Pendiente</option>
+            <option value="confirmed">Confirmado</option>
+            <option value="operating">En Operación</option>
+            <option value="completed">Completado</option>
+            <option value="cancelled">Cancelado</option>
+          </select>
+        </div>
+        <div class="f-group form-full">
+          <div class="f-label">Notas</div>
+          <input class="f-input" type="text" id="f-notes" placeholder="Número de vuelo, observaciones...">
+        </div>
+      </div>
+      <button class="f-save" onclick="saveTransfer()">GUARDAR TRASLADO</button>
+      <button class="f-cancel" onclick="closeModal('addModal')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE CONFIG ───────────────────────────────────────────────────────────
+const SB_URL = 'https://bekakdgvhcategibttuk.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJla2FrZGd2aGNhdGVnaWJ0dHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQ1ODksImV4cCI6MjA5NTM5MDU4OX0.pouq5ATcMN5Zq9EonVRytPTukSTWowuY2kaYelrm_II';
+const SB_HEADERS = {
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'return=representation'
+};
+
+let transfers = [];
+let dbLoaded = false;
+
+function showToast(msg, type='info') {
+  const existing = document.getElementById('sb-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'sb-toast';
+  t.style.cssText = `position:fixed;bottom:80px;right:20px;z-index:9999;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:600;color:#fff;box-shadow:0 4px 20px rgba(0,0,0,.3);transition:opacity .3s;background:${type==='error'?'#ef4444':type==='success'?'#22c55e':'#334155'}`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(),300); }, 2500);
+}
+
+// Map Supabase row → app object
+function rowToTransfer(r) {
+  return {
+    id: r.id,
+    date: r.date,
+    time: r.time || '',
+    city: r.city || 'cdm',
+    project: r.project || '—',
+    passengers: Array.isArray(r.passengers) ? r.passengers : (r.client ? [r.client] : []),
+    client: r.client || '',
+    from: r.from || '',
+    to: r.to || '',
+    provider: r.provider || '',
+    vehicle: r.vehicle || '',
+    type: r.type || 'transfer',
+    status: r.status || 'pending',
+    notes: r.notes || '',
+  };
+}
+
+// Map app object → Supabase row
+function transferToRow(t) {
+  return {
+    date: t.date,
+    time: t.time || null,
+    city: t.city,
+    project: t.project,
+    passengers: t.passengers || [],
+    client: t.passengers && t.passengers[0] ? t.passengers[0] : t.client,
+    from: t.from || null,
+    to: t.to || null,
+    provider: t.provider || null,
+    vehicle: t.vehicle || null,
+    type: t.type,
+    status: t.status,
+    notes: t.notes || null,
+  };
+}
+
+async function loadAll() {
+  try {
+    const r = await fetch(`${SB_URL}/rest/v1/traslados?select=*&order=date.asc,time.asc`, { headers: SB_HEADERS });
+    if (!r.ok) throw new Error(await r.text());
+    const rows = await r.json();
+    transfers = rows.map(rowToTransfer);
+    dbLoaded = true;
+    render();
+    updateChips();
+  } catch(e) {
+    showToast('Error al cargar datos: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+async function dbInsert(t) {
+  const row = transferToRow(t);
+  const r = await fetch(`${SB_URL}/rest/v1/traslados`, {
+    method: 'POST', headers: SB_HEADERS, body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  return data[0];
+}
+
+async function dbUpdate(id, t) {
+  const row = transferToRow(t);
+  const r = await fetch(`${SB_URL}/rest/v1/traslados?id=eq.${id}`, {
+    method: 'PATCH', headers: SB_HEADERS, body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  return data[0];
+}
+
+async function dbDelete(id) {
+  const r = await fetch(`${SB_URL}/rest/v1/traslados?id=eq.${id}`, {
+    method: 'DELETE', headers: SB_HEADERS
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+const MONTHS = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York' };
+const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado' };
+
+let curMonth = 5, curYear = 2026;
+let activeCity = 'all', activeStatus = 'all', activeType = 'all', activeProj = '', activeProvider = '';
+
+// ── FILTERS ──────────────────────────────────────────────────────────────────
+function filteredTransfers() {
+  return transfers.filter(t => {
+    if (activeCity !== 'all' && t.city !== activeCity) return false;
+    if (activeStatus !== 'all' && t.status !== activeStatus) return false;
+    if (activeType !== 'all' && t.type !== activeType) return false;
+    if (activeProj && !t.project.includes(activeProj)) return false;
+    if (activeProvider && (t.provider||'') !== activeProvider) return false;
+    return true;
+  });
+}
+
+function monthTransfers() {
+  const prefix = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+  return filteredTransfers().filter(t => t.date.startsWith(prefix));
+}
+
+function setFilter(city) {
+  activeCity = city; activeStatus = 'all'; activeType = 'all'; activeProj = ''; activeProvider = '';
+  updateChips(); render();
+}
+function setStatusFilter(s) {
+  activeStatus = s; activeCity = 'all'; activeType = 'all'; activeProj = ''; activeProvider = '';
+  updateChips(); render();
+}
+function setTypeFilter(t) {
+  activeType = t; activeCity = 'all'; activeStatus = 'all'; activeProj = ''; activeProvider = '';
+  updateChips(); render();
+}
+function setProjFilter(p) {
+  activeProj = p; activeCity = 'all'; activeStatus = 'all'; activeType = 'all'; activeProvider = '';
+  updateChips(); render();
+}
+function setProviderFilter(p) {
+  activeProvider = p; activeCity='all'; activeStatus='all'; activeType='all'; activeProj='';
+  updateChips(); render();
+}
+function clearFilters() {
+  activeCity='all'; activeStatus='all'; activeType='all'; activeProj=''; activeProvider='';
+  updateChips(); render();
+}
+
+function updateChips() {
+  const PROVIDERS = ['Jacob', 'Salva', 'Global', 'Sprinter Margarita', 'Juan José', 'Drivania', 'Paula (APCO)'];
+  const chips = {all:'chip-all', cdm:'chip-cdm', gdl:'chip-gdl', mty:'chip-mty', ny:'chip-ny'};
+  const allChipIds = ['chip-all','chip-cdm','chip-gdl','chip-mty','chip-ny','chip-pending','chip-confirmed',
+    ...PROVIDERS.map((_,i) => `chip-prov-${i}`)];
+  allChipIds.forEach(id => { const el = document.getElementById(id); if(el) el.className = 'f-chip'; });
+
+  const clearEl = document.getElementById('chip-clear');
+  const hasFilter = activeCity!=='all'||activeStatus!=='all'||activeType!=='all'||activeProj||activeProvider;
+  if(clearEl) clearEl.style.display = hasFilter ? 'block' : 'none';
+
+  if(activeCity !== 'all' && chips[activeCity]) {
+    const el = document.getElementById(chips[activeCity]);
+    if(el) el.className = `f-chip active-${activeCity}`;
+  } else if(activeProvider) {
+    const idx = PROVIDERS.indexOf(activeProvider);
+    if(idx >= 0) { const el = document.getElementById(`chip-prov-${idx}`); if(el) el.className = 'f-chip active-all'; }
+  } else {
+    const el = document.getElementById('chip-all');
+    if(el && activeStatus==='all'&&activeType==='all'&&!activeProj) el.className = 'f-chip active-all';
+  }
+
+  // Sidebar city active
+  ['all','cdm','gdl','mty','ny'].forEach(c => {
+    const el = document.getElementById(`sb-${c}`);
+    if(el) el.classList.toggle('active', activeCity===c);
+  });
+  // Sidebar provider active + counts
+  PROVIDERS.forEach((p, i) => {
+    const el = document.getElementById(`sbp-${i}`);
+    if(el) el.classList.toggle('active', activeProvider===p);
+    const cnt = document.getElementById(`cnt-prov-${i}`);
+    if(cnt) cnt.textContent = transfers.filter(t => t.provider===p).length;
+  });
+  const allEl = document.getElementById('sbp-all');
+  if(allEl) allEl.classList.toggle('active', activeProvider==='');
+}
+
+function setView(v) { /* month only for now */ }
+function goToday() {
+  const t = new Date();
+  curMonth = t.getMonth(); curYear = t.getFullYear();
+  render();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render() {
+  document.getElementById('headerMonth').textContent = `${MONTHS[curMonth]} ${curYear}`;
+
+  const firstDay = new Date(curYear, curMonth, 1);
+  const lastDay  = new Date(curYear, curMonth + 1, 0);
+  // Start on Monday: getDay() returns 0=Sun, we want Mon=0
+  let startDow = firstDay.getDay(); // 0=Sun
+  startDow = startDow === 0 ? 6 : startDow - 1; // convert to Mon=0
+  const totalCells = Math.ceil((startDow + lastDay.getDate()) / 7) * 7;
+
+  const today = new Date();
+  const prefix = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+
+  // Index filtered transfers by date
+  const byDate = {};
+  filteredTransfers().forEach(t => {
+    if(!byDate[t.date]) byDate[t.date]=[];
+    byDate[t.date].push(t);
+  });
+
+  let html = '';
+  for (let i = 0; i < totalCells; i++) {
+    const dayNum = i - startDow + 1;
+    const isCurrentMonth = dayNum >= 1 && dayNum <= lastDay.getDate();
+    const dateStr = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`;
+    const isToday = today.getFullYear()===curYear && today.getMonth()===curMonth && today.getDate()===dayNum;
+    const dayTr = (byDate[dateStr] || []).sort((a,b)=>a.time.localeCompare(b.time));
+
+    let cls = 'cal-day';
+    if (!isCurrentMonth) cls += ' other-month';
+    if (isToday) cls += ' today';
+
+    html += `<div class="${cls}" onclick="openDay('${dateStr}')">`;
+    html += `<div class="day-num">${isCurrentMonth ? dayNum : ''}</div>`;
+
+    if (isCurrentMonth && dayTr.length > 0) {
+      const MAX_SHOW = 3;
+      dayTr.slice(0, MAX_SHOW).forEach(t => {
+        if (t.type === 'fullday') {
+          html += `<div class="ev-fullday ${t.city}" onclick="event.stopPropagation();openDay('${dateStr}')">Full Day 12h<br>${t.client.substring(0,15)}<br>${t.project}</div>`;
+        } else {
+          html += `<div class="event-block ev-${t.city}" onclick="event.stopPropagation();openDay('${dateStr}')">
+            <span class="ev-time">${t.time}</span> <span class="ev-route">${shortRoute(t)}</span>
+            <div class="ev-code">${t.project}</div>
+          </div>`;
+        }
+      });
+      if (dayTr.length > MAX_SHOW) {
+        html += `<div class="more-badge">+${dayTr.length - MAX_SHOW} más</div>`;
+      }
+    }
+    html += `</div>`;
+  }
+
+  document.getElementById('calGrid').innerHTML = html;
+  updateSidebar();
+  updateBottomBar();
+}
+
+function shortRoute(t) {
+  const from = t.from ? t.from.split(' ')[0].replace(',','') : '—';
+  const to   = t.to   ? t.to.split(' ')[0].replace(',','')   : '—';
+  return `${from} → ${to}`;
+}
+
+function updateSidebar() {
+  const all = filteredTransfers();
+  const mTr = monthTransfers();
+  document.getElementById('cnt-all').textContent = all.length;
+  ['cdm','gdl','mty','ny'].forEach(c => {
+    document.getElementById(`cnt-${c}`).textContent = all.filter(t=>t.city===c).length;
+  });
+  ['pending','confirmed','operating','completed','cancelled'].forEach(s => {
+    document.getElementById(`cnt-${s}`).textContent = all.filter(t=>t.status===s).length;
+  });
+}
+
+function updateBottomBar() {
+  const mTr = monthTransfers();
+  document.getElementById('bb-total').textContent = mTr.length;
+  ['confirmed','pending','operating','completed','cancelled'].forEach(s => {
+    document.getElementById(`bb-${s}`).textContent = mTr.filter(t=>t.status===s).length;
+  });
+  ['cdm','gdl','mty','ny'].forEach(c => {
+    document.getElementById(`bb-${c}`).textContent = mTr.filter(t=>t.city===c).length;
+  });
+}
+
+// ── MONTH NAV ────────────────────────────────────────────────────────────────
+function prevMonth() { curMonth--; if(curMonth<0){curMonth=11;curYear--;} render(); }
+function nextMonth() { curMonth++; if(curMonth>11){curMonth=0;curYear++;} render(); }
+
+// ── DAY MODAL ────────────────────────────────────────────────────────────────
+let selectedDate = null;
+function openDay(dateStr) {
+  selectedDate = dateStr;
+  const [y,m,d] = dateStr.split('-');
+  document.getElementById('dayModalTitle').textContent = `${parseInt(d)} ${MONTHS[parseInt(m)-1]} ${y}`;
+  renderDayModal();
+  document.getElementById('dayModal').classList.add('open');
+}
+
+function renderDayModal() {
+  const dayTr = filteredTransfers()
+    .filter(t => t.date === selectedDate)
+    .sort((a,b) => a.time.localeCompare(b.time));
+
+  let html = '';
+  if (!dayTr.length) html += `<div class="empty-msg">Sin traslados este día</div>`;
+
+  dayTr.forEach(t => {
+    const statusCls = `sc-${t.status}`;
+    const paxList = t.passengers && t.passengers.length > 1 ? t.passengers : (t.client ? [t.client] : ['—']);
+    const paxCount = paxList.length;
+    const paxHtml = paxList.map((p, i) => `
+      <div class="t-pax-item">
+        <div class="t-pax-badge">${i+1}</div>
+        <span>${p}</span>
+      </div>`).join('');
+    html += `<div class="t-card ${t.city}">
+      <div class="t-top">
+        <div>
+          <div class="t-client">${paxList[0]}${paxCount > 1 ? ` <span style="font-size:11px;font-weight:400;color:#666">+${paxCount-1} más</span>` : ''}</div>
+          ${paxCount > 1 ? `<div class="t-pax-list">${paxHtml}</div>` : ''}
+        </div>
+        ${t.time ? `<div class="t-time-badge">${t.time}</div>` : ''}
+      </div>
+      ${(t.from||t.to) ? `<div class="t-row"><span class="t-icon">📍</span>${t.from||'—'} → ${t.to||'—'}</div>` : ''}
+      <div class="t-row"><span class="t-icon">🚗</span>${t.provider||'—'} · ${t.vehicle||'—'}</div>
+      ${t.notes ? `<div class="t-row"><span class="t-icon">📝</span>${t.notes}</div>` : ''}
+      <div class="t-meta">
+        <span class="t-chip">${t.project}</span>
+        <span class="t-chip">${CITY_LABELS[t.city]}</span>
+        <span class="t-chip">👥 ${paxCount} PAX</span>
+        <span class="t-status-chip ${statusCls}">${STATUS_LABELS[t.status]}</span>
+      </div>
+      <div class="t-actions">
+        <button class="t-btn edit" onclick="editTransfer(${t.id})">✏️ Editar</button>
+        <button class="t-btn dup"  onclick="duplicateTransfer(${t.id})">📋 Duplicar</button>
+        <button class="t-btn del"  onclick="deleteT(${t.id})">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  });
+
+  html += `<button class="add-btn-modal" onclick="openAddFromDay()">+ AGREGAR TRASLADO</button>`;
+  document.getElementById('dayModalBody').innerHTML = html;
+}
+
+function openAddFromDay() {
+  closeModal('dayModal');
+  openAddModal(selectedDate);
+}
+
+async function deleteT(id) {
+  if (!confirm('¿Eliminar este traslado?')) return;
+  try {
+    await dbDelete(id);
+    transfers = transfers.filter(t => t.id !== id);
+    showToast('Traslado eliminado', 'info');
+    renderDayModal();
+    render();
+    updateChips();
+  } catch(e) {
+    showToast('Error al eliminar: ' + e.message, 'error');
+  }
+}
+
+// ── ADD MODAL ────────────────────────────────────────────────────────────────
+let editingId = null;
+
+function openAddModal(prefillDate) {
+  editingId = null;
+  const today = new Date();
+  const d = prefillDate || `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+  resetForm();
+  document.getElementById('f-date').value = d;
+  document.getElementById('addModalTitle').textContent = 'NUEVO TRASLADO';
+  document.getElementById('addModal').classList.add('open');
+}
+
+function editTransfer(id) {
+  const t = transfers.find(x => x.id === id);
+  if (!t) return;
+  editingId = id;
+  resetForm();
+  document.getElementById('addModalTitle').textContent = 'EDITAR TRASLADO';
+  document.getElementById('f-date').value = t.date;
+  document.getElementById('f-time').value = t.time || '';
+  document.getElementById('f-city').value = t.city;
+  document.getElementById('f-from').value = t.from || '';
+  document.getElementById('f-to').value = t.to || '';
+  document.getElementById('f-provider').value = t.provider || '';
+  document.getElementById('f-vehicle').value = t.vehicle || '';
+  document.getElementById('f-type').value = t.type || 'transfer';
+  document.getElementById('f-status').value = t.status || 'pending';
+  document.getElementById('f-notes').value = t.notes || '';
+  // populate passengers
+  const paxList = t.passengers && t.passengers.length ? t.passengers : (t.client ? [t.client] : []);
+  const list = document.getElementById('pax-list');
+  list.innerHTML = '';
+  paxList.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'pax-row';
+    div.innerHTML = `<div class="pax-num">${i+1}</div>
+      <input class="pax-input" type="text" placeholder="Nombre del pasajero" data-pax value="${p.replace(/"/g,'&quot;')}">
+      <button type="button" class="pax-del" onclick="removePax(this)" style="visibility:${i===0&&paxList.length===1?'hidden':'visible'}">×</button>`;
+    list.appendChild(div);
+  });
+  if (!paxList.length) resetForm();
+  updatePaxCounter();
+  closeModal('dayModal');
+  document.getElementById('addModal').classList.add('open');
+}
+
+function duplicateTransfer(id) {
+  const t = transfers.find(x => x.id === id);
+  if (!t) return;
+  editingId = null;
+  resetForm();
+  document.getElementById('addModalTitle').textContent = 'DUPLICAR TRASLADO';
+  document.getElementById('f-date').value = t.date;
+  document.getElementById('f-time').value = t.time || '';
+  document.getElementById('f-city').value = t.city;
+  document.getElementById('f-from').value = t.from || '';
+  document.getElementById('f-to').value = t.to || '';
+  document.getElementById('f-provider').value = t.provider || '';
+  document.getElementById('f-vehicle').value = t.vehicle || '';
+  document.getElementById('f-type').value = t.type || 'transfer';
+  document.getElementById('f-status').value = 'pending';
+  document.getElementById('f-notes').value = t.notes || '';
+  // populate passengers
+  const paxList = t.passengers && t.passengers.length ? t.passengers : (t.client ? [t.client] : []);
+  const list = document.getElementById('pax-list');
+  list.innerHTML = '';
+  paxList.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'pax-row';
+    div.innerHTML = `<div class="pax-num">${i+1}</div>
+      <input class="pax-input" type="text" placeholder="Nombre del pasajero" data-pax value="${p.replace(/"/g,'&quot;')}">
+      <button type="button" class="pax-del" onclick="removePax(this)" style="visibility:${i===0&&paxList.length===1?'hidden':'visible'}">×</button>`;
+    list.appendChild(div);
+  });
+  if (!paxList.length) resetForm();
+  updatePaxCounter();
+  closeModal('dayModal');
+  document.getElementById('addModal').classList.add('open');
+}
+
+async function saveTransfer() {
+  const paxInputs = [...document.querySelectorAll('#pax-list [data-pax]')];
+  const passengers = paxInputs.map(el => el.value.trim()).filter(Boolean);
+  if (!passengers.length) { alert('Agrega al menos un pasajero'); return; }
+  const t = {
+    id: Date.now(),
+    date: document.getElementById('f-date').value,
+    time: document.getElementById('f-time').value || '',
+    city: document.getElementById('f-city').value,
+    project: '—',
+    passengers: passengers,
+    client: passengers[0],
+    from: document.getElementById('f-from').value.trim(),
+    to: document.getElementById('f-to').value.trim(),
+    provider: document.getElementById('f-provider').value.trim() || '—',
+    vehicle: document.getElementById('f-vehicle').value.trim() || '—',
+    type: document.getElementById('f-type').value,
+    status: document.getElementById('f-status').value,
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+  if (!t.date) { alert('Ingresa una fecha'); return; }
+  resetForm();
+  closeModal('addModal');
+  try {
+    if (editingId) {
+      const updated = await dbUpdate(editingId, t);
+      const idx = transfers.findIndex(x => x.id === editingId);
+      if (idx >= 0) transfers[idx] = rowToTransfer(updated);
+      editingId = null;
+      showToast('Traslado actualizado ✓', 'success');
+    } else {
+      const inserted = await dbInsert(t);
+      transfers.push(rowToTransfer(inserted));
+      showToast('Traslado guardado ✓', 'success');
+    }
+  } catch(e) {
+    showToast('Error al guardar: ' + e.message, 'error');
+    console.error(e);
+  }
+  render();
+  updateChips();
+}
+
+function resetForm() {
+  const list = document.getElementById('pax-list');
+  if (!list) return;
+  list.innerHTML = `<div class="pax-row">
+    <div class="pax-num">1</div>
+    <input class="pax-input" type="text" placeholder="Nombre del pasajero" data-pax>
+    <button type="button" class="pax-del" onclick="removePax(this)" style="visibility:hidden">×</button>
+  </div>`;
+  updatePaxCounter();
+}
+
+function addPax() {
+  const list = document.getElementById('pax-list');
+  const rows = list.querySelectorAll('.pax-row');
+  const num = rows.length + 1;
+  const div = document.createElement('div');
+  div.className = 'pax-row';
+  div.innerHTML = `<div class="pax-num">${num}</div>
+    <input class="pax-input" type="text" placeholder="Nombre del pasajero" data-pax>
+    <button type="button" class="pax-del" onclick="removePax(this)">×</button>`;
+  list.appendChild(div);
+  // show delete on first row if more than 1
+  if (num === 2) list.querySelector('.pax-del').style.visibility = 'visible';
+  div.querySelector('.pax-input').focus();
+  updatePaxCounter();
+}
+
+function removePax(btn) {
+  const list = document.getElementById('pax-list');
+  const row = btn.closest('.pax-row');
+  if (list.querySelectorAll('.pax-row').length <= 1) return;
+  row.remove();
+  // renumber
+  list.querySelectorAll('.pax-row').forEach((r, i) => {
+    r.querySelector('.pax-num').textContent = i + 1;
+    r.querySelector('.pax-del').style.visibility = i === 0 && list.querySelectorAll('.pax-row').length === 1 ? 'hidden' : 'visible';
+  });
+  updatePaxCounter();
+}
+
+function updatePaxCounter() {
+  const list = document.getElementById('pax-list');
+  const counter = document.getElementById('pax-counter');
+  if (!list || !counter) return;
+  const n = list.querySelectorAll('.pax-row').length;
+  counter.textContent = `(${n})`;
+}
+
+// ── SEARCH ───────────────────────────────────────────────────────────────────
+function openSearch() {
+  document.getElementById('searchBar').classList.add('open');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+}
+function closeSearch() {
+  document.getElementById('searchBar').classList.remove('open');
+  document.getElementById('searchResults').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+}
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  const res = document.getElementById('searchResults');
+  if (!q) { res.classList.remove('open'); return; }
+  const hits = transfers.filter(t => {
+    const paxStr = (t.passengers || [t.client || '']).join(' ').toLowerCase();
+    return paxStr.includes(q) ||
+      t.project.toLowerCase().includes(q) ||
+      CITY_LABELS[t.city].toLowerCase().includes(q) ||
+      (t.provider||'').toLowerCase().includes(q) ||
+      (t.notes||'').toLowerCase().includes(q);
+  }).slice(0, 10);
+  if (!hits.length) {
+    res.innerHTML = `<div class="sr-item">Sin resultados</div>`;
+  } else {
+    res.innerHTML = hits.map(t => {
+      const paxList = t.passengers && t.passengers.length ? t.passengers : [t.client||'—'];
+      return `<div class="sr-item" onclick="jumpToDate('${t.date}')">
+        <div class="sr-date">${t.date} · ${CITY_LABELS[t.city]} · ${t.project} · 👥 ${paxList.length} PAX</div>
+        <div style="font-weight:600">${paxList.join(', ')}</div>
+        <div style="font-size:11px;color:#888">${t.from||''} ${t.to ? '→ '+t.to : ''}</div>
+      </div>`;
+    }).join('');
+  }
+  res.classList.add('open');
+}
+function jumpToDate(dateStr) {
+  const [y,m] = dateStr.split('-');
+  curYear = parseInt(y); curMonth = parseInt(m)-1;
+  closeSearch(); render();
+  setTimeout(() => openDay(dateStr), 200);
+}
+function openFilter() { /* extend later */ }
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function handleOverlay(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
+const BB_KEY = 'wc2026_bbdata';
+let bbData = JSON.parse(localStorage.getItem(BB_KEY) || 'null') || {
+  providers: [
+    {name:'Dial 7', info:'+52 55 1234 5678'},
+    {name:'Blacklane', info:'+52 55 8765 4321'},
+    {name:'Executive Ground', info:'+1 212 555 7890'},
+    {name:'MTY Transfers', info:'+52 81 1234 5678'},
+    {name:'GDL Logistics', info:'+52 33 1234 5678'},
+  ],
+  notes: [
+    'Confirmar vuelos 24h antes del servicio',
+    'Proveedor confirma 2h antes de pickup',
+    'Contactar al cliente al llegar al pickup',
+    'Enviar O&D al finalizar cada servicio',
+    'Guardar recibos y comprobantes',
+  ],
+  contacts: [
+    {name:'Operaciones', info:'+52 55 1111 2222'},
+    {name:'Logística', info:'+52 55 2222 3333'},
+    {name:'Atención Clientes', info:'+52 55 3333 4444'},
+    {name:'Emergencias 24/7', info:'+52 55 9999 0000'},
+  ]
+};
+
+function saveBB() { localStorage.setItem(BB_KEY, JSON.stringify(bbData)); }
+
+function renderBBDisplays() {
+  // providers
+  const pd = document.getElementById('bb-providers-display');
+  if (pd) pd.innerHTML = bbData.providers.map(p =>
+    `<div class="bb-row"><span>${p.name}</span><span class="bb-val">${p.info}</span></div>`
+  ).join('');
+  // notes
+  const nd = document.getElementById('bb-notes-display');
+  if (nd) nd.innerHTML = bbData.notes.map(n =>
+    `<div class="bb-row">• ${n}</div>`
+  ).join('');
+  // contacts
+  const cd = document.getElementById('bb-contacts-display');
+  if (cd) cd.innerHTML = bbData.contacts.map(c =>
+    `<div class="bb-row"><span>${c.name}</span><span class="bb-val">${c.info}</span></div>`
+  ).join('');
+}
+
+let bbModalType = '';
+function openBBModal(type) {
+  bbModalType = type;
+  const titles = { providers:'Editar Proveedores', notes:'Editar Notas Importantes', contacts:'Editar Contactos Clave' };
+  document.getElementById('bbModalTitle').textContent = titles[type];
+  renderBBModalBody();
+  document.getElementById('bbModal').classList.add('open');
+}
+
+function renderBBModalBody() {
+  const body = document.getElementById('bbModalBody');
+  let html = '';
+  if (bbModalType === 'notes') {
+    html += bbData.notes.map((n, i) => `
+      <div class="bb-item-row">
+        <input type="text" value="${n.replace(/"/g,'&quot;')}" id="bbn-${i}" placeholder="Nota...">
+        <button class="bb-item-del" onclick="delBBItem('notes',${i})">× Eliminar</button>
+      </div>`).join('');
+    html += `<button class="bb-add-row" onclick="addBBItem('notes')">＋ Agregar nota</button>`;
+  } else {
+    const items = bbData[bbModalType];
+    html += items.map((item, i) => `
+      <div class="bb-item-row">
+        <input type="text" value="${item.name.replace(/"/g,'&quot;')}" id="bb-name-${i}" placeholder="Nombre">
+        <input type="text" value="${item.info.replace(/"/g,'&quot;')}" id="bb-info-${i}" placeholder="Teléfono / Info">
+        <button class="bb-item-del" onclick="delBBItem('${bbModalType}',${i})">×</button>
+      </div>`).join('');
+    html += `<button class="bb-add-row" onclick="addBBItem('${bbModalType}')">＋ Agregar</button>`;
+  }
+  html += `<button class="bb-save-btn" onclick="saveBBModal()">GUARDAR</button>`;
+  body.innerHTML = html;
+}
+
+function addBBItem(type) {
+  if (type === 'notes') bbData.notes.push('');
+  else bbData[type].push({name:'', info:''});
+  renderBBModalBody();
+}
+
+function delBBItem(type, idx) {
+  if (type === 'notes') bbData.notes.splice(idx, 1);
+  else bbData[type].splice(idx, 1);
+  renderBBModalBody();
+}
+
+function saveBBModal() {
+  if (bbModalType === 'notes') {
+    bbData.notes = [...document.querySelectorAll('[id^="bbn-"]')].map(el => el.value.trim()).filter(Boolean);
+  } else {
+    const items = bbData[bbModalType];
+    bbData[bbModalType] = items.map((_, i) => ({
+      name: (document.getElementById(`bb-name-${i}`)?.value || '').trim(),
+      info: (document.getElementById(`bb-info-${i}`)?.value || '').trim(),
+    })).filter(item => item.name);
+  }
+  saveBB();
+  renderBBDisplays();
+  closeModal('bbModal');
+  showToast('Guardado ✓', 'success');
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('calGrid').innerHTML = `
+  <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:14px;color:#94A3B8;">
+    <div style="font-size:32px">⏳</div>
+    <div style="font-size:14px;font-weight:600">Conectando con Supabase...</div>
+  </div>`;
+updateChips();
+renderBBDisplays();
+loadAll();
+</script>
+</body>
+</html>
