@@ -223,6 +223,17 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .bb-section { padding: 0 12px; }
 .bb-section:not(:last-child) { border-right: 1px solid #2A2A2A; }
 .bb-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #666; text-transform: uppercase; margin-bottom: 6px; }
+.bb-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.bb-title-row .bb-title { margin-bottom: 0; }
+.bb-edit-btn { background: none; border: 1px solid #444; border-radius: 5px; color: #aaa; font-size: 10px; padding: 1px 6px; cursor: pointer; }
+.bb-edit-btn:hover { background: #333; color: #fff; }
+/* bb modal form */
+.bb-item-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.bb-item-row input { flex: 1; padding: 8px 10px; border: 1.5px solid var(--border); border-radius: 8px; font-family:'Inter',sans-serif; font-size:12px; outline:none; }
+.bb-item-row input:focus { border-color:#0F172A; }
+.bb-item-del { background:none; border:1px solid #fca5a5; color:#ef4444; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; white-space:nowrap; }
+.bb-add-row { width:100%; padding:9px; background:#F1F5F9; border:1.5px dashed #CBD5E1; border-radius:8px; font-size:12px; font-weight:600; color:#64748B; cursor:pointer; margin-top:4px; }
+.bb-save-btn { width:100%; padding:11px; background:#0F172A; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; }
 .bb-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #aaa; margin-bottom: 3px; }
 .bb-val { font-weight: 700; color: #fff; }
 .bb-val.orange { color: var(--status-pending); }
@@ -429,7 +440,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- TOP HEADER -->
 <div class="top-header">
   <div class="logo-area">
-    <div class="logo-icon">🏆</div>
+    <img src="data:image/png;base64,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" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;">
     <div class="logo-text">
       <div class="wc">FIFA WORLD CUP</div>
       <div class="year" id="headerYear">2026</div>
@@ -560,27 +571,25 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
   <div class="bb-section">
-    <div class="bb-title">Proveedores</div>
-    <div class="bb-row"><span>Dial 7</span><span class="bb-val">+52 55 1234 5678</span></div>
-    <div class="bb-row"><span>Blacklane</span><span class="bb-val">+52 55 8765 4321</span></div>
-    <div class="bb-row"><span>Executive Ground</span><span class="bb-val">+1 212 555 7890</span></div>
-    <div class="bb-row"><span>MTY Transfers</span><span class="bb-val">+52 81 1234 5678</span></div>
-    <div class="bb-row"><span>GDL Logistics</span><span class="bb-val">+52 33 1234 5678</span></div>
+    <div class="bb-title-row">
+      <span class="bb-title">Proveedores</span>
+      <button class="bb-edit-btn" onclick="openBBModal('providers')">✏️</button>
+    </div>
+    <div id="bb-providers-display"></div>
   </div>
   <div class="bb-section">
-    <div class="bb-title">Notas Importantes</div>
-    <div class="bb-row">• Confirmar vuelos 24h antes del servicio</div>
-    <div class="bb-row">• Proveedor confirma 2h antes de pickup</div>
-    <div class="bb-row">• Contactar al cliente al llegar al pickup</div>
-    <div class="bb-row">• Enviar O&D al finalizar cada servicio</div>
-    <div class="bb-row">• Guardar recibos y comprobantes</div>
+    <div class="bb-title-row">
+      <span class="bb-title">Notas Importantes</span>
+      <button class="bb-edit-btn" onclick="openBBModal('notes')">✏️</button>
+    </div>
+    <div id="bb-notes-display"></div>
   </div>
   <div class="bb-section">
-    <div class="bb-title">Contactos Clave</div>
-    <div class="bb-row"><span>Operaciones</span><span class="bb-val">+52 55 1111 2222</span></div>
-    <div class="bb-row"><span>Logística</span><span class="bb-val">+52 55 2222 3333</span></div>
-    <div class="bb-row"><span>Atención Clientes</span><span class="bb-val">+52 55 3333 4444</span></div>
-    <div class="bb-row"><span>Emergencias 24/7</span><span class="bb-val">+52 55 9999 0000</span></div>
+    <div class="bb-title-row">
+      <span class="bb-title">Contactos Clave</span>
+      <button class="bb-edit-btn" onclick="openBBModal('contacts')">✏️</button>
+    </div>
+    <div id="bb-contacts-display"></div>
   </div>
   <div class="bb-section">
     <div class="bb-title">Resumen del Mes</div>
@@ -597,6 +606,17 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="bb-row"><span>🟢 Guadalajara</span><span class="bb-val" id="bb-gdl">0</span></div>
     <div class="bb-row"><span>🔵 Monterrey</span><span class="bb-val" id="bb-mty">0</span></div>
     <div class="bb-row"><span>🟣 New York</span><span class="bb-val" id="bb-ny">0</span></div>
+  </div>
+</div>
+
+<!-- BB EDIT MODAL -->
+<div class="overlay" id="bbModal" onclick="handleOverlay(event,'bbModal')">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="bbModalTitle">Editar</h3>
+      <button class="modal-close" onclick="closeModal('bbModal')">✕</button>
+    </div>
+    <div class="modal-body" id="bbModalBody"></div>
   </div>
 </div>
 
@@ -626,7 +646,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         </div>
         <div class="f-group">
           <div class="f-label">Hora Pickup</div>
-          <input class="f-input" type="time" id="f-time" value="09:00">
+          <input class="f-input" type="time" id="f-time">
         </div>
         <div class="f-group">
           <div class="f-label">Ciudad</div>
@@ -637,10 +657,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
             <option value="ny">New York</option>
           </select>
         </div>
-        <div class="f-group form-full">
-          <div class="f-label"># Proyecto</div>
-          <input class="f-input" type="text" id="f-proj" placeholder="ADI-MX-001">
-        </div>
+
         <div class="f-group pax-section" style="grid-column:1/-1">
           <div class="f-label">Pasajeros / PAX <span id="pax-counter" style="color:#94A3B8;font-weight:400">(1)</span></div>
           <div class="pax-list" id="pax-list">
@@ -815,6 +832,7 @@ async function dbDelete(id) {
 }
 
 const MONTHS = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
 const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York' };
 const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado' };
 
@@ -1098,7 +1116,6 @@ function editTransfer(id) {
   document.getElementById('f-date').value = t.date;
   document.getElementById('f-time').value = t.time || '';
   document.getElementById('f-city').value = t.city;
-  document.getElementById('f-proj').value = t.project === '—' ? '' : t.project;
   document.getElementById('f-from').value = t.from || '';
   document.getElementById('f-to').value = t.to || '';
   document.getElementById('f-provider').value = t.provider || '';
@@ -1133,7 +1150,6 @@ function duplicateTransfer(id) {
   document.getElementById('f-date').value = t.date;
   document.getElementById('f-time').value = t.time || '';
   document.getElementById('f-city').value = t.city;
-  document.getElementById('f-proj').value = t.project === '—' ? '' : t.project;
   document.getElementById('f-from').value = t.from || '';
   document.getElementById('f-to').value = t.to || '';
   document.getElementById('f-provider').value = t.provider || '';
@@ -1168,7 +1184,7 @@ async function saveTransfer() {
     date: document.getElementById('f-date').value,
     time: document.getElementById('f-time').value || '',
     city: document.getElementById('f-city').value,
-    project: document.getElementById('f-proj').value.trim() || '—',
+    project: '—',
     passengers: passengers,
     client: passengers[0],
     from: document.getElementById('f-from').value.trim(),
@@ -1298,14 +1314,120 @@ function openFilter() { /* extend later */ }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function handleOverlay(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
 
+// ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
+const BB_KEY = 'wc2026_bbdata';
+let bbData = JSON.parse(localStorage.getItem(BB_KEY) || 'null') || {
+  providers: [
+    {name:'Dial 7', info:'+52 55 1234 5678'},
+    {name:'Blacklane', info:'+52 55 8765 4321'},
+    {name:'Executive Ground', info:'+1 212 555 7890'},
+    {name:'MTY Transfers', info:'+52 81 1234 5678'},
+    {name:'GDL Logistics', info:'+52 33 1234 5678'},
+  ],
+  notes: [
+    'Confirmar vuelos 24h antes del servicio',
+    'Proveedor confirma 2h antes de pickup',
+    'Contactar al cliente al llegar al pickup',
+    'Enviar O&D al finalizar cada servicio',
+    'Guardar recibos y comprobantes',
+  ],
+  contacts: [
+    {name:'Operaciones', info:'+52 55 1111 2222'},
+    {name:'Logística', info:'+52 55 2222 3333'},
+    {name:'Atención Clientes', info:'+52 55 3333 4444'},
+    {name:'Emergencias 24/7', info:'+52 55 9999 0000'},
+  ]
+};
+
+function saveBB() { localStorage.setItem(BB_KEY, JSON.stringify(bbData)); }
+
+function renderBBDisplays() {
+  // providers
+  const pd = document.getElementById('bb-providers-display');
+  if (pd) pd.innerHTML = bbData.providers.map(p =>
+    `<div class="bb-row"><span>${p.name}</span><span class="bb-val">${p.info}</span></div>`
+  ).join('');
+  // notes
+  const nd = document.getElementById('bb-notes-display');
+  if (nd) nd.innerHTML = bbData.notes.map(n =>
+    `<div class="bb-row">• ${n}</div>`
+  ).join('');
+  // contacts
+  const cd = document.getElementById('bb-contacts-display');
+  if (cd) cd.innerHTML = bbData.contacts.map(c =>
+    `<div class="bb-row"><span>${c.name}</span><span class="bb-val">${c.info}</span></div>`
+  ).join('');
+}
+
+let bbModalType = '';
+function openBBModal(type) {
+  bbModalType = type;
+  const titles = { providers:'Editar Proveedores', notes:'Editar Notas Importantes', contacts:'Editar Contactos Clave' };
+  document.getElementById('bbModalTitle').textContent = titles[type];
+  renderBBModalBody();
+  document.getElementById('bbModal').classList.add('open');
+}
+
+function renderBBModalBody() {
+  const body = document.getElementById('bbModalBody');
+  let html = '';
+  if (bbModalType === 'notes') {
+    html += bbData.notes.map((n, i) => `
+      <div class="bb-item-row">
+        <input type="text" value="${n.replace(/"/g,'&quot;')}" id="bbn-${i}" placeholder="Nota...">
+        <button class="bb-item-del" onclick="delBBItem('notes',${i})">× Eliminar</button>
+      </div>`).join('');
+    html += `<button class="bb-add-row" onclick="addBBItem('notes')">＋ Agregar nota</button>`;
+  } else {
+    const items = bbData[bbModalType];
+    html += items.map((item, i) => `
+      <div class="bb-item-row">
+        <input type="text" value="${item.name.replace(/"/g,'&quot;')}" id="bb-name-${i}" placeholder="Nombre">
+        <input type="text" value="${item.info.replace(/"/g,'&quot;')}" id="bb-info-${i}" placeholder="Teléfono / Info">
+        <button class="bb-item-del" onclick="delBBItem('${bbModalType}',${i})">×</button>
+      </div>`).join('');
+    html += `<button class="bb-add-row" onclick="addBBItem('${bbModalType}')">＋ Agregar</button>`;
+  }
+  html += `<button class="bb-save-btn" onclick="saveBBModal()">GUARDAR</button>`;
+  body.innerHTML = html;
+}
+
+function addBBItem(type) {
+  if (type === 'notes') bbData.notes.push('');
+  else bbData[type].push({name:'', info:''});
+  renderBBModalBody();
+}
+
+function delBBItem(type, idx) {
+  if (type === 'notes') bbData.notes.splice(idx, 1);
+  else bbData[type].splice(idx, 1);
+  renderBBModalBody();
+}
+
+function saveBBModal() {
+  if (bbModalType === 'notes') {
+    bbData.notes = [...document.querySelectorAll('[id^="bbn-"]')].map(el => el.value.trim()).filter(Boolean);
+  } else {
+    const items = bbData[bbModalType];
+    bbData[bbModalType] = items.map((_, i) => ({
+      name: (document.getElementById(`bb-name-${i}`)?.value || '').trim(),
+      info: (document.getElementById(`bb-info-${i}`)?.value || '').trim(),
+    })).filter(item => item.name);
+  }
+  saveBB();
+  renderBBDisplays();
+  closeModal('bbModal');
+  showToast('Guardado ✓', 'success');
+}
+
 // ── INIT ─────────────────────────────────────────────────────────────────────
-// Show loading state
 document.getElementById('calGrid').innerHTML = `
   <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:14px;color:#94A3B8;">
     <div style="font-size:32px">⏳</div>
     <div style="font-size:14px;font-weight:600">Conectando con Supabase...</div>
   </div>`;
 updateChips();
+renderBBDisplays();
 loadAll();
 </script>
 </body>
