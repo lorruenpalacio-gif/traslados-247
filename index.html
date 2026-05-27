@@ -507,7 +507,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="sb-title">Estado</div>
       <div class="sb-item" onclick="setStatusFilter('pending')"><div class="status-dot" style="background:#F59E0B"></div> Pendiente <span class="sb-count" id="cnt-pending" style="background:#F59E0B">0</span></div>
       <div class="sb-item" onclick="setStatusFilter('confirmed')"><div class="status-dot" style="background:#22C55E"></div> Confirmado <span class="sb-count" id="cnt-confirmed" style="background:#22C55E">0</span></div>
-      <div class="sb-item" onclick="setStatusFilter('operating')"><div class="status-dot" style="background:#3B82F6"></div> En Operación <span class="sb-count" id="cnt-operating" style="background:#3B82F6">0</span></div>
       <div class="sb-item" onclick="setStatusFilter('completed')"><div class="status-dot" style="background:#6B7280"></div> Completado <span class="sb-count" id="cnt-completed" style="background:#6B7280">0</span></div>
       <div class="sb-item" onclick="setStatusFilter('cancelled')"><div class="status-dot" style="background:#EF4444"></div> Cancelado <span class="sb-count" id="cnt-cancelled" style="background:#EF4444">0</span></div>
       <div class="sb-item" onclick="setStatusFilter('all')"><span style="font-size:12px">↺</span> Ver todos</div>
@@ -603,7 +602,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="bb-row"><span>Total de Servicios</span><span class="bb-val" id="bb-total">0</span></div>
     <div class="bb-row"><span>Confirmados</span><span class="bb-val green" id="bb-confirmed">0</span></div>
     <div class="bb-row"><span>Pendientes</span><span class="bb-val orange" id="bb-pending">0</span></div>
-    <div class="bb-row"><span>En Operación</span><span class="bb-val blue" id="bb-operating">0</span></div>
     <div class="bb-row"><span>Completados</span><span class="bb-val" id="bb-completed">0</span></div>
     <div class="bb-row"><span>Cancelados</span><span class="bb-val red" id="bb-cancelled">0</span></div>
   </div>
@@ -708,7 +706,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
           <select class="f-input" id="f-status">
             <option value="pending">Pendiente</option>
             <option value="confirmed">Confirmado</option>
-            <option value="operating">En Operación</option>
             <option value="completed">Completado</option>
             <option value="cancelled">Cancelado</option>
           </select>
@@ -839,7 +836,7 @@ function fmtDate(iso) {
 }
 
 const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York' };
-const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado' };
+const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado' };
 
 let curMonth = 5, curYear = 2026;
 let activeCity = 'all', activeStatus = 'all', activeType = 'all', activeProj = '', activeProvider = '';
@@ -1018,7 +1015,7 @@ function updateSidebar() {
   ['cdm','gdl','mty','ny'].forEach(c => {
     document.getElementById(`cnt-${c}`).textContent = all.filter(t=>t.city===c).length;
   });
-  ['pending','confirmed','operating','completed','cancelled'].forEach(s => {
+  ['pending','confirmed','completed','cancelled'].forEach(s => {
     document.getElementById(`cnt-${s}`).textContent = all.filter(t=>t.status===s).length;
   });
 }
@@ -1026,7 +1023,7 @@ function updateSidebar() {
 function updateBottomBar() {
   const mTr = monthTransfers();
   document.getElementById('bb-total').textContent = mTr.length;
-  ['confirmed','pending','operating','completed','cancelled'].forEach(s => {
+  ['confirmed','pending','completed','cancelled'].forEach(s => {
     document.getElementById(`bb-${s}`).textContent = mTr.filter(t=>t.status===s).length;
   });
 
@@ -1339,7 +1336,7 @@ function exportExcel() {
   }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
-  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado'};
+  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado'};
   const TYPE_MAP = {arrival:'Arrival', departure:'Departure', fullday:'Full Day', transfer:'Traslado', vip:'VIP'};
 
   const headers = ['Fecha','Hora','Ciudad','Pasajeros','Origen','Destino','Proveedor','Vehículo','Tipo','Estado','Notas'];
@@ -1379,7 +1376,7 @@ function exportPDF() {
   const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
   const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FDF2F8'};
   const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#DB2777'};
-  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado'};
+  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado'};
 
   const w = window.open('', '_blank');
   const rows = mTr.map(t => {
