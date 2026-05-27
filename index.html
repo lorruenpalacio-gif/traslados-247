@@ -401,60 +401,62 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .time-picker-wrap { position: relative; }
 .time-display {
   padding: 9px 11px; border: 1.5px solid var(--border);
-  border-radius: 8px; font-size: 15px; font-family: monospace;
-  letter-spacing: 3px; cursor: pointer; background: #fff;
-  display: flex; align-items: center; justify-content: space-between;
-  user-select: none;
+  border-radius: 8px; background: #fff;
+  display: flex; align-items: center; gap: 6px;
 }
-.time-display:hover { border-color: #0F172A; }
-.time-display.open { border-color: #0F172A; }
-.time-display .td-val { font-weight: 700; font-size: 16px; color: #0F172A; }
-.time-display .td-clear { font-size: 14px; color: #94A3B8; padding: 0 4px; }
+.time-display:focus-within { border-color: #0F172A; }
+.tp-text-input {
+  flex: 1; border: none; outline: none; background: transparent;
+  font-family: monospace; font-size: 16px; font-weight: 700;
+  letter-spacing: 3px; color: #0F172A; width: 70px;
+  cursor: text;
+}
+.tp-text-input::placeholder { color: #CBD5E1; font-weight: 400; letter-spacing: 1px; }
+.tp-open-btn {
+  background: none; border: none; cursor: pointer;
+  font-size: 16px; color: #94A3B8; padding: 0 2px;
+  flex-shrink: 0;
+}
 .time-popup {
   display: none; position: absolute; top: calc(100% + 6px); left: 0;
   background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px;
   box-shadow: 0 8px 30px rgba(0,0,0,.15); z-index: 999;
-  width: 200px; overflow: hidden;
+  width: 190px;
 }
-.time-popup.open { display: flex; flex-direction: column; }
-.time-cols { display: flex; height: 200px; }
+.time-popup.open { display: block; }
+.time-cols { display: flex; height: 180px; }
 .time-col {
   flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-  scrollbar-width: thin;
-  scrollbar-color: #CBD5E1 #f8fafc;
+  scrollbar-width: thin; scrollbar-color: #94A3B8 #f1f5f9;
   border-right: 1px solid #f0f0f0;
 }
 .time-col:last-child { border-right: none; }
-.time-col::-webkit-scrollbar { width: 5px; }
-.time-col::-webkit-scrollbar-track { background: #f8fafc; }
-.time-col::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
-.time-col::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+.time-col::-webkit-scrollbar { width: 6px; }
+.time-col::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
+.time-col::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 3px; }
 .time-col-header {
   text-align: center; font-size: 10px; font-weight: 700;
-  color: #94A3B8; letter-spacing: 1px; padding: 8px 0 4px;
+  color: #94A3B8; letter-spacing: 1px; padding: 7px 0 4px;
   border-bottom: 1px solid #f0f0f0; background: #fafafa;
-  text-transform: uppercase;
+  text-transform: uppercase; position: sticky; top: 0; z-index: 1;
 }
+.time-col-spacer { height: 70px; flex-shrink: 0; }
 .time-opt {
-  scroll-snap-align: start;
-  height: 40px; display: flex; align-items: center; justify-content: center;
+  scroll-snap-align: start; height: 38px;
+  display: flex; align-items: center; justify-content: center;
   font-size: 16px; font-family: monospace; font-weight: 600;
   cursor: pointer; color: #334155; transition: background .1s;
 }
 .time-opt:hover { background: #F1F5F9; }
-.time-opt.selected { background: #0F172A; color: #fff; border-radius: 6px; margin: 0 4px; width: calc(100% - 8px); }
+.time-opt.selected { background: #0F172A; color: #fff; }
 .time-popup-footer {
   display: flex; gap: 8px; padding: 8px 10px;
   border-top: 1px solid #f0f0f0; background: #fafafa;
+  border-radius: 0 0 12px 12px;
 }
-.tp-btn {
-  flex: 1; padding: 8px; border-radius: 8px; border: none;
-  font-size: 12px; font-weight: 700; cursor: pointer;
-}
+.tp-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; }
 .tp-btn.confirm { background: #0F172A; color: #fff; }
 .tp-btn.clear { background: #f1f5f9; color: #64748b; }
-/* spacers top/bottom so first/last item can center */
-.time-col-spacer { height: 80px; flex-shrink: 0; }
 
 /* search overlay */
 .search-bar {
@@ -718,16 +720,30 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
           <div class="f-label">Hora Pickup</div>
           <div class="time-picker-wrap" id="tpWrap">
             <input type="hidden" id="f-time" value="">
-            <div class="time-display" id="tpDisplay" onclick="toggleTimePicker()">
-              <span class="td-val" id="tpDisplayVal">— : —</span>
-              <span class="td-clear" onclick="event.stopPropagation();clearTime()">⏱</span>
+            <div class="time-display">
+              <input class="tp-text-input" id="tpTextInput" type="text"
+                maxlength="5" placeholder="HH:MM"
+                oninput="tpTextChanged(this)"
+                onkeydown="if(event.key==='Enter')closePicker()">
+              <button class="tp-open-btn" type="button" onclick="toggleTimePicker()">⏱</button>
             </div>
             <div class="time-popup" id="tpPopup">
-              <div style="display:flex;">
-                <div style="flex:1">
+              <div class="time-cols">
+                <div>
                   <div class="time-col-header">Hora</div>
                   <div class="time-col" id="tpHours"></div>
                 </div>
+                <div>
+                  <div class="time-col-header">Min</div>
+                  <div class="time-col" id="tpMins"></div>
+                </div>
+              </div>
+              <div class="time-popup-footer">
+                <button class="tp-btn clear" type="button" onclick="clearTime()">Limpiar</button>
+                <button class="tp-btn confirm" type="button" onclick="confirmTime()">Confirmar</button>
+              </div>
+            </div>
+          </div>
                 <div style="flex:1">
                   <div class="time-col-header">Minutos</div>
                   <div class="time-col" id="tpMins"></div>
@@ -1524,140 +1540,117 @@ function exportPDF() {
 }
 
 // ── CUSTOM TIME PICKER ───────────────────────────────────────────────────────
-let tpSelH = -1, tpSelM = -1;
+let tpSelH = -1, tpSelM = -1, tpBuilt = false;
 
 function buildTimePicker() {
+  if (tpBuilt) return;
+  tpBuilt = true;
   const hCol = document.getElementById('tpHours');
   const mCol = document.getElementById('tpMins');
-  if (!hCol || hCol.children.length > 2) return; // already built
-  // spacer top
   const hTop = document.createElement('div'); hTop.className='time-col-spacer'; hCol.appendChild(hTop);
   const mTop = document.createElement('div'); mTop.className='time-col-spacer'; mCol.appendChild(mTop);
   for (let h = 0; h < 24; h++) {
     const d = document.createElement('div');
-    d.className = 'time-opt'; d.textContent = String(h).padStart(2,'0');
-    d.dataset.val = h;
-    d.onclick = () => selectHour(h);
+    d.className='time-opt'; d.textContent=String(h).padStart(2,'0'); d.dataset.val=h;
+    d.onclick = () => { selectHour(h); syncTextInput(); };
     hCol.appendChild(d);
   }
   for (let m = 0; m < 60; m++) {
     const d = document.createElement('div');
-    d.className = 'time-opt'; d.textContent = String(m).padStart(2,'0');
-    d.dataset.val = m;
-    d.onclick = () => selectMin(m);
+    d.className='time-opt'; d.textContent=String(m).padStart(2,'0'); d.dataset.val=m;
+    d.onclick = () => { selectMin(m); syncTextInput(); };
     mCol.appendChild(d);
   }
-  // spacer bottom
   const hBot = document.createElement('div'); hBot.className='time-col-spacer'; hCol.appendChild(hBot);
   const mBot = document.createElement('div'); mBot.className='time-col-spacer'; mCol.appendChild(mBot);
 }
 
 function selectHour(h) {
   tpSelH = h;
-  document.querySelectorAll('#tpHours .time-opt').forEach(el => {
-    el.classList.toggle('selected', parseInt(el.dataset.val) === h);
-  });
-  updateTpDisplay();
+  document.querySelectorAll('#tpHours .time-opt').forEach(el =>
+    el.classList.toggle('selected', parseInt(el.dataset.val) === h));
 }
 function selectMin(m) {
   tpSelM = m;
-  document.querySelectorAll('#tpMins .time-opt').forEach(el => {
-    el.classList.toggle('selected', parseInt(el.dataset.val) === m);
-  });
-  updateTpDisplay();
-}
-function updateTpDisplay() {
-  const h = tpSelH >= 0 ? String(tpSelH).padStart(2,'0') : '—';
-  const m = tpSelM >= 0 ? String(tpSelM).padStart(2,'0') : '—';
-  document.getElementById('tpDisplayVal').textContent = `${h} : ${m}`;
-  const manual = document.getElementById('tpManual');
-  if (manual && tpSelH >= 0 && tpSelM >= 0)
-    manual.value = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
-}
-function toggleTimePicker() {
-  buildTimePicker();
-  const popup = document.getElementById('tpPopup');
-  const disp  = document.getElementById('tpDisplay');
-  const isOpen = popup.classList.toggle('open');
-  disp.classList.toggle('open', isOpen);
-  if (isOpen) {
-    // scroll to selected hour/min
-    setTimeout(() => {
-      if (tpSelH >= 0) {
-        const el = document.querySelector(`#tpHours .time-opt[data-val="${tpSelH}"]`);
-        if (el) el.scrollIntoView({block:'center'});
-      }
-      if (tpSelM >= 0) {
-        const el = document.querySelector(`#tpMins .time-opt[data-val="${tpSelM}"]`);
-        if (el) el.scrollIntoView({block:'center'});
-      }
-    }, 50);
-  }
-}
-function confirmTime() {
-  if (tpSelH < 0) tpSelH = 0;
-  if (tpSelM < 0) tpSelM = 0;
-  const val = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
-  document.getElementById('f-time').value = val;
-  updateTpDisplay();
-  document.getElementById('tpPopup').classList.remove('open');
-  document.getElementById('tpDisplay').classList.remove('open');
-}
-function clearTime() {
-  tpSelH = -1; tpSelM = -1;
-  document.getElementById('f-time').value = '';
-  document.getElementById('tpDisplayVal').textContent = '— : —';
-  document.getElementById('tpPopup').classList.remove('open');
-  document.getElementById('tpDisplay').classList.remove('open');
-  document.querySelectorAll('.time-opt').forEach(el => el.classList.remove('selected'));
-}
-function setPickerTime(val) {
-  // Called from editTransfer/duplicateTransfer to prefill
-  if (!val) { clearTime(); return; }
-  const [h, m] = val.split(':').map(Number);
-  buildTimePicker();
-  tpSelH = h; tpSelM = m;
-  document.querySelectorAll('#tpHours .time-opt').forEach(el =>
-    el.classList.toggle('selected', parseInt(el.dataset.val) === h));
   document.querySelectorAll('#tpMins .time-opt').forEach(el =>
     el.classList.toggle('selected', parseInt(el.dataset.val) === m));
-  document.getElementById('f-time').value = val;
-  updateTpDisplay();
 }
-function tpManualInput(el) {
-  let v = el.value.replace(/[^0-9]/g, '');
-  if (v.length > 2) v = v.slice(0,2) + ':' + v.slice(2,4);
+function syncTextInput() {
+  const h = tpSelH >= 0 ? String(tpSelH).padStart(2,'0') : '';
+  const m = tpSelM >= 0 ? String(tpSelM).padStart(2,'0') : '';
+  const el = document.getElementById('tpTextInput');
+  if (el && h && m) el.value = `${h}:${m}`;
+}
+
+function tpTextChanged(el) {
+  // Auto-insert colon
+  let v = el.value.replace(/[^0-9:]/g,'');
+  const digits = v.replace(/:/g,'');
+  if (digits.length >= 3) {
+    v = digits.slice(0,2) + ':' + digits.slice(2,4);
+  }
   el.value = v;
+  // Sync picker columns if valid
   if (v.length === 5) {
     let [h, m] = v.split(':').map(Number);
     if (h <= 23 && m <= 59) {
+      buildTimePicker();
       selectHour(h); selectMin(m);
-      // scroll cols to selection
       const hEl = document.querySelector(`#tpHours .time-opt[data-val="${h}"]`);
       const mEl = document.querySelector(`#tpMins .time-opt[data-val="${m}"]`);
       if (hEl) hEl.scrollIntoView({block:'center', behavior:'smooth'});
       if (mEl) mEl.scrollIntoView({block:'center', behavior:'smooth'});
     }
   }
-}
-function applyManual() {
-  const el = document.getElementById('tpManual');
-  if (el && el.value.length === 5) {
-    let [h, m] = el.value.split(':').map(Number);
-    if (h <= 23 && m <= 59) { selectHour(h); selectMin(m); confirmTime(); return; }
-  }
-  confirmTime();
+  // Always update hidden input
+  document.getElementById('f-time').value = v.length === 5 ? v : '';
 }
 
-// Close picker when clicking outside
+function toggleTimePicker() {
+  buildTimePicker();
+  const popup = document.getElementById('tpPopup');
+  popup.classList.toggle('open');
+  if (popup.classList.contains('open') && tpSelH >= 0) {
+    setTimeout(() => {
+      const hEl = document.querySelector(`#tpHours .time-opt[data-val="${tpSelH}"]`);
+      const mEl = document.querySelector(`#tpMins .time-opt[data-val="${tpSelM}"]`);
+      if (hEl) hEl.scrollIntoView({block:'center'});
+      if (mEl) mEl.scrollIntoView({block:'center'});
+    }, 60);
+  }
+}
+function closePicker() {
+  document.getElementById('tpPopup')?.classList.remove('open');
+}
+function confirmTime() {
+  if (tpSelH >= 0 && tpSelM >= 0) {
+    const val = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
+    document.getElementById('f-time').value = val;
+    document.getElementById('tpTextInput').value = val;
+  }
+  closePicker();
+}
+function clearTime() {
+  tpSelH=-1; tpSelM=-1;
+  document.getElementById('f-time').value='';
+  document.getElementById('tpTextInput').value='';
+  document.querySelectorAll('.time-opt').forEach(el=>el.classList.remove('selected'));
+  closePicker();
+}
+function setPickerTime(val) {
+  buildTimePicker();
+  if (!val) { clearTime(); return; }
+  const [h,m] = val.split(':').map(Number);
+  tpSelH=h; tpSelM=m;
+  document.getElementById('f-time').value = val;
+  document.getElementById('tpTextInput').value = val;
+  document.querySelectorAll('#tpHours .time-opt').forEach(el=>el.classList.toggle('selected',parseInt(el.dataset.val)===h));
+  document.querySelectorAll('#tpMins .time-opt').forEach(el=>el.classList.toggle('selected',parseInt(el.dataset.val)===m));
+}
 document.addEventListener('click', e => {
   const wrap = document.getElementById('tpWrap');
-  if (wrap && !wrap.contains(e.target)) {
-    document.getElementById('tpPopup')?.classList.remove('open');
-    document.getElementById('tpDisplay')?.classList.remove('open');
-  }
+  if (wrap && !wrap.contains(e.target)) closePicker();
 });
-
 
 // ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
 const BB_KEY = 'wc2026_bbdata';
