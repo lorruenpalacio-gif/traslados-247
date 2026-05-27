@@ -397,6 +397,61 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 .empty-msg { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0; }
 
+/* ── CUSTOM TIME PICKER ── */
+.time-picker-wrap { position: relative; }
+.time-display {
+  padding: 9px 11px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-size: 15px; font-family: monospace;
+  letter-spacing: 3px; cursor: pointer; background: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  user-select: none;
+}
+.time-display:hover { border-color: #0F172A; }
+.time-display.open { border-color: #0F172A; }
+.time-display .td-val { font-weight: 700; font-size: 16px; color: #0F172A; }
+.time-display .td-clear { font-size: 14px; color: #94A3B8; padding: 0 4px; }
+.time-popup {
+  display: none; position: absolute; top: calc(100% + 6px); left: 0;
+  background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,.15); z-index: 999;
+  width: 200px; overflow: hidden;
+}
+.time-popup.open { display: flex; flex-direction: column; }
+.time-cols { display: flex; height: 200px; }
+.time-col {
+  flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  border-right: 1px solid #f0f0f0;
+}
+.time-col:last-child { border-right: none; }
+.time-col::-webkit-scrollbar { display: none; }
+.time-col-header {
+  text-align: center; font-size: 10px; font-weight: 700;
+  color: #94A3B8; letter-spacing: 1px; padding: 8px 0 4px;
+  border-bottom: 1px solid #f0f0f0; background: #fafafa;
+  text-transform: uppercase;
+}
+.time-opt {
+  scroll-snap-align: start;
+  height: 40px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-family: monospace; font-weight: 600;
+  cursor: pointer; color: #334155; transition: background .1s;
+}
+.time-opt:hover { background: #F1F5F9; }
+.time-opt.selected { background: #0F172A; color: #fff; border-radius: 6px; margin: 0 4px; width: calc(100% - 8px); }
+.time-popup-footer {
+  display: flex; gap: 8px; padding: 8px 10px;
+  border-top: 1px solid #f0f0f0; background: #fafafa;
+}
+.tp-btn {
+  flex: 1; padding: 8px; border-radius: 8px; border: none;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+}
+.tp-btn.confirm { background: #0F172A; color: #fff; }
+.tp-btn.clear { background: #f1f5f9; color: #64748b; }
+/* spacers top/bottom so first/last item can center */
+.time-col-spacer { height: 80px; flex-shrink: 0; }
+
 /* search overlay */
 .search-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 600;
@@ -657,9 +712,29 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         </div>
         <div class="f-group">
           <div class="f-label">Hora Pickup</div>
-          <input class="f-input" type="text" id="f-time" placeholder="HH:MM (ej. 14:30)"
-            maxlength="5" oninput="fmtTimeInput(this)"
-            style="font-size:15px;letter-spacing:2px;font-family:monospace;">
+          <div class="time-picker-wrap" id="tpWrap">
+            <input type="hidden" id="f-time" value="">
+            <div class="time-display" id="tpDisplay" onclick="toggleTimePicker()">
+              <span class="td-val" id="tpDisplayVal">— : —</span>
+              <span class="td-clear" onclick="event.stopPropagation();clearTime()">⏱</span>
+            </div>
+            <div class="time-popup" id="tpPopup">
+              <div style="display:flex;">
+                <div style="flex:1">
+                  <div class="time-col-header">Hora</div>
+                  <div class="time-col" id="tpHours"></div>
+                </div>
+                <div style="flex:1">
+                  <div class="time-col-header">Minutos</div>
+                  <div class="time-col" id="tpMins"></div>
+                </div>
+              </div>
+              <div class="time-popup-footer">
+                <button class="tp-btn clear" onclick="clearTime()">Limpiar</button>
+                <button class="tp-btn confirm" onclick="confirmTime()">Confirmar</button>
+              </div>
+            </div>
+          </div>
         </div>
         <div class="f-group">
           <div class="f-label">Ciudad</div>
@@ -1248,6 +1323,7 @@ async function saveTransfer() {
 }
 
 function resetForm() {
+  clearTime();
   const list = document.getElementById('pax-list');
   if (!list) return;
   list.innerHTML = `<div class="pax-row">
@@ -1437,19 +1513,113 @@ function exportPDF() {
   w.document.close();
 }
 
-// ── TIME INPUT HELPER ────────────────────────────────────────────────────────
-function fmtTimeInput(el) {
-  let v = el.value.replace(/[^0-9]/g, '');
-  if (v.length >= 3) v = v.slice(0,2) + ':' + v.slice(2,4);
-  // Clamp hours 0-23, minutes 0-59
-  if (v.length === 5) {
-    let [h, m] = v.split(':').map(Number);
-    if (h > 23) h = 23;
-    if (m > 59) m = 59;
-    v = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+// ── CUSTOM TIME PICKER ───────────────────────────────────────────────────────
+let tpSelH = -1, tpSelM = -1;
+
+function buildTimePicker() {
+  const hCol = document.getElementById('tpHours');
+  const mCol = document.getElementById('tpMins');
+  if (!hCol || hCol.children.length > 2) return; // already built
+  // spacer top
+  const hTop = document.createElement('div'); hTop.className='time-col-spacer'; hCol.appendChild(hTop);
+  const mTop = document.createElement('div'); mTop.className='time-col-spacer'; mCol.appendChild(mTop);
+  for (let h = 0; h < 24; h++) {
+    const d = document.createElement('div');
+    d.className = 'time-opt'; d.textContent = String(h).padStart(2,'0');
+    d.dataset.val = h;
+    d.onclick = () => selectHour(h);
+    hCol.appendChild(d);
   }
-  el.value = v;
+  for (let m = 0; m < 60; m++) {
+    const d = document.createElement('div');
+    d.className = 'time-opt'; d.textContent = String(m).padStart(2,'0');
+    d.dataset.val = m;
+    d.onclick = () => selectMin(m);
+    mCol.appendChild(d);
+  }
+  // spacer bottom
+  const hBot = document.createElement('div'); hBot.className='time-col-spacer'; hCol.appendChild(hBot);
+  const mBot = document.createElement('div'); mBot.className='time-col-spacer'; mCol.appendChild(mBot);
 }
+
+function selectHour(h) {
+  tpSelH = h;
+  document.querySelectorAll('#tpHours .time-opt').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.dataset.val) === h);
+  });
+  updateTpDisplay();
+}
+function selectMin(m) {
+  tpSelM = m;
+  document.querySelectorAll('#tpMins .time-opt').forEach(el => {
+    el.classList.toggle('selected', parseInt(el.dataset.val) === m);
+  });
+  updateTpDisplay();
+}
+function updateTpDisplay() {
+  const h = tpSelH >= 0 ? String(tpSelH).padStart(2,'0') : '—';
+  const m = tpSelM >= 0 ? String(tpSelM).padStart(2,'0') : '—';
+  document.getElementById('tpDisplayVal').textContent = `${h} : ${m}`;
+}
+function toggleTimePicker() {
+  buildTimePicker();
+  const popup = document.getElementById('tpPopup');
+  const disp  = document.getElementById('tpDisplay');
+  const isOpen = popup.classList.toggle('open');
+  disp.classList.toggle('open', isOpen);
+  if (isOpen) {
+    // scroll to selected hour/min
+    setTimeout(() => {
+      if (tpSelH >= 0) {
+        const el = document.querySelector(`#tpHours .time-opt[data-val="${tpSelH}"]`);
+        if (el) el.scrollIntoView({block:'center'});
+      }
+      if (tpSelM >= 0) {
+        const el = document.querySelector(`#tpMins .time-opt[data-val="${tpSelM}"]`);
+        if (el) el.scrollIntoView({block:'center'});
+      }
+    }, 50);
+  }
+}
+function confirmTime() {
+  if (tpSelH < 0) tpSelH = 0;
+  if (tpSelM < 0) tpSelM = 0;
+  const val = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
+  document.getElementById('f-time').value = val;
+  updateTpDisplay();
+  document.getElementById('tpPopup').classList.remove('open');
+  document.getElementById('tpDisplay').classList.remove('open');
+}
+function clearTime() {
+  tpSelH = -1; tpSelM = -1;
+  document.getElementById('f-time').value = '';
+  document.getElementById('tpDisplayVal').textContent = '— : —';
+  document.getElementById('tpPopup').classList.remove('open');
+  document.getElementById('tpDisplay').classList.remove('open');
+  document.querySelectorAll('.time-opt').forEach(el => el.classList.remove('selected'));
+}
+function setPickerTime(val) {
+  // Called from editTransfer/duplicateTransfer to prefill
+  if (!val) { clearTime(); return; }
+  const [h, m] = val.split(':').map(Number);
+  buildTimePicker();
+  tpSelH = h; tpSelM = m;
+  document.querySelectorAll('#tpHours .time-opt').forEach(el =>
+    el.classList.toggle('selected', parseInt(el.dataset.val) === h));
+  document.querySelectorAll('#tpMins .time-opt').forEach(el =>
+    el.classList.toggle('selected', parseInt(el.dataset.val) === m));
+  document.getElementById('f-time').value = val;
+  updateTpDisplay();
+}
+// Close picker when clicking outside
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('tpWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('tpPopup')?.classList.remove('open');
+    document.getElementById('tpDisplay')?.classList.remove('open');
+  }
+});
+
 
 // ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
 const BB_KEY = 'wc2026_bbdata';
