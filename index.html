@@ -643,7 +643,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   <div class="modal">
     <div class="modal-head">
       <h3 id="dayModalTitle">—</h3>
-      <button class="modal-close" onclick="closeModal('dayModal')">✕</button>
+      <div style="display:flex;align-items:center;gap:6px;">
+        <button onclick="exportDayPDF()" style="background:#c0392b;color:#fff;border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:700;cursor:pointer;">📄 PDF</button>
+        <button class="modal-close" onclick="closeModal('dayModal')">✕</button>
+      </div>
     </div>
     <div class="modal-body" id="dayModalBody"></div>
   </div>
@@ -1449,6 +1452,71 @@ function exportPDF() {
     <tbody>${rows}</tbody>
   </table>
   <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── EXPORT DAY PDF ───────────────────────────────────────────────────────────
+function exportDayPDF() {
+  const title = document.getElementById('dayModalTitle').textContent;
+  const dayTr = filteredTransfers()
+    .filter(t => t.date === selectedDate)
+    .sort((a,b) => (a.time||'').localeCompare(b.time||''));
+
+  const CITY_MAP   = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York', dal:'Dallas'};
+  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FDF2F8', dal:'#FFFBEB'};
+  const CITY_BORDER= {cdm:'#F97316', gdl:'#0D9488', mty:'#1E40AF', ny:'#DB2777', dal:'#D97706'};
+  const SVC_COLOR  = {arrival:'#DC2626', departure:'#0EA5E9', fullday:'#22C55E', vip:'#7C3AED', transfer:'#94A3B8'};
+  const SVC_LABEL  = {arrival:'Arrival', departure:'Departure', fullday:'Full Day / A disposición', vip:'VIP / Especial', transfer:'Traslado'};
+  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado'};
+  const STATUS_COLOR = {pending:'#F59E0B', confirmed:'#22C55E', completed:'#6B7280', cancelled:'#EF4444'};
+
+  const rows = dayTr.map((t,i) => {
+    const pax = (t.passengers && t.passengers.length ? t.passengers : [t.client||'—']).join(' / ');
+    const bg = i%2===0 ? (CITY_COLOR[t.city]||'#fff') : '#fff';
+    const svcColor = SVC_COLOR[t.type] || '#94A3B8';
+    const statusColor = STATUS_COLOR[t.status] || '#ccc';
+    const statusLabel = STATUS_MAP[t.status] || t.status;
+    const city = CITY_MAP[t.city]||t.city;
+    const route = [t.from, t.to].filter(Boolean).join(' → ') || '—';
+    const prov = [t.provider, t.vehicle].filter(Boolean).join(' · ') || '—';
+    return `<tr style="background:${bg};border-left:4px solid ${svcColor};">
+      <td style="padding:5px 7px;font-weight:700;font-size:11px;white-space:nowrap;">${t.time||'—'}</td>
+      <td style="padding:5px 7px;font-weight:700;font-size:11px;">${pax}</td>
+      <td style="padding:5px 7px;font-size:10px;color:#475569;">${route}</td>
+      <td style="padding:5px 7px;font-size:10px;color:#475569;">${prov}</td>
+      <td style="padding:5px 7px;font-size:10px;">${city}</td>
+      <td style="padding:5px 7px;"><span style="background:${statusColor};color:#fff;border-radius:10px;padding:1px 7px;font-size:9px;font-weight:700;white-space:nowrap;">${statusLabel}</span></td>
+      <td style="padding:5px 7px;font-size:9px;color:#64748b;font-style:italic;">${t.notes||''}</td>
+    </tr>`;
+  }).join('');
+  const cards = `<table style="width:100%;border-collapse:collapse;font-family:Arial,sans-serif;">
+    <thead><tr style="background:#0f172a;color:#fff;">
+      <th style="padding:6px 7px;font-size:10px;text-align:left;white-space:nowrap;">HORA</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">PASAJERO(S)</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">RUTA</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">PROVEEDOR · VEH.</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">CIUDAD</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">ESTADO</th>
+      <th style="padding:6px 7px;font-size:10px;text-align:left;">NOTAS</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Traslados · ${title}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 16px; color: #1a1a1a; font-size: 11px; }
+    h1 { font-size: 18px; margin-bottom: 2px; }
+    .sub { color:#666; font-size:11px; margin-bottom:12px; }
+    .print-btn { display:inline-block; margin-bottom:14px; padding:7px 18px; background:#0f172a; color:#fff; border:none; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; }
+    @media print { .print-btn { display:none; } body { margin:8px; } }
+  </style></head><body>
+  <h1>🏆 ${title}</h1>
+  <div class="sub">24/7 World Concierge &nbsp;·&nbsp; ${dayTr.length} traslado${dayTr.length!==1?'s':''} &nbsp;·&nbsp; ${new Date().toLocaleDateString('es')}</div>
+  <button class="print-btn" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+  ${cards || '<p style="color:#94A3B8">Sin traslados este día.</p>'}
   </body></html>`);
   w.document.close();
 }
