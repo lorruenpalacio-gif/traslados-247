@@ -499,6 +499,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="sb-item" onclick="setTypeFilter('arrival')"><div class="svc-line" style="background:#DC2626;"></div> Arrival (Llegada)</div>
       <div class="sb-item" onclick="setTypeFilter('departure')"><div class="svc-line" style="background:#0EA5E9;"></div> Departure (Salida)</div>
       <div class="sb-item" onclick="setTypeFilter('fullday')"><div class="svc-line" style="background:#22C55E; height:4px;"></div> Full Day / A disposición</div>
+      <div class="sb-item" onclick="setTypeFilter('transfer')"><div class="svc-line" style="background:#94A3B8;"></div> Traslado</div>
       <div class="sb-item" onclick="setTypeFilter('vip')"><div class="svc-line" style="background:#7C3AED;"></div> VIP / Especial</div>
       <div class="sb-item" onclick="setTypeFilter('all')"><span style="font-size:12px">↺</span> Ver todos</div>
     </div>
@@ -695,6 +696,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         <div class="f-group">
           <div class="f-label">Tipo de Servicio</div>
           <select class="f-input" id="f-type">
+            <option value="transfer">Traslado</option>
             <option value="arrival">Arrival (Llegada)</option>
             <option value="departure">Departure (Salida)</option>
             <option value="fullday">Full Day / A disposición</option>
