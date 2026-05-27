@@ -18,7 +18,7 @@
   --status-completed: #6B7280;
   --status-cancelled: #EF4444;
 
-  --sidebar-w: 220px;
+  --sidebar-w: 185px;
   --bg: #F1F5F9;
   --sidebar-bg: #1C1C1E;
   --header-bg: #FFFFFF;
@@ -35,7 +35,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .top-header {
   background: var(--sidebar-bg);
   display: flex; align-items: stretch;
-  height: 88px; flex-shrink: 0;
+  height: 72px; flex-shrink: 0;
 }
 .logo-area {
   width: var(--sidebar-w);
@@ -56,7 +56,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   gap: 2px;
 }
 .header-center .month-title {
-  font-family: 'Bebas Neue'; font-size: 40px; letter-spacing: 4px; color: #fff; line-height: 1;
+  font-family: 'Bebas Neue'; font-size: 32px; letter-spacing: 3px; color: #fff; line-height: 1;
 }
 .header-center .sub { font-size: 11px; color: var(--accent); letter-spacing: 3px; font-weight: 500; }
 
@@ -85,8 +85,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 }
 .wd-cell {
   flex: 1; text-align: center;
-  font-size: 11px; font-weight: 600; letter-spacing: 1px;
-  color: #aaa; padding: 8px 0;
+  font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  color: #aaa; padding: 5px 0;
   border-right: 1px solid #2A2A2A;
 }
 .wd-cell:last-child { border-right: none; }
@@ -104,18 +104,18 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .sidebar::-webkit-scrollbar { width: 4px; }
 .sidebar::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
 
-.sb-section { padding: 0 14px; margin-bottom: 18px; }
+.sb-section { padding: 0 10px; margin-bottom: 12px; }
 .sb-title {
-  font-size: 9px; font-weight: 700; letter-spacing: 1.5px;
+  font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
   color: #666; text-transform: uppercase;
-  margin-bottom: 8px; padding-bottom: 6px;
+  margin-bottom: 6px; padding-bottom: 4px;
   border-bottom: 1px solid #2A2A2A;
 }
 .sb-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 6px 10px; border-radius: 8px;
-  cursor: pointer; margin-bottom: 2px;
-  font-size: 12px; color: #ccc;
+  display: flex; align-items: center; gap: 6px;
+  padding: 4px 8px; border-radius: 7px;
+  cursor: pointer; margin-bottom: 1px;
+  font-size: 11px; color: #ccc;
   transition: background .15s;
   position: relative;
 }
@@ -138,9 +138,9 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 /* Proyectos */
 .proj-item {
-  display: flex; align-items: center; gap: 6px;
-  padding: 4px 10px; border-radius: 6px;
-  cursor: pointer; font-size: 11px; color: #bbb;
+  display: flex; align-items: center; gap: 5px;
+  padding: 3px 8px; border-radius: 6px;
+  cursor: pointer; font-size: 10px; color: #bbb;
   transition: background .15s; margin-bottom: 1px;
 }
 .proj-item:hover { background: #2A2A2A; color: #fff; }
@@ -153,7 +153,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   flex: 1; overflow-y: auto;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-auto-rows: minmax(200px, 1fr);
+  grid-auto-rows: minmax(240px, 1fr);
   gap: 1px; background: var(--border);
   padding: 1px;
 }
@@ -182,15 +182,15 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 }
 
 .event-block {
-  border-radius: 5px; padding: 4px 6px;
-  margin-bottom: 3px; border-left: 3px solid;
-  font-size: 10px; line-height: 1.35;
+  border-radius: 5px; padding: 3px 5px;
+  margin-bottom: 2px; border-left: 3px solid;
+  font-size: 9px; line-height: 1.3;
   overflow: hidden; cursor: pointer;
 }
-.event-block .ev-time { font-weight: 700; font-size: 10px; }
-.event-block .ev-name { font-weight: 700; font-size: 10.5px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.event-block .ev-route { color: #475569; font-size: 9.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.event-block .ev-provider { color: #64748b; font-size: 9.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-block .ev-time { font-weight: 700; font-size: 9px; }
+.event-block .ev-name { font-weight: 700; font-size: 9.5px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-block .ev-route { color: #475569; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-block .ev-provider { color: #64748b; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .ev-cdm { background: var(--cdm-light); border-color: var(--cdm); }
 .ev-gdl { background: var(--gdl-light); border-color: var(--gdl); }
@@ -216,13 +216,13 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 /* ── BOTTOM BAR ── */
 .bottom-bar {
   background: var(--sidebar-bg);
-  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+  display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 1px; border-top: 1px solid #2A2A2A;
-  flex-shrink: 0; padding: 10px 16px; gap: 0;
+  flex-shrink: 0; padding: 6px 12px; gap: 0;
 }
-.bb-section { padding: 0 12px; }
+.bb-section { padding: 0 8px; }
 .bb-section:not(:last-child) { border-right: 1px solid #2A2A2A; }
-.bb-title { font-size: 9px; font-weight: 700; letter-spacing: 1.5px; color: #666; text-transform: uppercase; margin-bottom: 6px; }
+.bb-title { font-size: 8px; font-weight: 700; letter-spacing: 1px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
 .bb-title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .bb-title-row .bb-title { margin-bottom: 0; }
 .bb-edit-btn { background: none; border: 1px solid #444; border-radius: 5px; color: #aaa; font-size: 10px; padding: 1px 6px; cursor: pointer; }
@@ -234,7 +234,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .bb-item-del { background:none; border:1px solid #fca5a5; color:#ef4444; border-radius:6px; padding:4px 8px; cursor:pointer; font-size:12px; white-space:nowrap; }
 .bb-add-row { width:100%; padding:9px; background:#F1F5F9; border:1.5px dashed #CBD5E1; border-radius:8px; font-size:12px; font-weight:600; color:#64748B; cursor:pointer; margin-top:4px; }
 .bb-save-btn { width:100%; padding:11px; background:#0F172A; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:14px; cursor:pointer; margin-top:14px; }
-.bb-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; color: #aaa; margin-bottom: 3px; }
+.bb-row { display: flex; justify-content: space-between; align-items: center; font-size: 9px; color: #aaa; margin-bottom: 2px; }
 .bb-val { font-weight: 700; color: #fff; }
 .bb-val.orange { color: var(--status-pending); }
 .bb-val.blue   { color: var(--status-operating); }
@@ -407,13 +407,13 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 /* filter chip bar below weekdays */
 .filter-bar {
   background: #F8FAFC; border-bottom: 1px solid var(--border);
-  display: flex; gap: 6px; padding: 6px 10px;
+  display: flex; gap: 4px; padding: 4px 8px;
   overflow-x: auto; flex-shrink: 0;
 }
 .filter-bar::-webkit-scrollbar { display: none; }
 .f-chip {
-  padding: 4px 12px; border-radius: 20px;
-  font-size: 11px; font-weight: 600; border: 1.5px solid transparent;
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; border: 1.5px solid transparent;
   cursor: pointer; white-space: nowrap; background: #fff;
   border-color: var(--border); color: var(--muted);
   transition: all .15s;
@@ -455,7 +455,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <button class="hbtn" onclick="prevMonth()" title="Mes anterior">‹</button>
     <button class="hbtn" onclick="nextMonth()" title="Mes siguiente">›</button>
     <button class="hbtn" onclick="openSearch()">🔍</button>
-    <button class="hbtn" onclick="openFilter()">⚙</button>
+    <button class="hbtn export-btn" onclick="exportExcel()" title="Descargar Excel" style="font-size:10px;font-weight:700;background:#1a6b3c;color:#fff;width:auto;padding:0 7px;height:26px;">📊 XLS</button>
+    <button class="hbtn export-btn" onclick="exportPDF()" title="Descargar PDF" style="font-size:10px;font-weight:700;background:#c0392b;color:#fff;width:auto;padding:0 7px;height:26px;">📄 PDF</button>
     <button class="hbtn primary" onclick="openAddModal()">＋</button>
   </div>
 </div>
@@ -599,13 +600,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <div class="bb-row"><span>En Operación</span><span class="bb-val blue" id="bb-operating">0</span></div>
     <div class="bb-row"><span>Completados</span><span class="bb-val" id="bb-completed">0</span></div>
     <div class="bb-row"><span>Cancelados</span><span class="bb-val red" id="bb-cancelled">0</span></div>
-  </div>
-  <div class="bb-section">
-    <div class="bb-title">Por Ciudad (mes)</div>
-    <div class="bb-row"><span>🟠 Cd. México</span><span class="bb-val" id="bb-cdm">0</span></div>
-    <div class="bb-row"><span>🟢 Guadalajara</span><span class="bb-val" id="bb-gdl">0</span></div>
-    <div class="bb-row"><span>🔵 Monterrey</span><span class="bb-val" id="bb-mty">0</span></div>
-    <div class="bb-row"><span>🟣 New York</span><span class="bb-val" id="bb-ny">0</span></div>
   </div>
 </div>
 
@@ -1023,9 +1017,7 @@ function updateBottomBar() {
   ['confirmed','pending','operating','completed','cancelled'].forEach(s => {
     document.getElementById(`bb-${s}`).textContent = mTr.filter(t=>t.status===s).length;
   });
-  ['cdm','gdl','mty','ny'].forEach(c => {
-    document.getElementById(`bb-${c}`).textContent = mTr.filter(t=>t.city===c).length;
-  });
+
 }
 
 // ── MONTH NAV ────────────────────────────────────────────────────────────────
@@ -1326,6 +1318,100 @@ function openFilter() { /* extend later */ }
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function handleOverlay(e, id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ── EXPORT FUNCTIONS ──────────────────────────────────────────────────────────
+function exportExcel() {
+  const mTr = filteredTransfers().filter(t => {
+    const p = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+    return t.date.startsWith(p);
+  }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+  const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
+  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado'};
+  const TYPE_MAP = {arrival:'Arrival', departure:'Departure', fullday:'Full Day', transfer:'Traslado', vip:'VIP'};
+
+  const headers = ['Fecha','Hora','Ciudad','Pasajeros','Origen','Destino','Proveedor','Vehículo','Tipo','Estado','Notas'];
+  const rows = mTr.map(t => [
+    t.date,
+    t.time || '',
+    CITY_MAP[t.city] || t.city,
+    (t.passengers || [t.client]).join(' / '),
+    t.from || '',
+    t.to || '',
+    t.provider || '',
+    t.vehicle || '',
+    TYPE_MAP[t.type] || t.type,
+    STATUS_MAP[t.status] || t.status,
+    t.notes || '',
+  ]);
+
+  // Build CSV (Excel-compatible UTF-8 with BOM)
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Traslados_${MONTHS[curMonth]}_${curYear}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Excel descargado ✓', 'success');
+}
+
+function exportPDF() {
+  const mTr = filteredTransfers().filter(t => {
+    const p = `${curYear}-${String(curMonth+1).padStart(2,'0')}`;
+    return t.date.startsWith(p);
+  }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+
+  const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
+  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FAF5FF'};
+  const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#A855F7'};
+  const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado'};
+
+  const w = window.open('', '_blank');
+  const rows = mTr.map(t => {
+    const pax = (t.passengers || [t.client]).join(', ');
+    const bg = CITY_COLOR[t.city] || '#fff';
+    const border = CITY_BORDER[t.city] || '#ccc';
+    return `<tr style="background:${bg};border-left:4px solid ${border}">
+      <td>${t.date}</td>
+      <td>${t.time||''}</td>
+      <td>${CITY_MAP[t.city]||t.city}</td>
+      <td><strong>${pax}</strong></td>
+      <td>${t.from||''}</td>
+      <td>${t.to||''}</td>
+      <td>${t.provider||''}</td>
+      <td>${t.vehicle||''}</td>
+      <td>${STATUS_MAP[t.status]||t.status}</td>
+      <td>${t.notes||''}</td>
+    </tr>`;
+  }).join('');
+
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Traslados ${MONTHS[curMonth]} ${curYear}</title>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; margin: 20px; color: #1a1a1a; }
+    h1 { font-size: 18px; margin-bottom: 4px; }
+    p { color: #666; margin-bottom: 16px; font-size: 11px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { background: #1C1C1E; color: #fff; padding: 7px 8px; text-align: left; font-size: 10px; letter-spacing: .5px; }
+    td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    @media print { body { margin: 10px; } }
+  </style></head><body>
+  <h1>🏆 Traslados · ${MONTHS[curMonth]} ${curYear}</h1>
+  <p>24/7 World Concierge · ${mTr.length} registros · Generado ${new Date().toLocaleDateString('es')}</p>
+  <table>
+    <thead><tr>
+      <th>Fecha</th><th>Hora</th><th>Ciudad</th><th>Pasajero(s)</th>
+      <th>Origen</th><th>Destino</th><th>Proveedor</th><th>Vehículo</th><th>Estado</th><th>Notas</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <script>window.onload=()=>{window.print();}<\/script>
+  </body></html>`);
+  w.document.close();
+}
 
 // ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
 const BB_KEY = 'wc2026_bbdata';
