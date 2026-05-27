@@ -164,12 +164,24 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .cal-day {
   background: var(--card-bg);
   padding: 7px 6px 5px;
-  cursor: pointer;
+  cursor: default;
   position: relative;
   transition: background .1s;
   min-height: 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
+.day-num { cursor: pointer; }
+.day-events {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+.day-events::-webkit-scrollbar { width: 4px; }
+.day-events::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 2px; }
 .cal-day:hover { background: #F8FAFC; }
 .cal-day.other-month { background: #F8FAFC; }
 .cal-day.other-month .day-num { color: #CBD5E1; }
@@ -179,7 +191,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .day-num {
   font-size: 16px; font-weight: 600;
   color: var(--text); line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 6px; flex-shrink: 0;
 }
 
 .event-block {
@@ -645,7 +657,57 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         </div>
         <div class="f-group">
           <div class="f-label">Hora Pickup</div>
-          <input class="f-input" type="time" id="f-time">
+          <select class="f-input" id="f-time">
+            <option value="">— Sin hora —</option>
+            <option value="00:00">00:00</option>
+            <option value="00:30">00:30</option>
+            <option value="01:00">01:00</option>
+            <option value="01:30">01:30</option>
+            <option value="02:00">02:00</option>
+            <option value="02:30">02:30</option>
+            <option value="03:00">03:00</option>
+            <option value="03:30">03:30</option>
+            <option value="04:00">04:00</option>
+            <option value="04:30">04:30</option>
+            <option value="05:00">05:00</option>
+            <option value="05:30">05:30</option>
+            <option value="06:00">06:00</option>
+            <option value="06:30">06:30</option>
+            <option value="07:00">07:00</option>
+            <option value="07:30">07:30</option>
+            <option value="08:00">08:00</option>
+            <option value="08:30">08:30</option>
+            <option value="09:00">09:00</option>
+            <option value="09:30">09:30</option>
+            <option value="10:00">10:00</option>
+            <option value="10:30">10:30</option>
+            <option value="11:00">11:00</option>
+            <option value="11:30">11:30</option>
+            <option value="12:00">12:00</option>
+            <option value="12:30">12:30</option>
+            <option value="13:00">13:00</option>
+            <option value="13:30">13:30</option>
+            <option value="14:00">14:00</option>
+            <option value="14:30">14:30</option>
+            <option value="15:00">15:00</option>
+            <option value="15:30">15:30</option>
+            <option value="16:00">16:00</option>
+            <option value="16:30">16:30</option>
+            <option value="17:00">17:00</option>
+            <option value="17:30">17:30</option>
+            <option value="18:00">18:00</option>
+            <option value="18:30">18:30</option>
+            <option value="19:00">19:00</option>
+            <option value="19:30">19:30</option>
+            <option value="20:00">20:00</option>
+            <option value="20:30">20:30</option>
+            <option value="21:00">21:00</option>
+            <option value="21:30">21:30</option>
+            <option value="22:00">22:00</option>
+            <option value="22:30">22:30</option>
+            <option value="23:00">23:00</option>
+            <option value="23:30">23:30</option>
+          </select>
         </div>
         <div class="f-group">
           <div class="f-label">Ciudad</div>
@@ -963,12 +1025,12 @@ function render() {
     if (!isCurrentMonth) cls += ' other-month';
     if (isToday) cls += ' today';
 
-    html += `<div class="${cls}" onclick="openDay('${dateStr}')">`;
-    html += `<div class="day-num">${isCurrentMonth ? dayNum : ''}</div>`;
+    html += `<div class="${cls}">`;
+    html += `<div class="day-num" onclick="openDay('${dateStr}')">${isCurrentMonth ? dayNum : ''}</div>`;
 
     if (isCurrentMonth && dayTr.length > 0) {
-      const MAX_SHOW = 3;
-      dayTr.slice(0, MAX_SHOW).forEach(t => {
+      html += `<div class="day-events">`;
+      dayTr.forEach(t => {
         const paxList = t.passengers && t.passengers.length ? t.passengers : (t.client ? [t.client] : ['—']);
         const firstName = paxList[0];
         const extraPax = paxList.length > 1 ? ` +${paxList.length - 1}` : '';
@@ -977,14 +1039,15 @@ function render() {
         const provText  = [t.provider, t.vehicle].filter(Boolean).join(' · ');
         const svcClass = `ev-svc-${t.type || 'transfer'}`;
         if (t.type === 'fullday') {
-          html += `<div class="ev-fullday ${t.city} ${svcClass}" onclick="event.stopPropagation();openDay('${dateStr}')">
-            Full Day · ${firstName.substring(0,18)}
+          html += `<div class="ev-fullday ${t.city} ${svcClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
+            Full Day · ${firstName.substring(0,18)} ✏️
             ${provText ? `<div style="font-size:9px;font-weight:400;margin-top:2px">🚗 ${provText}</div>` : ''}
           </div>`;
         } else {
-          html += `<div class="event-block ev-${t.city} ${svcClass}" onclick="event.stopPropagation();openDay('${dateStr}')">
+          html += `<div class="event-block ev-${t.city} ${svcClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span class="ev-time">${t.time || ''}</span>
+              <span style="font-size:8px;color:#94A3B8;margin-left:4px">✏️</span>
             </div>
             <div class="ev-name">${firstName}${extraPax}</div>
             <div class="ev-route">📍 ${fromShort} → ${toShort}</div>
@@ -992,9 +1055,7 @@ function render() {
           </div>`;
         }
       });
-      if (dayTr.length > MAX_SHOW) {
-        html += `<div class="more-badge">+${dayTr.length - MAX_SHOW} más</div>`;
-      }
+      html += `</div>`; // close .day-events
     }
     html += `</div>`;
   }
