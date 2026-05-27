@@ -11,6 +11,7 @@
   --gdl: #22C55E; --gdl-light: #F0FDF4; --gdl-border: #4ADE80;
   --mty: #3B82F6; --mty-light: #EFF6FF; --mty-border: #60A5FA;
   --ny:  #DB2777; --ny-light:  #FDF2F8; --ny-border:  #C0166A;
+  --dal: #D97706; --dal-light: #FFFBEB; --dal-border: #B45309;
 
   --status-pending:   #F59E0B;
   --status-confirmed: #22C55E;
@@ -209,6 +210,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .ev-gdl { background: var(--gdl-light); }
 .ev-mty { background: var(--mty-light); }
 .ev-ny  { background: var(--ny-light); }
+.ev-dal { background: var(--dal-light); }
 /* Service left border stripe */
 .ev-svc-arrival   { border-color: #DC2626 !important; }
 .ev-svc-departure { border-color: #0EA5E9 !important; }
@@ -295,6 +297,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .t-card.gdl { background: var(--gdl-light); border-color: var(--gdl); }
 .t-card.mty { background: var(--mty-light); border-color: var(--mty); }
 .t-card.ny  { background: var(--ny-light);  border-color: var(--ny);  }
+.t-card.dal { background: var(--dal-light); border-color: var(--dal); }
 
 .t-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .t-client { font-weight: 700; font-size: 14px; }
@@ -441,6 +444,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .f-chip.active-gdl { background: var(--gdl-light); border-color: var(--gdl); color: var(--gdl); }
 .f-chip.active-mty { background: var(--mty-light); border-color: var(--mty); color: var(--mty); }
 .f-chip.active-ny  { background: var(--ny-light);  border-color: var(--ny);  color: var(--ny);  }
+.f-chip.active-dal { background: var(--dal-light); border-color: var(--dal); color: var(--dal); }
 .f-chip.active-all { background: #0F172A; border-color: #0F172A; color: #fff; }
 
 /* status dots in sidebar */
@@ -504,6 +508,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="sb-item" onclick="setFilter('gdl')" id="sb-gdl"><div class="sb-dot gdl"></div> Guadalajara <span class="sb-count" id="cnt-gdl">0</span></div>
       <div class="sb-item" onclick="setFilter('mty')" id="sb-mty"><div class="sb-dot mty"></div> Monterrey <span class="sb-count" id="cnt-mty">0</span></div>
       <div class="sb-item" onclick="setFilter('ny')"  id="sb-ny" ><div class="sb-dot ny"></div>  New York <span class="sb-count" id="cnt-ny">0</span></div>
+      <div class="sb-item" onclick="setFilter('dal')" id="sb-dal"><div class="sb-dot" style="background:#D97706"></div> Dallas <span class="sb-count" id="cnt-dal">0</span></div>
     </div>
 
     <div class="sb-section">
@@ -534,6 +539,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="sb-item" onclick="setFilter('gdl')">🌳 Guadalajara</div>
       <div class="sb-item" onclick="setFilter('mty')">⛰ Monterrey</div>
       <div class="sb-item" onclick="setFilter('ny')">🗽 New York</div>
+      <div class="sb-item" onclick="setFilter('dal')">🌟 Dallas</div>
       <div class="sb-item" onclick="setStatusFilter('pending')">⏳ Pendientes</div>
       <div class="sb-item" onclick="setStatusFilter('confirmed')">✅ Por Confirmar</div>
     </div>
@@ -571,6 +577,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="f-chip" onclick="setFilter('gdl')" id="chip-gdl">🟢 Guadalajara</div>
       <div class="f-chip" onclick="setFilter('mty')" id="chip-mty">🔵 Monterrey</div>
       <div class="f-chip" onclick="setFilter('ny')"  id="chip-ny">🟣 New York</div>
+      <div class="f-chip" onclick="setFilter('dal')" id="chip-dal">🟡 Dallas</div>
       <div class="f-chip" onclick="setStatusFilter('pending')" id="chip-pending">⏳ Pendientes</div>
       <div class="f-chip" onclick="setStatusFilter('confirmed')" id="chip-confirmed">✅ Confirmados</div>
       <div class="f-chip" onclick="setProviderFilter('Jacob')" id="chip-prov-0">🚗 Jacob</div>
@@ -675,6 +682,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
             <option value="gdl">Guadalajara</option>
             <option value="mty">Monterrey</option>
             <option value="ny">New York</option>
+            <option value="dal">Dallas</option>
           </select>
         </div>
 
@@ -858,7 +866,7 @@ function fmtDate(iso) {
   return `${d}/${m}/${y}`;
 }
 
-const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York' };
+const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York', dal:'Dallas' };
 const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado' };
 
 let curMonth = 5, curYear = 2026;
@@ -929,7 +937,7 @@ function updateChips() {
   }
 
   // Sidebar city active
-  ['all','cdm','gdl','mty','ny'].forEach(c => {
+  ['all','cdm','gdl','mty','ny','dal'].forEach(c => {
     const el = document.getElementById(`sb-${c}`);
     if(el) el.classList.toggle('active', activeCity===c);
   });
@@ -1034,7 +1042,7 @@ function updateSidebar() {
   const all = filteredTransfers();
   const mTr = monthTransfers();
   document.getElementById('cnt-all').textContent = all.length;
-  ['cdm','gdl','mty','ny'].forEach(c => {
+  ['cdm','gdl','mty','ny','dal'].forEach(c => {
     document.getElementById(`cnt-${c}`).textContent = all.filter(t=>t.city===c).length;
   });
   ['pending','confirmed','completed','cancelled'].forEach(s => {
@@ -1358,7 +1366,7 @@ function exportExcel() {
     return t.date.startsWith(p);
   }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
-  const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
+  const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York', dal:'Dallas'};
   const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado'};
   const TYPE_MAP = {arrival:'Arrival', departure:'Departure', fullday:'Full Day', transfer:'Traslado', vip:'VIP'};
 
@@ -1397,8 +1405,8 @@ function exportPDF() {
   }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
-  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FDF2F8'};
-  const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#DB2777'};
+  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FDF2F8', dal:'#FFFBEB'};
+  const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#DB2777', dal:'#D97706'};
   const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', completed:'Completado', cancelled:'Cancelado'};
 
   const w = window.open('', '_blank');
