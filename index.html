@@ -1440,10 +1440,12 @@ function exportPDF() {
     table { width: 100%; border-collapse: collapse; }
     th { background: #1C1C1E; color: #fff; padding: 7px 8px; text-align: left; font-size: 10px; letter-spacing: .5px; }
     td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
-    @media print { body { margin: 10px; } }
+    button { display:inline-block; }
+    @media print { body { margin: 10px; } button { display:none !important; } }
   </style></head><body>
   <h1>🏆 Traslados · ${MONTHS[curMonth]} ${curYear}</h1>
-  <p>24/7 World Concierge · ${mTr.length} registros · Generado ${new Date().toLocaleDateString('es')}</p>
+  <p style="margin-bottom:10px;">24/7 World Concierge &nbsp;·&nbsp; ${mTr.length} registros &nbsp;·&nbsp; ${new Date().toLocaleDateString('es')}</p>
+  <button onclick="window.print()" style="margin-bottom:16px;padding:7px 18px;background:#0f172a;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">🖨️ Imprimir / Guardar PDF</button>
   <table>
     <thead><tr>
       <th style="white-space:nowrap">Fecha</th><th>Hora</th><th>Ciudad</th><th>Pasajero(s)</th>
@@ -1451,7 +1453,6 @@ function exportPDF() {
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
-  <script>window.onload=()=>{window.print();}<\/script>
   </body></html>`);
   w.document.close();
 }
