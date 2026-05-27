@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>WC2026 · Traslados</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --cdm: #F97316; --cdm-light: #FFF7ED; --cdm-border: #FB923C;
@@ -1388,16 +1389,13 @@ function exportExcel() {
     t.notes || '',
   ]);
 
-  // Build CSV (Excel-compatible UTF-8 with BOM)
-  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
-  const bom = '\uFEFF';
-  const blob = new Blob([bom + csv], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Traslados_${MONTHS[curMonth]}_${curYear}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  // Build XLSX with SheetJS
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  // Column widths
+  ws['!cols'] = [10,8,18,30,30,30,20,16,16,14,25].map(w => ({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws, MONTHS[curMonth]);
+  XLSX.writeFile(wb, `Traslados_${MONTHS[curMonth]}_${curYear}.xlsx`);
   showToast('Excel descargado ✓', 'success');
 }
 
