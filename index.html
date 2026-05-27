@@ -397,67 +397,6 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
 .empty-msg { text-align: center; color: var(--muted); font-size: 13px; padding: 20px 0; }
 
-/* ── CUSTOM TIME PICKER ── */
-.time-picker-wrap { position: relative; }
-.time-display {
-  padding: 9px 11px; border: 1.5px solid var(--border);
-  border-radius: 8px; background: #fff;
-  display: flex; align-items: center; gap: 6px;
-}
-.time-display:focus-within { border-color: #0F172A; }
-.tp-text-input {
-  flex: 1; border: none; outline: none; background: transparent;
-  font-family: monospace; font-size: 16px; font-weight: 700;
-  letter-spacing: 3px; color: #0F172A; width: 70px;
-  cursor: text;
-}
-.tp-text-input::placeholder { color: #CBD5E1; font-weight: 400; letter-spacing: 1px; }
-.tp-open-btn {
-  background: none; border: none; cursor: pointer;
-  font-size: 16px; color: #94A3B8; padding: 0 2px;
-  flex-shrink: 0;
-}
-.time-popup {
-  display: none; position: absolute; top: calc(100% + 6px); left: 0;
-  background: #fff; border: 1.5px solid #e2e8f0; border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,.15); z-index: 999;
-  width: 190px;
-}
-.time-popup.open { display: block; }
-.time-cols { display: flex; height: 180px; }
-.time-col {
-  flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-  scrollbar-width: thin; scrollbar-color: #94A3B8 #f1f5f9;
-  border-right: 1px solid #f0f0f0;
-}
-.time-col:last-child { border-right: none; }
-.time-col::-webkit-scrollbar { width: 6px; }
-.time-col::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 3px; }
-.time-col::-webkit-scrollbar-thumb { background: #94A3B8; border-radius: 3px; }
-.time-col-header {
-  text-align: center; font-size: 10px; font-weight: 700;
-  color: #94A3B8; letter-spacing: 1px; padding: 7px 0 4px;
-  border-bottom: 1px solid #f0f0f0; background: #fafafa;
-  text-transform: uppercase; position: sticky; top: 0; z-index: 1;
-}
-.time-col-spacer { height: 70px; flex-shrink: 0; }
-.time-opt {
-  scroll-snap-align: start; height: 38px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; font-family: monospace; font-weight: 600;
-  cursor: pointer; color: #334155; transition: background .1s;
-}
-.time-opt:hover { background: #F1F5F9; }
-.time-opt.selected { background: #0F172A; color: #fff; }
-.time-popup-footer {
-  display: flex; gap: 8px; padding: 8px 10px;
-  border-top: 1px solid #f0f0f0; background: #fafafa;
-  border-radius: 0 0 12px 12px;
-}
-.tp-btn { flex: 1; padding: 8px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; }
-.tp-btn.confirm { background: #0F172A; color: #fff; }
-.tp-btn.clear { background: #f1f5f9; color: #64748b; }
-
 /* search overlay */
 .search-bar {
   position: fixed; top: 0; left: 0; right: 0; z-index: 600;
@@ -718,15 +657,16 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
         </div>
         <div class="f-group">
           <div class="f-label">Hora Pickup</div>
-          <div class="time-picker-wrap" id="tpWrap">
-            <input type="hidden" id="f-time" value="">
-            <div class="time-display">
-              <input class="tp-text-input" id="tpTextInput" type="text"
-                maxlength="5" placeholder="HH:MM"
-                oninput="tpTextChanged(this)"
-                onkeydown="if(event.key==='Enter')closePicker()">
-              <button class="tp-open-btn" type="button" onclick="toggleTimePicker()">⏱</button>
-            </div>
+          <input type="hidden" id="f-time" value="">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <select id="tp-hour" class="f-input" style="text-align:center;font-family:monospace;font-size:15px;font-weight:700;" onchange="syncTime()">
+              <option value="">--</option><option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option>
+            </select>
+            <span style="font-size:20px;font-weight:700;color:#334155">:</span>
+            <select id="tp-min" class="f-input" style="text-align:center;font-family:monospace;font-size:15px;font-weight:700;" onchange="syncTime()">
+              <option value="">--</option><option value="00">00</option><option value="01">01</option><option value="02">02</option><option value="03">03</option><option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option><option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option><option value="32">32</option><option value="33">33</option><option value="34">34</option><option value="35">35</option><option value="36">36</option><option value="37">37</option><option value="38">38</option><option value="39">39</option><option value="40">40</option><option value="41">41</option><option value="42">42</option><option value="43">43</option><option value="44">44</option><option value="45">45</option><option value="46">46</option><option value="47">47</option><option value="48">48</option><option value="49">49</option><option value="50">50</option><option value="51">51</option><option value="52">52</option><option value="53">53</option><option value="54">54</option><option value="55">55</option><option value="56">56</option><option value="57">57</option><option value="58">58</option><option value="59">59</option>
+            </select>
+          </div>
             <div class="time-popup" id="tpPopup">
               <div class="time-cols">
                 <div>
@@ -1521,118 +1461,24 @@ function exportPDF() {
   w.document.close();
 }
 
-// ── CUSTOM TIME PICKER ───────────────────────────────────────────────────────
-let tpSelH = -1, tpSelM = -1, tpBuilt = false;
-
-function buildTimePicker() {
-  if (tpBuilt) return;
-  tpBuilt = true;
-  const hCol = document.getElementById('tpHours');
-  const mCol = document.getElementById('tpMins');
-  const hTop = document.createElement('div'); hTop.className='time-col-spacer'; hCol.appendChild(hTop);
-  const mTop = document.createElement('div'); mTop.className='time-col-spacer'; mCol.appendChild(mTop);
-  for (let h = 0; h < 24; h++) {
-    const d = document.createElement('div');
-    d.className='time-opt'; d.textContent=String(h).padStart(2,'0'); d.dataset.val=h;
-    d.onclick = () => { selectHour(h); syncTextInput(); };
-    hCol.appendChild(d);
-  }
-  for (let m = 0; m < 60; m++) {
-    const d = document.createElement('div');
-    d.className='time-opt'; d.textContent=String(m).padStart(2,'0'); d.dataset.val=m;
-    d.onclick = () => { selectMin(m); syncTextInput(); };
-    mCol.appendChild(d);
-  }
-  const hBot = document.createElement('div'); hBot.className='time-col-spacer'; hCol.appendChild(hBot);
-  const mBot = document.createElement('div'); mBot.className='time-col-spacer'; mCol.appendChild(mBot);
-}
-
-function selectHour(h) {
-  tpSelH = h;
-  document.querySelectorAll('#tpHours .time-opt').forEach(el =>
-    el.classList.toggle('selected', parseInt(el.dataset.val) === h));
-}
-function selectMin(m) {
-  tpSelM = m;
-  document.querySelectorAll('#tpMins .time-opt').forEach(el =>
-    el.classList.toggle('selected', parseInt(el.dataset.val) === m));
-}
-function syncTextInput() {
-  const h = tpSelH >= 0 ? String(tpSelH).padStart(2,'0') : '';
-  const m = tpSelM >= 0 ? String(tpSelM).padStart(2,'0') : '';
-  const el = document.getElementById('tpTextInput');
-  if (el && h && m) el.value = `${h}:${m}`;
-}
-
-function tpTextChanged(el) {
-  // Auto-insert colon
-  let v = el.value.replace(/[^0-9:]/g,'');
-  const digits = v.replace(/:/g,'');
-  if (digits.length >= 3) {
-    v = digits.slice(0,2) + ':' + digits.slice(2,4);
-  }
-  el.value = v;
-  // Sync picker columns if valid
-  if (v.length === 5) {
-    let [h, m] = v.split(':').map(Number);
-    if (h <= 23 && m <= 59) {
-      buildTimePicker();
-      selectHour(h); selectMin(m);
-      const hEl = document.querySelector(`#tpHours .time-opt[data-val="${h}"]`);
-      const mEl = document.querySelector(`#tpMins .time-opt[data-val="${m}"]`);
-      if (hEl) hEl.scrollIntoView({block:'center', behavior:'smooth'});
-      if (mEl) mEl.scrollIntoView({block:'center', behavior:'smooth'});
-    }
-  }
-  // Always update hidden input
-  document.getElementById('f-time').value = v.length === 5 ? v : '';
-}
-
-function toggleTimePicker() {
-  buildTimePicker();
-  const popup = document.getElementById('tpPopup');
-  popup.classList.toggle('open');
-  if (popup.classList.contains('open') && tpSelH >= 0) {
-    setTimeout(() => {
-      const hEl = document.querySelector(`#tpHours .time-opt[data-val="${tpSelH}"]`);
-      const mEl = document.querySelector(`#tpMins .time-opt[data-val="${tpSelM}"]`);
-      if (hEl) hEl.scrollIntoView({block:'center'});
-      if (mEl) mEl.scrollIntoView({block:'center'});
-    }, 60);
-  }
-}
-function closePicker() {
-  document.getElementById('tpPopup')?.classList.remove('open');
-}
-function confirmTime() {
-  if (tpSelH >= 0 && tpSelM >= 0) {
-    const val = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
-    document.getElementById('f-time').value = val;
-    document.getElementById('tpTextInput').value = val;
-  }
-  closePicker();
-}
-function clearTime() {
-  tpSelH=-1; tpSelM=-1;
-  document.getElementById('f-time').value='';
-  document.getElementById('tpTextInput').value='';
-  document.querySelectorAll('.time-opt').forEach(el=>el.classList.remove('selected'));
-  closePicker();
+// ── TIME HELPERS ─────────────────────────────────────────────────────────────
+function syncTime() {
+  const h = document.getElementById('tp-hour').value;
+  const m = document.getElementById('tp-min').value;
+  document.getElementById('f-time').value = (h && m) ? `${h}:${m}` : '';
 }
 function setPickerTime(val) {
-  buildTimePicker();
   if (!val) { clearTime(); return; }
-  const [h,m] = val.split(':').map(Number);
-  tpSelH=h; tpSelM=m;
-  document.getElementById('f-time').value = val;
-  document.getElementById('tpTextInput').value = val;
-  document.querySelectorAll('#tpHours .time-opt').forEach(el=>el.classList.toggle('selected',parseInt(el.dataset.val)===h));
-  document.querySelectorAll('#tpMins .time-opt').forEach(el=>el.classList.toggle('selected',parseInt(el.dataset.val)===m));
+  const [h, m] = val.split(':');
+  document.getElementById('tp-hour').value = h;
+  document.getElementById('tp-min').value  = m;
+  document.getElementById('f-time').value  = val;
 }
-document.addEventListener('click', e => {
-  const wrap = document.getElementById('tpWrap');
-  if (wrap && !wrap.contains(e.target)) closePicker();
-});
+function clearTime() {
+  document.getElementById('tp-hour').value = '';
+  document.getElementById('tp-min').value  = '';
+  document.getElementById('f-time').value  = '';
+}
 
 // ── BOTTOM BAR EDITABLE DATA ─────────────────────────────────────────────────
 const BB_KEY = 'wc2026_bbdata';
