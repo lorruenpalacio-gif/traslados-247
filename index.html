@@ -10,7 +10,7 @@
   --cdm: #F97316; --cdm-light: #FFF7ED; --cdm-border: #FB923C;
   --gdl: #22C55E; --gdl-light: #F0FDF4; --gdl-border: #4ADE80;
   --mty: #3B82F6; --mty-light: #EFF6FF; --mty-border: #60A5FA;
-  --ny:  #A855F7; --ny-light:  #FAF5FF; --ny-border:  #C084FC;
+  --ny:  #DB2777; --ny-light:  #FDF2F8; --ny-border:  #C0166A;
 
   --status-pending:   #F59E0B;
   --status-confirmed: #22C55E;
@@ -126,7 +126,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .sb-dot.cdm { background: var(--cdm); }
 .sb-dot.gdl { background: var(--gdl); }
 .sb-dot.mty { background: var(--mty); }
-.sb-dot.ny  { background: var(--ny);  }
+.sb-dot.ny  { background: var(--ny); }
 
 .sb-item .sb-count {
   margin-left: auto; font-size: 10px; font-weight: 700;
@@ -193,10 +193,16 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .event-block .ev-route { color: #475569; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .event-block .ev-provider { color: #64748b; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.ev-cdm { background: var(--cdm-light); border-color: var(--cdm); }
-.ev-gdl { background: var(--gdl-light); border-color: var(--gdl); }
-.ev-mty { background: var(--mty-light); border-color: var(--mty); }
-.ev-ny  { background: var(--ny-light);  border-color: var(--ny);  }
+.ev-cdm { background: var(--cdm-light); }
+.ev-gdl { background: var(--gdl-light); }
+.ev-mty { background: var(--mty-light); }
+.ev-ny  { background: var(--ny-light); }
+/* Service left border stripe */
+.ev-svc-arrival   { border-color: #DC2626 !important; }
+.ev-svc-departure { border-color: #0EA5E9 !important; }
+.ev-svc-fullday   { border-color: #22C55E !important; }
+.ev-svc-vip       { border-color: #7C3AED !important; }
+.ev-svc-transfer  { border-color: #94A3B8 !important; }
 
 .ev-fullday {
   border-radius: 5px; padding: 4px 6px;
@@ -419,7 +425,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
   border-color: var(--border); color: var(--muted);
   transition: all .15s;
 }
-.f-chip.active-cdm { background: var(--cdm-light); border-color: var(--cdm); color: var(--cdm); }
+.f-chip.active-cdm { background: var(--cdm-light); border-color: var(--cdm); color: #c05a00; }
 .f-chip.active-gdl { background: var(--gdl-light); border-color: var(--gdl); color: var(--gdl); }
 .f-chip.active-mty { background: var(--mty-light); border-color: var(--mty); color: var(--mty); }
 .f-chip.active-ny  { background: var(--ny-light);  border-color: var(--ny);  color: var(--ny);  }
@@ -490,11 +496,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 
     <div class="sb-section">
       <div class="sb-title">Tipo de Servicio</div>
-      <div class="sb-item" onclick="setTypeFilter('arrival')"><div class="svc-line" style="background:#F97316;"></div> Arrival (Llegada)</div>
-      <div class="sb-item" onclick="setTypeFilter('departure')"><div class="svc-line" style="background:#22C55E;"></div> Departure (Salida)</div>
-      <div class="sb-item" onclick="setTypeFilter('fullday')"><div class="svc-line" style="background:#EF4444; height:4px;"></div> Full Day / Disponibilidad</div>
-      <div class="sb-item" onclick="setTypeFilter('transfer')"><div class="svc-line" style="background:#3B82F6;"></div> Traslado / Actividad</div>
-      <div class="sb-item" onclick="setTypeFilter('vip')"><div class="svc-line" style="background:#A855F7;"></div> VIP / Especial</div>
+      <div class="sb-item" onclick="setTypeFilter('arrival')"><div class="svc-line" style="background:#DC2626;"></div> Arrival (Llegada)</div>
+      <div class="sb-item" onclick="setTypeFilter('departure')"><div class="svc-line" style="background:#0EA5E9;"></div> Departure (Salida)</div>
+      <div class="sb-item" onclick="setTypeFilter('fullday')"><div class="svc-line" style="background:#22C55E; height:4px;"></div> Full Day / A disposición</div>
+      <div class="sb-item" onclick="setTypeFilter('vip')"><div class="svc-line" style="background:#7C3AED;"></div> VIP / Especial</div>
       <div class="sb-item" onclick="setTypeFilter('all')"><span style="font-size:12px">↺</span> Ver todos</div>
     </div>
 
@@ -1372,8 +1377,8 @@ function exportPDF() {
   }).sort((a,b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 
   const CITY_MAP = {cdm:'Ciudad de México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York'};
-  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FAF5FF'};
-  const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#A855F7'};
+  const CITY_COLOR = {cdm:'#FFF7ED', gdl:'#F0FDF4', mty:'#EFF6FF', ny:'#FDF2F8'};
+  const CITY_BORDER = {cdm:'#F97316', gdl:'#22C55E', mty:'#3B82F6', ny:'#DB2777'};
   const STATUS_MAP = {pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado'};
 
   const w = window.open('', '_blank');
