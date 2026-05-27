@@ -1025,8 +1025,8 @@ function render() {
     if (!isCurrentMonth) cls += ' other-month';
     if (isToday) cls += ' today';
 
-    html += `<div class="${cls}">`;
-    html += `<div class="day-num" onclick="openDay('${dateStr}')">${isCurrentMonth ? dayNum : ''}</div>`;
+    html += `<div class="${cls}" onclick="openDay('${dateStr}')">`; 
+    html += `<div class="day-num">${isCurrentMonth ? dayNum : ''}</div>`;
 
     if (isCurrentMonth && dayTr.length > 0) {
       html += `<div class="day-events">`;
