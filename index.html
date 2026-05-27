@@ -977,13 +977,14 @@ function render() {
         const fromShort = t.from ? t.from.split(',')[0] : '—';
         const toShort   = t.to   ? t.to.split(',')[0]   : '—';
         const provText  = [t.provider, t.vehicle].filter(Boolean).join(' · ');
+        const svcClass = `ev-svc-${t.type || 'transfer'}`;
         if (t.type === 'fullday') {
-          html += `<div class="ev-fullday ${t.city}" onclick="event.stopPropagation();openDay('${dateStr}')">
+          html += `<div class="ev-fullday ${t.city} ${svcClass}" onclick="event.stopPropagation();openDay('${dateStr}')">
             Full Day · ${firstName.substring(0,18)}
             ${provText ? `<div style="font-size:9px;font-weight:400;margin-top:2px">🚗 ${provText}</div>` : ''}
           </div>`;
         } else {
-          html += `<div class="event-block ev-${t.city}" onclick="event.stopPropagation();openDay('${dateStr}')">
+          html += `<div class="event-block ev-${t.city} ${svcClass}" onclick="event.stopPropagation();openDay('${dateStr}')">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span class="ev-time">${t.time || ''}</span>
             </div>
