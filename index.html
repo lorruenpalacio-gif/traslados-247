@@ -827,6 +827,12 @@ async function dbDelete(id) {
 
 const MONTHS = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
+function fmtDate(iso) {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 const CITY_LABELS = { cdm:'Cd. México', gdl:'Guadalajara', mty:'Monterrey', ny:'New York' };
 const STATUS_LABELS = { pending:'Pendiente', confirmed:'Confirmado', operating:'En Operación', completed:'Completado', cancelled:'Cancelado' };
 
@@ -1332,7 +1338,7 @@ function exportExcel() {
 
   const headers = ['Fecha','Hora','Ciudad','Pasajeros','Origen','Destino','Proveedor','Vehículo','Tipo','Estado','Notas'];
   const rows = mTr.map(t => [
-    t.date,
+    fmtDate(t.date),
     t.time || '',
     CITY_MAP[t.city] || t.city,
     (t.passengers || [t.client]).join(' / '),
@@ -1375,7 +1381,7 @@ function exportPDF() {
     const bg = CITY_COLOR[t.city] || '#fff';
     const border = CITY_BORDER[t.city] || '#ccc';
     return `<tr style="background:${bg};border-left:4px solid ${border}">
-      <td>${t.date}</td>
+      <td style="white-space:nowrap">${fmtDate(t.date)}</td>
       <td>${t.time||''}</td>
       <td>${CITY_MAP[t.city]||t.city}</td>
       <td><strong>${pax}</strong></td>
@@ -1403,7 +1409,7 @@ function exportPDF() {
   <p>24/7 World Concierge · ${mTr.length} registros · Generado ${new Date().toLocaleDateString('es')}</p>
   <table>
     <thead><tr>
-      <th>Fecha</th><th>Hora</th><th>Ciudad</th><th>Pasajero(s)</th>
+      <th style="white-space:nowrap">Fecha</th><th>Hora</th><th>Ciudad</th><th>Pasajero(s)</th>
       <th>Origen</th><th>Destino</th><th>Proveedor</th><th>Vehículo</th><th>Estado</th><th>Notas</th>
     </tr></thead>
     <tbody>${rows}</tbody>
