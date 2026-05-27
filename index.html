@@ -420,11 +420,15 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .time-cols { display: flex; height: 200px; }
 .time-col {
   flex: 1; overflow-y: scroll; scroll-snap-type: y mandatory;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 #f8fafc;
   border-right: 1px solid #f0f0f0;
 }
 .time-col:last-child { border-right: none; }
-.time-col::-webkit-scrollbar { display: none; }
+.time-col::-webkit-scrollbar { width: 5px; }
+.time-col::-webkit-scrollbar-track { background: #f8fafc; }
+.time-col::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+.time-col::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
 .time-col-header {
   text-align: center; font-size: 10px; font-weight: 700;
   color: #94A3B8; letter-spacing: 1px; padding: 8px 0 4px;
@@ -729,7 +733,13 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
                   <div class="time-col" id="tpMins"></div>
                 </div>
               </div>
-              <div class="time-popup-footer">
+              <div style="padding:8px 10px 4px;border-bottom:1px solid #f0f0f0;background:#fafafa;display:flex;align-items:center;gap:6px;">
+                <input type="text" id="tpManual" maxlength="5" placeholder="HH:MM"
+                  style="flex:1;padding:6px 8px;border:1.5px solid #e2e8f0;border-radius:7px;font-family:monospace;font-size:15px;letter-spacing:2px;font-weight:700;outline:none;text-align:center;"
+                  oninput="tpManualInput(this)" onfocus="this.style.borderColor='#0F172A'" onblur="this.style.borderColor='#e2e8f0'">
+                <button class="tp-btn confirm" style="flex:0;padding:6px 10px;font-size:11px;" onclick="applyManual()">OK</button>
+              </div>
+            <div class="time-popup-footer">
                 <button class="tp-btn clear" onclick="clearTime()">Limpiar</button>
                 <button class="tp-btn confirm" onclick="confirmTime()">Confirmar</button>
               </div>
@@ -1560,6 +1570,9 @@ function updateTpDisplay() {
   const h = tpSelH >= 0 ? String(tpSelH).padStart(2,'0') : '—';
   const m = tpSelM >= 0 ? String(tpSelM).padStart(2,'0') : '—';
   document.getElementById('tpDisplayVal').textContent = `${h} : ${m}`;
+  const manual = document.getElementById('tpManual');
+  if (manual && tpSelH >= 0 && tpSelM >= 0)
+    manual.value = `${String(tpSelH).padStart(2,'0')}:${String(tpSelM).padStart(2,'0')}`;
 }
 function toggleTimePicker() {
   buildTimePicker();
@@ -1611,6 +1624,31 @@ function setPickerTime(val) {
   document.getElementById('f-time').value = val;
   updateTpDisplay();
 }
+function tpManualInput(el) {
+  let v = el.value.replace(/[^0-9]/g, '');
+  if (v.length > 2) v = v.slice(0,2) + ':' + v.slice(2,4);
+  el.value = v;
+  if (v.length === 5) {
+    let [h, m] = v.split(':').map(Number);
+    if (h <= 23 && m <= 59) {
+      selectHour(h); selectMin(m);
+      // scroll cols to selection
+      const hEl = document.querySelector(`#tpHours .time-opt[data-val="${h}"]`);
+      const mEl = document.querySelector(`#tpMins .time-opt[data-val="${m}"]`);
+      if (hEl) hEl.scrollIntoView({block:'center', behavior:'smooth'});
+      if (mEl) mEl.scrollIntoView({block:'center', behavior:'smooth'});
+    }
+  }
+}
+function applyManual() {
+  const el = document.getElementById('tpManual');
+  if (el && el.value.length === 5) {
+    let [h, m] = el.value.split(':').map(Number);
+    if (h <= 23 && m <= 59) { selectHour(h); selectMin(m); confirmTime(); return; }
+  }
+  confirmTime();
+}
+
 // Close picker when clicking outside
 document.addEventListener('click', e => {
   const wrap = document.getElementById('tpWrap');
