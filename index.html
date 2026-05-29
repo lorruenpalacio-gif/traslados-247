@@ -206,6 +206,22 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 .event-block .ev-name { font-weight: 700; font-size: 9.5px; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .event-block .ev-route { color: #475569; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .event-block .ev-provider { color: #64748b; font-size: 8.5px; display: flex; align-items: center; gap: 3px; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.event-block.ev-cancelled {
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  opacity: 0.65;
+}
+.event-block.ev-cancelled .ev-name { text-decoration: line-through; color: #94A3B8; }
+.event-block.ev-cancelled .ev-time { color: #94A3B8; }
+.event-block.ev-cancelled .ev-route { color: #CBD5E1; }
+.event-block.ev-cancelled .ev-provider { color: #CBD5E1; }
+.ev-fullday.ev-cancelled {
+  background: #F1F5F9 !important;
+  border-color: #CBD5E1 !important;
+  opacity: 0.65;
+  text-decoration: line-through;
+  color: #94A3B8 !important;
+}
 
 .ev-cdm { background: var(--cdm-light); }
 .ev-gdl { background: var(--gdl-light); }
@@ -1010,12 +1026,13 @@ function render() {
         const provText  = [t.provider, t.vehicle].filter(Boolean).join(' · ');
         const svcClass = `ev-svc-${t.type || 'transfer'}`;
         if (t.type === 'fullday') {
-          html += `<div class="ev-fullday ${t.city} ${svcClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
+          html += `<div class="ev-fullday ${t.city} ${svcClass}${cancelClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
             Full Day · ${firstName.substring(0,18)} ✏️
             ${provText ? `<div style="font-size:9px;font-weight:400;margin-top:2px">🚗 ${provText}</div>` : ''}
           </div>`;
         } else {
-          html += `<div class="event-block ev-${t.city} ${svcClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
+          const cancelClass = t.status === 'cancelled' ? ' ev-cancelled' : '';
+          html += `<div class="event-block ev-${t.city} ${svcClass}${cancelClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span class="ev-time">${t.time || ''}</span>
               <span style="font-size:8px;color:#94A3B8;margin-left:4px">✏️</span>
