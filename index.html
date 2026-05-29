@@ -837,17 +837,37 @@ function transferToRow(t) {
 }
 
 async function loadAll() {
+  const grid = document.getElementById('calGrid');
   try {
-    const r = await fetch(`${SB_URL}/rest/v1/traslados?select=*&order=date.asc,time.asc`, { headers: SB_HEADERS });
-    if (!r.ok) throw new Error(await r.text());
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+    const r = await fetch(`${SB_URL}/rest/v1/traslados?select=*&order=date.asc,time.asc`, {
+      headers: SB_HEADERS, signal: controller.signal
+    });
+    clearTimeout(timeout);
+    if (!r.ok) throw new Error('Error ' + r.status + ': ' + await r.text());
     const rows = await r.json();
     transfers = rows.map(rowToTransfer);
     dbLoaded = true;
     render();
     updateChips();
   } catch(e) {
-    showToast('Error al cargar datos: ' + e.message, 'error');
-    console.error(e);
+    const isPaused = e.message && e.message.includes('Project');
+    const isTimeout = e.name === 'AbortError';
+    const msg = isTimeout
+      ? 'Tiempo de espera agotado'
+      : isPaused ? 'Proyecto Supabase pausado' : e.message;
+    if (grid) grid.innerHTML = `
+      <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;color:#94A3B8;text-align:center;">
+        <div style="font-size:40px">⚠️</div>
+        <div style="font-size:15px;font-weight:700;color:#ef4444;">No se pudo conectar con Supabase</div>
+        <div style="font-size:13px;max-width:380px;line-height:1.6;">${msg}<br><br>
+          El proyecto gratuito de Supabase se pausa después de 1 semana sin uso.<br>
+          <strong>Solución:</strong> Ve a <a href="https://supabase.com" target="_blank" style="color:#3b82f6;">supabase.com</a> → tu proyecto → <em>"Restore project"</em> y espera 1-2 minutos.
+        </div>
+        <button onclick="location.reload()" style="padding:10px 24px;background:#0f172a;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;margin-top:8px;">🔄 Reintentar</button>
+      </div>`;
+    console.error('Supabase error:', e);
   }
 }
 
@@ -1025,13 +1045,13 @@ function render() {
         const toShort   = t.to   ? t.to.split(',')[0]   : '—';
         const provText  = [t.provider, t.vehicle].filter(Boolean).join(' · ');
         const svcClass = `ev-svc-${t.type || 'transfer'}`;
+        const cancelClass = t.status === 'cancelled' ? ' ev-cancelled' : '';
         if (t.type === 'fullday') {
           html += `<div class="ev-fullday ${t.city} ${svcClass}${cancelClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
             Full Day · ${firstName.substring(0,18)} ✏️
             ${provText ? `<div style="font-size:9px;font-weight:400;margin-top:2px">🚗 ${provText}</div>` : ''}
           </div>`;
         } else {
-          const cancelClass = t.status === 'cancelled' ? ' ev-cancelled' : '';
           html += `<div class="event-block ev-${t.city} ${svcClass}${cancelClass}" title="Click para editar" onclick="event.stopPropagation();editTransfer(${t.id})" style="cursor:pointer;">
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <span class="ev-time">${t.time || ''}</span>
