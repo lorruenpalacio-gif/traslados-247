@@ -580,6 +580,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="sb-item" id="sbp-4" onclick="setProviderFilter('Juan José')"><span style="font-size:13px">🚗</span> Juan José <span class="sb-count" id="cnt-prov-4">0</span></div>
       <div class="sb-item" id="sbp-5" onclick="setProviderFilter('Drivania')"><span style="font-size:13px">🚗</span> Drivania <span class="sb-count" id="cnt-prov-5">0</span></div>
       <div class="sb-item" id="sbp-6" onclick="setProviderFilter('Paula (APCO)')"><span style="font-size:13px">🚗</span> Paula (APCO) <span class="sb-count" id="cnt-prov-6">0</span></div>
+      <div class="sb-item" id="sbp-7" onclick="setProviderFilter('Eduardo')"><span style="font-size:13px">🚗</span> Eduardo <span class="sb-count" id="cnt-prov-7">0</span></div>
+      <div class="sb-item" id="sbp-8" onclick="setProviderFilter('Manzano')"><span style="font-size:13px">🚗</span> Manzano <span class="sb-count" id="cnt-prov-8">0</span></div>
       <div class="sb-item" id="sbp-all" onclick="setProviderFilter('')"><span style="font-size:12px">↺</span> Ver todos</div>
     </div>
 
@@ -604,6 +606,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <div class="f-chip" onclick="setProviderFilter('Juan José')" id="chip-prov-4">🚗 Juan José</div>
       <div class="f-chip" onclick="setProviderFilter('Drivania')" id="chip-prov-5">🚗 Drivania</div>
       <div class="f-chip" onclick="setProviderFilter('Paula (APCO)')" id="chip-prov-6">🚗 Paula (APCO)</div>
+      <div class="f-chip" onclick="setProviderFilter('Eduardo')" id="chip-prov-7">🚗 Eduardo</div>
+      <div class="f-chip" onclick="setProviderFilter('Manzano')" id="chip-prov-8">🚗 Manzano</div>
       <div class="f-chip" onclick="clearFilters()" id="chip-clear" style="display:none">✕ Limpiar</div>
     </div>
     <div class="cal-grid" id="calGrid"></div>
@@ -736,6 +740,8 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
             <option value="Juan José">Juan José</option>
             <option value="Drivania">Drivania</option>
             <option value="Paula (APCO)">Paula (APCO)</option>
+            <option value="Eduardo">Eduardo</option>
+            <option value="Manzano">Manzano</option>
           </select>
         </div>
         <div class="f-group">
@@ -955,7 +961,7 @@ function clearFilters() {
 }
 
 function updateChips() {
-  const PROVIDERS = ['Jacob', 'Salva', 'Global', 'Sprinter Margarita', 'Juan José', 'Drivania', 'Paula (APCO)'];
+  const PROVIDERS = ['Jacob', 'Salva', 'Global', 'Sprinter Margarita', 'Juan José', 'Drivania', 'Paula (APCO)', 'Eduardo', 'Manzano'];
   const chips = {all:'chip-all', cdm:'chip-cdm', gdl:'chip-gdl', mty:'chip-mty', ny:'chip-ny'};
   const allChipIds = ['chip-all','chip-cdm','chip-gdl','chip-mty','chip-ny','chip-pending','chip-confirmed',
     ...PROVIDERS.map((_,i) => `chip-prov-${i}`)];
