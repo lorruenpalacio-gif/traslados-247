@@ -662,7 +662,7 @@ const SB_HEADS = {
 };
 
 async function sbFetch(path, opts={}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, { headers: SB_HEADS, ...opts });
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, Object.assign({ headers: SB_HEADS }, opts));
   const text = await res.text();
   if (!res.ok) throw new Error(text);
   return text ? JSON.parse(text) : [];
@@ -747,14 +747,14 @@ async function loadGastos() {
       }));
     } else {
       // First load - use demo data
-      gastos = DEMO.map(d=>{...d});
+      gastos = DEMO.map(function(d){ return Object.assign({}, d); });
     }
     refreshAll();
   } catch(e) {
     console.error('Supabase load failed:', e);
     // Fallback to localStorage
     const local = localStorage.getItem('wc26_g');
-    gastos = local ? JSON.parse(local) : DEMO.map(d=>{...d});
+    gastos = local ? JSON.parse(local) : DEMO.map(function(d){ return Object.assign({}, d); });
     refreshAll();
     showToast('Sin conexion - usando datos locales', true);
   }
@@ -801,7 +801,7 @@ async function fetchLiveRate() {
 
 /* -- FILTERS -- */
 function getFiltered(){
-  let list=[...gastos];
+  let list=gastos.slice();
   const s=document.getElementById('searchInput').value.toLowerCase();
   const cf=document.getElementById('filterCity').value||_cityFilter;
   const catf=document.getElementById('filterCatSel').value||_catFilter;
@@ -1037,7 +1037,7 @@ async function saveGasto(){
 async function dupGasto(id){
   const g=gastos.find(x=>x.id===id);
   if(!g) return;
-  const copy={...g, id:null, descripcion:'[Copia] '+g.descripcion};
+  const copy=Object.assign({}, g, {id:null, descripcion:'[Copia] '+g.descripcion});
   showLoading(true);
   try {
     const newId=await dbInsert(copy);
