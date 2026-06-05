@@ -727,7 +727,11 @@ const fMXN = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumF
 const fUSD = v => '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fShort = v => '$'+(v>=1000?Math.round(v).toLocaleString('en-US'):v.toFixed(2));
 
-document.getElementById('tcInput').addEventListener('input', ()=>{ refreshAll(); updateConv(); });
+document.getElementById('tcInput').addEventListener('input', function(){
+  localStorage.setItem('wc26_tc', document.getElementById('tcInput').value);
+  refreshAll();
+  updateConv();
+});
 
 /* -- SUPABASE CRUD -- */
 async function loadGastos() {
@@ -787,6 +791,7 @@ async function fetchLiveRate() {
     const d = await r.json();
     if(d.rates&&d.rates.MXN){
       document.getElementById('tcInput').value=d.rates.MXN.toFixed(2);
+      localStorage.setItem('wc26_tc', d.rates.MXN.toFixed(2));
       refreshAll(); updateConv();
       showToast('TC actualizado: $'+d.rates.MXN.toFixed(2)+' MXN/USD');
     }
@@ -1128,6 +1133,10 @@ function showToast(msg, err=false){
 document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
 /* -- INIT -- */
+(function(){
+  var saved = localStorage.getItem('wc26_tc');
+  if(saved) document.getElementById('tcInput').value = saved;
+})();
 loadGastos();
 
 </script>
