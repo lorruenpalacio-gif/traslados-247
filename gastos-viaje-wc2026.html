@@ -651,107 +651,39 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 
 <script>
 
+/* ── SUPABASE ── */
 const SUPABASE_URL = 'https://bekakdgvhcategibttuk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJla2FrZGd2aGNhdGVnaWJ0dHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQ1ODksImV4cCI6MjA5NTM5MDU4OX0.pouq5ATcMN5Zq9EonVRytPTukSTWowuY2kaYelrm_II';
-const SB_HEADERS = {
+const SB_HEADS = {
   'apikey': SUPABASE_KEY,
   'Authorization': 'Bearer ' + SUPABASE_KEY,
   'Content-Type': 'application/json',
   'Prefer': 'return=representation'
 };
 
-async function sbFetch(path, options={}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    headers: SB_HEADERS,
-    ...options
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error('Supabase error: ' + err);
-  }
+async function sbFetch(path, opts={}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, { headers: SB_HEADS, ...opts });
   const text = await res.text();
+  if (!res.ok) throw new Error(text);
   return text ? JSON.parse(text) : [];
 }
 
-async function loadGastos() {
-  try {
-    showLoading(true);
-    const data = await sbFetch('gastos_viaje?order=fecha.desc');
-    gastos = data.map(r => ({
-      id: r.id,
-      fecha: r.fecha,
-      ciudad: r.ciudad,
-      categoria: r.categoria,
-      descripcion: r.descripcion,
-      mxn: parseFloat(r.mxn),
-      reembolsable: r.reembolsable,
-      proyecto: r.proyecto,
-      notas: r.notas || ''
-    }));
-    nextId = gastos.length > 0 ? Math.max(...gastos.map(g => typeof g.id === 'number' ? g.id : 0)) + 1 : 1;
-    refreshAll();
-  } catch(e) {
-    console.error('Error loading:', e);
-    showToast('Error cargando datos: ' + e.message, true);
-    // fallback to localStorage
-    const local = localStorage.getItem('wc26_g');
-    if (local) gastos = JSON.parse(local);
-    refreshAll();
-  } finally {
-    showLoading(false);
-  }
-}
-
-async function saveGastoToDB(g, isEdit) {
-  const payload = {
-    fecha: g.fecha,
-    ciudad: g.ciudad,
-    categoria: g.categoria,
-    descripcion: g.descripcion,
-    mxn: g.mxn,
-    reembolsable: g.reembolsable,
-    proyecto: g.proyecto,
-    notas: g.notas
-  };
-  if (isEdit && typeof g.id === 'number') {
-    // Update existing
-    await sbFetch('gastos_viaje?id=eq.' + g.id, {
-      method: 'PATCH',
-      body: JSON.stringify(payload)
-    });
-  } else {
-    // Insert new — let Supabase generate the id
-    const result = await sbFetch('gastos_viaje', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    if (result && result[0]) g.id = result[0].id;
-  }
-  return g;
-}
-
-async function deleteGastoFromDB(id) {
-  if (typeof id === 'number') {
-    await sbFetch('gastos_viaje?id=eq.' + id, { method: 'DELETE' });
-  }
-}
-
-function showLoading(show) {
-  let el = document.getElementById('loadingOverlay');
+function showLoading(on) {
+  let el = document.getElementById('sbLoading');
   if (!el) {
     el = document.createElement('div');
-    el.id = 'loadingOverlay';
-    el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;font-family:Inter,sans-serif;font-size:14px;color:#6b7280;gap:8px;';
-    el.innerHTML = '<i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite"></i> Cargando datos...';
+    el.id = 'sbLoading';
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;background:#fff;padding:16px 24px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.15);font-family:Inter,sans-serif;font-size:13px;color:#6b7280"><i class="ti ti-loader" style="font-size:20px;animation:sbspin 1s linear infinite;color:#f5a623"></i>Guardando en Supabase...</div>';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;z-index:9999;';
     document.body.appendChild(el);
-    const style = document.createElement('style');
-    style.textContent = '@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}';
-    document.head.appendChild(style);
+    const s = document.createElement('style');
+    s.textContent = '@keyframes sbspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}';
+    document.head.appendChild(s);
   }
-  el.style.display = show ? 'flex' : 'none';
+  el.style.display = on ? 'flex' : 'none';
 }
 
-
+/* ── DATA ── */
 const CAT_COLORS = {
   'Uber / Taxi':'#f97316','Comida':'#eab308','Hospedaje':'#3b82f6',
   'Estacionamiento':'#8b5cf6','Peajes':'#14b8a6','Propinas':'#ec4899',
@@ -769,7 +701,7 @@ const CITY_NAMES  = {CDMX:'CDMX',GDL:'Guadalajara',MTY:'Monterrey',NY:'New York'
 
 const DEMO = [
   {id:1,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Uber / Taxi',descripcion:'Aeropuerto → Hotel',mxn:580,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Llegada 08:30 AM'},
-  {id:2,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Comida',descripcion:'Almuerzo con cliente',mxn:420,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Restaurante Porfirio\'s'},
+  {id:2,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Comida',descripcion:'Almuerzo con cliente',mxn:420,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:"Restaurante Porfirio's"},
   {id:3,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Imprevistos',descripcion:'Compra de cargador',mxn:650,reembolsable:'No',proyecto:'GASTO PERSONAL',notas:'Cargador portátil'},
   {id:4,fecha:'2026-05-16',ciudad:'GDL',categoria:'Uber / Taxi',descripcion:'Hotel → Estadio',mxn:310,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Partido 20:00 hrs'},
   {id:5,fecha:'2026-05-16',ciudad:'GDL',categoria:'Comida',descripcion:'Cena equipo',mxn:780,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'La Tequila Cocina'},
@@ -785,8 +717,7 @@ const DEMO = [
   {id:15,fecha:'2026-05-11',ciudad:'MTY',categoria:'Compras Operativas',descripcion:'Material de oficina',mxn:380,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Papelería y folders'},
 ];
 
-let gastos = JSON.parse(localStorage.getItem('wc26_g')||'null') || DEMO.map(d=>({...d}));
-let nextId = Math.max(...gastos.map(g=>g.id),0)+1;
+let gastos = [];
 let editId = null;
 let cChart=null, catChrt=null, lChart=null;
 let _catFilter='', _cityFilter='', _viewFilter='';
@@ -798,6 +729,61 @@ const fShort = v => '$'+(v>=1000?Math.round(v).toLocaleString('en-US'):v.toFixed
 
 document.getElementById('tcInput').addEventListener('input', ()=>{ refreshAll(); updateConv(); });
 
+/* ── SUPABASE CRUD ── */
+async function loadGastos() {
+  try {
+    const data = await sbFetch('gastos_viaje?order=fecha.desc');
+    if (data.length > 0) {
+      gastos = data.map(r => ({
+        id: r.id,
+        fecha: r.fecha,
+        ciudad: r.ciudad,
+        categoria: r.categoria,
+        descripcion: r.descripcion,
+        mxn: parseFloat(r.mxn),
+        reembolsable: r.reembolsable,
+        proyecto: r.proyecto,
+        notas: r.notas || ''
+      }));
+    } else {
+      // First load — use demo data
+      gastos = DEMO.map(d=>{...d});
+    }
+    refreshAll();
+  } catch(e) {
+    console.error('Supabase load failed:', e);
+    // Fallback to localStorage
+    const local = localStorage.getItem('wc26_g');
+    gastos = local ? JSON.parse(local) : DEMO.map(d=>{...d});
+    refreshAll();
+    showToast('Sin conexión — usando datos locales', true);
+  }
+}
+
+async function dbInsert(g) {
+  const payload = {
+    fecha: g.fecha, ciudad: g.ciudad, categoria: g.categoria,
+    descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
+    proyecto: g.proyecto, notas: g.notas
+  };
+  const result = await sbFetch('gastos_viaje', { method:'POST', body: JSON.stringify(payload) });
+  return result && result[0] ? result[0].id : null;
+}
+
+async function dbUpdate(g) {
+  const payload = {
+    fecha: g.fecha, ciudad: g.ciudad, categoria: g.categoria,
+    descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
+    proyecto: g.proyecto, notas: g.notas
+  };
+  await sbFetch('gastos_viaje?id=eq.'+g.id, { method:'PATCH', body: JSON.stringify(payload) });
+}
+
+async function dbDelete(id) {
+  await sbFetch('gastos_viaje?id=eq.'+id, { method:'DELETE' });
+}
+
+/* ── LIVE TC ── */
 async function fetchLiveRate() {
   const btn=document.getElementById('liveBtn');
   btn.innerHTML='<i class="ti ti-loader" style="font-size:9px"></i> Cargando...';
@@ -813,6 +799,7 @@ async function fetchLiveRate() {
   btn.innerHTML='<i class="ti ti-refresh" style="font-size:9px"></i> Tipo real';
 }
 
+/* ── FILTERS ── */
 function getFiltered(){
   let list=[...gastos];
   const s=document.getElementById('searchInput').value.toLowerCase();
@@ -823,11 +810,12 @@ function getFiltered(){
   if(catf) list=list.filter(g=>g.categoria===catf);
   if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Sí');
   if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Sí');
-  return list.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  return list.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
 }
 
-function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); renderResumen(); updateLastTime(); }
+function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); updateLastTime(); }
 
+/* ── KPIs ── */
 function renderKPIs(){
   const tc=getTC();
   const total=gastos.reduce((s,g)=>s+g.mxn,0);
@@ -835,20 +823,16 @@ function renderKPIs(){
   const alim=gastos.filter(g=>['Comida','Propinas','Cliente / Hospitality'].includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
   const hosp=gastos.filter(g=>g.categoria==='Hospedaje').reduce((s,g)=>s+g.mxn,0);
   const proy=gastos.filter(g=>!['Uber / Taxi','Peajes','Comida','Propinas','Cliente / Hospitality','Hospedaje'].includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
-
   const cards=[
     {label:'Transporte',mxn:transp,color:'orange',icon:'ti-car',cls:'orange'},
     {label:'Alimentación',mxn:alim,color:'teal',icon:'ti-tools-kitchen-2',cls:'teal'},
     {label:'Hospedaje',mxn:hosp,color:'blue',icon:'ti-building',cls:'blue'},
     {label:'Proyectos',mxn:proy,color:'purple',icon:'ti-briefcase',cls:'purple'},
-    {label:'Total General',mxn:total,color:'gold',icon:'ti-chart-pie',cls:'gray',isTotal:true},
+    {label:'Total General',mxn:total,color:'gold',icon:'ti-chart-pie',cls:'gray'},
   ];
-
   document.getElementById('kpiGrid').innerHTML=cards.map(c=>`
-    <div class="kpi-card${c.isTotal?' total-card':''}">
-      <div class="kpi-icon-circle ${c.cls}">
-        <i class="ti ${c.icon}" style="font-size:20px"></i>
-      </div>
+    <div class="kpi-card">
+      <div class="kpi-icon-circle ${c.cls}"><i class="ti ${c.icon}" style="font-size:20px"></i></div>
       <div class="kpi-info">
         <div class="kpi-label">${c.label}</div>
         <div class="kpi-mxn">${fMXN(c.mxn)}</div>
@@ -859,16 +843,15 @@ function renderKPIs(){
     </div>`).join('');
 }
 
+/* ── CHARTS ── */
 function renderCharts(){
   const tc=getTC();
-  // City donut
   const cityMap={};
   gastos.forEach(g=>{ cityMap[g.ciudad]=(cityMap[g.ciudad]||0)+g.mxn/tc; });
   const cities=Object.keys(cityMap);
   const cityVals=cities.map(c=>cityMap[c]);
   const cityTotal=cityVals.reduce((a,b)=>a+b,0);
   const cityColors=cities.map(c=>CITY_COLORS[c]||'#6b7280');
-
   if(cChart) cChart.destroy();
   cChart=new Chart(document.getElementById('cityChart'),{
     type:'doughnut',
@@ -881,17 +864,15 @@ function renderCharts(){
       <span class="leg-dot" style="background:${cityColors[i]}"></span>
       <span class="leg-name">${CITY_NAMES[c]||c}</span>
       <span class="leg-amt">${fShort(cityVals[i])}</span>
-      <span class="leg-pct">${Math.round(cityVals[i]/cityTotal*100)}%</span>
+      <span class="leg-pct">${cityTotal>0?Math.round(cityVals[i]/cityTotal*100):0}%</span>
     </div>`).join('');
 
-  // Cat donut
   const catMap={};
   gastos.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+g.mxn/tc; });
   const cats=Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a]).slice(0,5);
   const catVals=cats.map(c=>catMap[c]);
   const catTotal=Object.values(catMap).reduce((a,b)=>a+b,0);
   const catColors=cats.map(c=>CAT_COLORS[c]||'#6b7280');
-
   if(catChrt) catChrt.destroy();
   catChrt=new Chart(document.getElementById('catChart'),{
     type:'doughnut',
@@ -904,32 +885,24 @@ function renderCharts(){
       <span class="leg-dot" style="background:${catColors[i]}"></span>
       <span class="leg-name">${c}</span>
       <span class="leg-amt">${fShort(catVals[i])}</span>
-      <span class="leg-pct">${Math.round(catVals[i]/catTotal*100)}%</span>
+      <span class="leg-pct">${catTotal>0?Math.round(catVals[i]/catTotal*100):0}%</span>
     </div>`).join('');
 
-  // Line chart daily cumulative
   const dayMap={};
   gastos.forEach(g=>{ dayMap[g.fecha]=(dayMap[g.fecha]||0)+g.mxn/tc; });
   const days=Object.keys(dayMap).sort();
   let cum=0;
   const cumVals=days.map(d=>{ cum+=dayMap[d]; return parseFloat(cum.toFixed(2)); });
   const dayLabels=days.map(d=>{ const p=d.split('-'); return `${parseInt(p[2])} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][parseInt(p[1])-1]}`; });
-
   if(lChart) lChart.destroy();
   lChart=new Chart(document.getElementById('lineChart'),{
     type:'line',
     data:{labels:dayLabels,datasets:[{label:'Acumulado',data:cumVals,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.06)',borderWidth:2,fill:true,pointBackgroundColor:'#22c55e',pointRadius:4,tension:0.3}]},
-    options:{
-      responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.raw.toFixed(0)+' USD'}}},
-      scales:{
-        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},maxRotation:30}},
-        y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>'$'+v.toFixed(0)}}
-      }
-    }
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.raw.toFixed(0)+' USD'}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},maxRotation:30}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>'$'+v.toFixed(0)}}}}
   });
 }
 
+/* ── TABLE ── */
 function renderTable(){
   const filtered=getFiltered();
   const tc=getTC();
@@ -943,7 +916,6 @@ function renderTable(){
   const total=filtered.reduce((s,g)=>s+g.mxn,0)/tc;
   document.getElementById('tableCount').textContent=`${filtered.length} registros`;
   document.getElementById('tableTotal').textContent=fUSD(total)+' USD';
-
   tbody.innerHTML=filtered.map(g=>{
     const usd=g.mxn/tc;
     const cdot=`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${CITY_COLORS[g.ciudad]||'#6b7280'};margin-right:5px;"></span>`;
@@ -970,23 +942,9 @@ function renderTable(){
   }).join('');
 }
 
-function renderResumen(){
-  const tc=getTC();
-  const totalMXN=gastos.reduce((s,g)=>s+g.mxn,0);
-  const totalUSD=totalMXN/tc;
-  const reemb=gastos.filter(g=>g.reembolsable==='Sí').reduce((s,g)=>s+g.mxn,0)/tc;
-  const noReemb=gastos.filter(g=>g.reembolsable!=='Sí').reduce((s,g)=>s+g.mxn,0)/tc;
-  const dias=new Set(gastos.map(g=>g.fecha)).size||1;
-  document.getElementById('rsMXN').textContent=fMXN(totalMXN);
-  document.getElementById('rsUSD').textContent=fUSD(totalUSD);
-  document.getElementById('rsReemb').textContent=fUSD(reemb)+' USD';
-  document.getElementById('rsNoReemb').textContent=fUSD(noReemb)+' USD';
-  document.getElementById('rsPromedio').textContent=fUSD(totalUSD/dias)+' USD';
-  document.getElementById('rsDias').textContent=dias;
-}
-
 function fmtDate(d){
-  const [y,m,dd]=d.split('-');
+  if(!d) return '—';
+  const [y,m,dd]=String(d).split('-');
   const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   return `${parseInt(dd)} ${ms[parseInt(m)-1]} ${y}`;
 }
@@ -994,14 +952,17 @@ function fmtDate(d){
 function updateLastTime(){
   const n=new Date();
   const p=v=>String(v).padStart(2,'0');
-  document.getElementById('lastUpdate').textContent=`${p(n.getDate())} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][n.getMonth()]} ${n.getFullYear()} — ${p(n.getHours())}:${p(n.getMinutes())}`;
+  const el=document.getElementById('lastUpdate');
+  if(el) el.textContent=`${p(n.getDate())} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][n.getMonth()]} ${n.getFullYear()} — ${p(n.getHours())}:${p(n.getMinutes())}`;
 }
 
+/* ── MODAL ── */
 function openModal(id=null){
   editId=id;
   const today=new Date().toISOString().split('T')[0];
-  if(id){
+  if(id!==null){
     const g=gastos.find(x=>x.id===id);
+    if(!g) return;
     document.getElementById('modalTitle').textContent='Editar Gasto';
     document.getElementById('f-fecha').value=g.fecha;
     document.getElementById('f-ciudad').value=g.ciudad;
@@ -1025,6 +986,7 @@ function openModal(id=null){
   updateConv();
   document.getElementById('modalOverlay').classList.add('open');
 }
+
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); editId=null; }
 
 function updateConv(){
@@ -1037,9 +999,9 @@ function updateConv(){
 async function saveGasto(){
   const mxn=parseFloat(document.getElementById('f-mxn').value);
   if(!mxn||mxn<=0){ alert('Ingresa un monto válido en MXN'); return; }
-  const isEdit = !!editId;
+  const isEdit=(editId!==null);
   const g={
-    id: editId||null,
+    id: editId,
     fecha: document.getElementById('f-fecha').value,
     ciudad: document.getElementById('f-ciudad').value,
     categoria: document.getElementById('f-cat').value,
@@ -1049,64 +1011,85 @@ async function saveGasto(){
     proyecto: document.getElementById('f-proyecto').value||'GENERAL',
     notas: document.getElementById('f-notas').value||''
   };
+  closeModal();
+  showLoading(true);
   try {
-    showLoading(true);
-    const saved = await saveGastoToDB(g, isEdit);
-    if(isEdit){ const idx=gastos.findIndex(x=>x.id===editId); if(idx>-1) gastos[idx]=saved; }
-    else gastos.push(saved);
-    localStorage.setItem('wc26_g',JSON.stringify(gastos));
-    closeModal(); refreshAll();
-    showToast(isEdit?'Gasto actualizado':'Gasto guardado exitosamente');
-  } catch(e) {
-    showToast('Error guardando: '+e.message, true);
+    if(isEdit){
+      await dbUpdate(g);
+      const idx=gastos.findIndex(x=>x.id===editId);
+      if(idx>-1) gastos[idx]=g;
+      showToast('Gasto actualizado');
+    } else {
+      const newId=await dbInsert(g);
+      g.id=newId;
+      gastos.unshift(g);
+      showToast('Gasto guardado exitosamente');
+    }
+    refreshAll();
+  } catch(e){
+    showToast('Error: '+e.message, true);
+    console.error(e);
   } finally {
     showLoading(false);
   }
 }
 
-
-
-
-
-
-function dupGasto(id){
-  const g = gastos.find(x => x.id === id);
+async function dupGasto(id){
+  const g=gastos.find(x=>x.id===id);
   if(!g) return;
-  const copy = {...g, id: nextId++, descripcion: '[Copia] ' + g.descripcion};
-  gastos.push(copy);
-  localStorage.setItem('wc26_g', JSON.stringify(gastos)); // also saved to Supabase
-  refreshAll();
-  showToast('Gasto duplicado');
+  const copy={...g, id:null, descripcion:'[Copia] '+g.descripcion};
+  showLoading(true);
+  try {
+    const newId=await dbInsert(copy);
+    copy.id=newId;
+    gastos.unshift(copy);
+    refreshAll();
+    showToast('Gasto duplicado');
+  } catch(e){
+    showToast('Error duplicando: '+e.message, true);
+  } finally {
+    showLoading(false);
+  }
 }
 
 function delGasto(id, btn){
-  if(btn.dataset.confirm === '1'){
-    gastos = gastos.filter(g => g.id !== id);
-    localStorage.setItem('wc26_g', JSON.stringify(gastos)); // also saved to Supabase
-    refreshAll();
-    showToast('Gasto eliminado');
+  if(btn.dataset.confirm==='1'){
+    btn.dataset.confirm='';
+    showLoading(true);
+    dbDelete(id).then(()=>{
+      gastos=gastos.filter(g=>g.id!==id);
+      refreshAll();
+      showToast('Gasto eliminado');
+    }).catch(e=>{
+      showToast('Error eliminando: '+e.message, true);
+    }).finally(()=>showLoading(false));
   } else {
-    btn.dataset.confirm = '1';
-    btn.title = 'Click de nuevo para confirmar';
-    btn.style.background = '#fef2f2';
-    btn.style.color = '#dc2626';
-    btn.style.borderColor = '#ef4444';
-    btn.innerHTML = '<i class="ti ti-trash" style="font-size:11px"></i><span style="font-size:9px;margin-left:2px">¿Seguro?</span>';
-    btn.style.width = 'auto';
-    btn.style.padding = '0 6px';
-    setTimeout(() => {
-      if(btn.dataset.confirm === '1'){
-        btn.dataset.confirm = '';
-        btn.title = 'Eliminar';
-        btn.style.background = '#f9fafb';
-        btn.style.color = '#6b7280';
-        btn.style.borderColor = '#d1d5db';
-        btn.innerHTML = '<i class="ti ti-trash"></i>';
-        btn.style.width = '28px';
-        btn.style.padding = '';
+    btn.dataset.confirm='1';
+    btn.title='Click de nuevo para confirmar';
+    btn.style.cssText='width:auto;padding:0 6px;height:28px;border-radius:5px;border:1px solid #ef4444;background:#fef2f2;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#dc2626;font-size:11px;gap:3px;';
+    btn.innerHTML='<i class="ti ti-trash" style="font-size:11px"></i> ¿Seguro?';
+    setTimeout(()=>{
+      if(btn.dataset.confirm==='1'){
+        btn.dataset.confirm='';
+        btn.title='Eliminar';
+        btn.style.cssText='width:28px;height:28px;border-radius:5px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;';
+        btn.innerHTML='<i class="ti ti-trash"></i>';
       }
-    }, 3000);
+    },3000);
   }
+}
+
+function exportCSV(){
+  const tc=getTC();
+  const hdr='Fecha,Ciudad,Categoría,Descripción,MXN,USD,Reembolsable,Proyecto,Notas
+';
+  const rows=gastos.map(g=>`${g.fecha},${g.ciudad},${g.categoria},"${g.descripcion}",${g.mxn.toFixed(2)},${(g.mxn/tc).toFixed(2)},${g.reembolsable},${g.proyecto},"${g.notas}"`).join('
+');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([hdr+rows],{type:'text/csv;charset=utf-8;'}));
+  a.download='gastos_wc2026_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('CSV exportado correctamente');
 }
 
 function setView(v,el){
@@ -1133,20 +1116,7 @@ function filterByCity(city,el){
 }
 function openFilters(){ document.getElementById('searchInput').focus(); }
 
-function exportCSV(){
-  const tc=getTC();
-  const hdr='Fecha,Ciudad,Categoría,Descripción,MXN,USD,Reembolsable,Proyecto,Notas
-';
-  const rows=gastos.map(g=>`${g.fecha},${g.ciudad},${g.categoria},"${g.descripcion}",${g.mxn.toFixed(2)},${(g.mxn/tc).toFixed(2)},${g.reembolsable},${g.proyecto},"${g.notas}"`).join('
-');
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([hdr+rows],{type:'text/csv;charset=utf-8;'}));
-  a.download='gastos_wc2026_'+new Date().toISOString().split('T')[0]+'.csv';
-  a.click();
-  showToast('CSV exportado correctamente');
-}
-
-function showToast(msg,err=false){
+function showToast(msg, err=false){
   const t=document.getElementById('toast');
   document.getElementById('toastMsg').textContent=msg;
   t.style.background=err?'#dc2626':'#1a1d2e';
@@ -1156,6 +1126,7 @@ function showToast(msg,err=false){
 
 document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
+/* ── INIT ── */
 loadGastos();
 
 </script>
