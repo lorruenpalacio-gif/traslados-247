@@ -734,7 +734,7 @@ async function loadGastos() {
   try {
     const data = await sbFetch('gastos_viaje?order=fecha.desc');
     gastos = data.map(r => ({
-      id: r.id,
+      id: parseInt(r.id, 10),
       fecha: r.fecha,
       ciudad: r.ciudad,
       categoria: r.categoria,
@@ -771,11 +771,11 @@ async function dbUpdate(g) {
     descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
     proyecto: g.proyecto, notas: g.notas
   };
-  await sbFetch('gastos_viaje?id=eq.'+g.id, { method:'PATCH', body: JSON.stringify(payload) });
+  await sbFetch('gastos_viaje?id=eq.'+parseInt(g.id,10), { method:'PATCH', body: JSON.stringify(payload) });
 }
 
 async function dbDelete(id) {
-  await sbFetch('gastos_viaje?id=eq.'+id, { method:'DELETE' });
+  await sbFetch('gastos_viaje?id=eq.'+parseInt(id,10), { method:'DELETE' });
 }
 
 /* -- LIVE TC -- */
@@ -953,6 +953,7 @@ function updateLastTime(){
 
 /* -- MODAL -- */
 function openModal(id=null){
+  if(id !== null) id = parseInt(id, 10);
   editId=id;
   const today=new Date().toISOString().split('T')[0];
   if(id!==null){
@@ -995,6 +996,7 @@ async function saveGasto(){
   const mxn=parseFloat(document.getElementById('f-mxn').value);
   if(!mxn||mxn<=0){ alert('Ingresa un monto válido en MXN'); return; }
   const isEdit=(editId!==null);
+  if(isEdit) editId=parseInt(editId,10);
   const g={
     id: editId,
     fecha: document.getElementById('f-fecha').value,
@@ -1036,7 +1038,7 @@ async function dupGasto(id){
   showLoading(true);
   try {
     const newId=await dbInsert(copy);
-    copy.id=newId;
+    copy.id=parseInt(newId,10);
     gastos.unshift(copy);
     refreshAll();
     showToast('Gasto duplicado');
@@ -1048,6 +1050,7 @@ async function dupGasto(id){
 }
 
 function delGasto(id, btn){
+  id=parseInt(id,10);
   if(btn.dataset.confirm==='1'){
     btn.dataset.confirm='';
     showLoading(true);
