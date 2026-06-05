@@ -733,22 +733,17 @@ document.getElementById('tcInput').addEventListener('input', ()=>{ refreshAll();
 async function loadGastos() {
   try {
     const data = await sbFetch('gastos_viaje?order=fecha.desc');
-    if (data.length > 0) {
-      gastos = data.map(r => ({
-        id: r.id,
-        fecha: r.fecha,
-        ciudad: r.ciudad,
-        categoria: r.categoria,
-        descripcion: r.descripcion,
-        mxn: parseFloat(r.mxn),
-        reembolsable: r.reembolsable,
-        proyecto: r.proyecto,
-        notas: r.notas || ''
-      }));
-    } else {
-      // First load - use demo data
-      gastos = DEMO.map(function(d){ return Object.assign({}, d); });
-    }
+    gastos = data.map(r => ({
+      id: r.id,
+      fecha: r.fecha,
+      ciudad: r.ciudad,
+      categoria: r.categoria,
+      descripcion: r.descripcion,
+      mxn: parseFloat(r.mxn),
+      reembolsable: r.reembolsable,
+      proyecto: r.proyecto,
+      notas: r.notas || ''
+    }));
     refreshAll();
   } catch(e) {
     console.error('Supabase load failed:', e);
