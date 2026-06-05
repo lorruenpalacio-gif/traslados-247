@@ -403,27 +403,18 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 
 /* Sidebar collapsed */
-.sidebar.collapsed { width: 0; min-width: 0; overflow: hidden; }
-.sidebar-toggle {
-  position: fixed;
-  top: 20px;
-  left: 16px;
-  z-index: 300;
-  width: 32px; height: 32px;
-  background: var(--topbar-bg);
-  border: none;
-  border-radius: 6px;
-  color: #fff;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: left 0.25s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+.sidebar {
+  transition: width 0.25s ease, min-width 0.25s ease;
 }
-.sidebar.collapsed ~ .main .sidebar-toggle,
-body.sidebar-hidden .sidebar-toggle { left: 16px; }
-body { transition: grid-template-columns 0.25s; }
-body.sidebar-hidden { grid-template-columns: 0 1fr; }
+.sidebar.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  border-right: none;
+}
+.main {
+  transition: margin-left 0.25s ease;
+}
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
 </style>
@@ -1160,10 +1151,11 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.targe
 
 /* -- SIDEBAR TOGGLE -- */
 function toggleSidebar(){
-  var body = document.body;
-  var hidden = body.classList.toggle('sidebar-hidden');
-  localStorage.setItem('wc26_sidebar', hidden ? '0' : '1');
-  document.getElementById('toggleIcon').className = hidden ? 'ti ti-layout-sidebar-right' : 'ti ti-layout-sidebar';
+  var sidebar = document.querySelector('.sidebar');
+  var collapsed = sidebar.classList.toggle('collapsed');
+  localStorage.setItem('wc26_sidebar', collapsed ? '0' : '1');
+  var icon = document.getElementById('toggleIcon');
+  if(icon) icon.className = collapsed ? 'ti ti-layout-sidebar-right' : 'ti ti-layout-sidebar';
 }
 
 /* -- INIT -- */
@@ -1171,7 +1163,8 @@ function toggleSidebar(){
   var saved = localStorage.getItem('wc26_tc');
   if(saved) document.getElementById('tcInput').value = saved;
   if(localStorage.getItem('wc26_sidebar') === '0'){
-    document.body.classList.add('sidebar-hidden');
+    var sidebar = document.querySelector('.sidebar');
+    if(sidebar) sidebar.classList.add('collapsed');
     var icon = document.getElementById('toggleIcon');
     if(icon) icon.className = 'ti ti-layout-sidebar-right';
   }
