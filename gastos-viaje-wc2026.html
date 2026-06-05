@@ -38,7 +38,7 @@
   --shadow-card: 0 2px 8px rgba(0,0,0,0.06);
 }
 
-/* ── ROOT LAYOUT ── */
+/* -- ROOT LAYOUT -- */
 html, body { height: 100%; overflow: hidden; }
 body {
   font-family: 'Inter', sans-serif;
@@ -51,7 +51,7 @@ body {
   overflow: hidden;
 }
 
-/* ── SIDEBAR ── */
+/* -- SIDEBAR -- */
 .sidebar {
   width: 210px;
   min-width: 210px;
@@ -110,7 +110,7 @@ body {
   font-size: 10px; color: var(--text3); flex-shrink: 0;
 }
 
-/* ── MAIN ── */
+/* -- MAIN -- */
 .main {
   flex: 1;
   display: flex;
@@ -120,7 +120,7 @@ body {
   min-width: 0;
 }
 
-/* ── TOPBAR ── */
+/* -- TOPBAR -- */
 .topbar {
   background: var(--topbar-bg);
   padding: 0 22px;
@@ -173,7 +173,7 @@ body {
 .btn-topbar.primary { background: var(--gold); color: #1a1a2e; }
 .btn-topbar.primary:hover { background: #f0c040; }
 
-/* ── CONTENT (scrollable area) ── */
+/* -- CONTENT (scrollable area) -- */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -186,7 +186,7 @@ body {
   min-height: 0;
 }
 
-/* ── KPI GRID ── */
+/* -- KPI GRID -- */
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
@@ -226,7 +226,7 @@ body {
 .kpi-usd.gold   { color: var(--gold-text); }
 .kpi-usd-sub { font-size: 9px; color: var(--text3); text-transform: uppercase; }
 
-/* ── CHARTS ROW ── */
+/* -- CHARTS ROW -- */
 .charts-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1.5fr;
@@ -258,7 +258,7 @@ body {
 .leg-amt { color: var(--text); font-weight: 600; font-size: 11px; }
 .leg-pct { color: var(--text3); font-size: 10px; min-width: 36px; text-align: right; }
 
-/* ── TABLE CARD ── */
+/* -- TABLE CARD -- */
 .table-card {
   background: var(--white);
   border: 1px solid var(--border);
@@ -350,7 +350,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 }
 .table-footer strong { color: var(--green-text); }
 
-/* ── MODAL ── */
+/* -- MODAL -- */
 .modal-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.45);
   display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -389,7 +389,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 .btn-save { padding: 8px 20px; background: var(--gold); border: 1px solid var(--gold); border-radius: var(--radius-sm); font-size: 13px; font-family: 'Inter', sans-serif; cursor: pointer; color: #fff; font-weight: 600; }
 .btn-save:hover { background: #e6950f; }
 
-/* ── TOAST ── */
+/* -- TOAST -- */
 .toast {
   position: fixed; bottom: 20px; right: 20px; background: var(--text); color: #fff;
   border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px;
@@ -651,7 +651,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 
 <script>
 
-/* ── SUPABASE ── */
+/* -- SUPABASE -- */
 const SUPABASE_URL = 'https://bekakdgvhcategibttuk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJla2FrZGd2aGNhdGVnaWJ0dHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQ1ODksImV4cCI6MjA5NTM5MDU4OX0.pouq5ATcMN5Zq9EonVRytPTukSTWowuY2kaYelrm_II';
 const SB_HEADS = {
@@ -683,7 +683,7 @@ function showLoading(on) {
   el.style.display = on ? 'flex' : 'none';
 }
 
-/* ── DATA ── */
+/* -- DATA -- */
 const CAT_COLORS = {
   'Uber / Taxi':'#f97316','Comida':'#eab308','Hospedaje':'#3b82f6',
   'Estacionamiento':'#8b5cf6','Peajes':'#14b8a6','Propinas':'#ec4899',
@@ -729,7 +729,7 @@ const fShort = v => '$'+(v>=1000?Math.round(v).toLocaleString('en-US'):v.toFixed
 
 document.getElementById('tcInput').addEventListener('input', ()=>{ refreshAll(); updateConv(); });
 
-/* ── SUPABASE CRUD ── */
+/* -- SUPABASE CRUD -- */
 async function loadGastos() {
   try {
     const data = await sbFetch('gastos_viaje?order=fecha.desc');
@@ -746,7 +746,7 @@ async function loadGastos() {
         notas: r.notas || ''
       }));
     } else {
-      // First load — use demo data
+      // First load - use demo data
       gastos = DEMO.map(d=>{...d});
     }
     refreshAll();
@@ -756,7 +756,7 @@ async function loadGastos() {
     const local = localStorage.getItem('wc26_g');
     gastos = local ? JSON.parse(local) : DEMO.map(d=>{...d});
     refreshAll();
-    showToast('Sin conexión — usando datos locales', true);
+    showToast('Sin conexion - usando datos locales', true);
   }
 }
 
@@ -783,7 +783,7 @@ async function dbDelete(id) {
   await sbFetch('gastos_viaje?id=eq.'+id, { method:'DELETE' });
 }
 
-/* ── LIVE TC ── */
+/* -- LIVE TC -- */
 async function fetchLiveRate() {
   const btn=document.getElementById('liveBtn');
   btn.innerHTML='<i class="ti ti-loader" style="font-size:9px"></i> Cargando...';
@@ -799,7 +799,7 @@ async function fetchLiveRate() {
   btn.innerHTML='<i class="ti ti-refresh" style="font-size:9px"></i> Tipo real';
 }
 
-/* ── FILTERS ── */
+/* -- FILTERS -- */
 function getFiltered(){
   let list=[...gastos];
   const s=document.getElementById('searchInput').value.toLowerCase();
@@ -815,7 +815,7 @@ function getFiltered(){
 
 function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); updateLastTime(); }
 
-/* ── KPIs ── */
+/* -- KPIs -- */
 function renderKPIs(){
   const tc=getTC();
   const total=gastos.reduce((s,g)=>s+g.mxn,0);
@@ -843,7 +843,7 @@ function renderKPIs(){
     </div>`).join('');
 }
 
-/* ── CHARTS ── */
+/* -- CHARTS -- */
 function renderCharts(){
   const tc=getTC();
   const cityMap={};
@@ -902,7 +902,7 @@ function renderCharts(){
   });
 }
 
-/* ── TABLE ── */
+/* -- TABLE -- */
 function renderTable(){
   const filtered=getFiltered();
   const tc=getTC();
@@ -943,7 +943,7 @@ function renderTable(){
 }
 
 function fmtDate(d){
-  if(!d) return '—';
+  if(!d) return '--';
   const [y,m,dd]=String(d).split('-');
   const ms=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
   return `${parseInt(dd)} ${ms[parseInt(m)-1]} ${y}`;
@@ -953,10 +953,10 @@ function updateLastTime(){
   const n=new Date();
   const p=v=>String(v).padStart(2,'0');
   const el=document.getElementById('lastUpdate');
-  if(el) el.textContent=`${p(n.getDate())} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][n.getMonth()]} ${n.getFullYear()} — ${p(n.getHours())}:${p(n.getMinutes())}`;
+  if(el) el.textContent=`${p(n.getDate())} ${['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][n.getMonth()]} ${n.getFullYear()} - ${p(n.getHours())}:${p(n.getMinutes())}`;
 }
 
-/* ── MODAL ── */
+/* -- MODAL -- */
 function openModal(id=null){
   editId=id;
   const today=new Date().toISOString().split('T')[0];
@@ -1005,7 +1005,7 @@ async function saveGasto(){
     fecha: document.getElementById('f-fecha').value,
     ciudad: document.getElementById('f-ciudad').value,
     categoria: document.getElementById('f-cat').value,
-    descripcion: document.getElementById('f-desc').value||'—',
+    descripcion: document.getElementById('f-desc').value||'-',
     mxn,
     reembolsable: document.getElementById('f-reemb').value,
     proyecto: document.getElementById('f-proyecto').value||'GENERAL',
@@ -1126,7 +1126,7 @@ function showToast(msg, err=false){
 
 document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
-/* ── INIT ── */
+/* -- INIT -- */
 loadGastos();
 
 </script>
