@@ -1080,12 +1080,15 @@ function delGasto(id, btn){
 }
 
 function exportCSV(){
-  const tc=getTC();
-  const hdr='Fecha,Ciudad,Categoría,Descripción,MXN,USD,Reembolsable,Proyecto,Notas
-';
-  const rows=gastos.map(g=>`${g.fecha},${g.ciudad},${g.categoria},"${g.descripcion}",${g.mxn.toFixed(2)},${(g.mxn/tc).toFixed(2)},${g.reembolsable},${g.proyecto},"${g.notas}"`).join('
-');
-  const a=document.createElement('a');
+  var tc=getTC();
+  var NEWLINE='\n';
+  var hdr='Fecha,Ciudad,Categoria,Descripcion,MXN,USD,Reembolsable,Proyecto,Notas'+NEWLINE;
+  var rows=gastos.map(function(g){
+    return g.fecha+','+g.ciudad+','+g.categoria+',"'+g.descripcion+'",'+
+           g.mxn.toFixed(2)+','+(g.mxn/tc).toFixed(2)+','+g.reembolsable+','+
+           g.proyecto+',"'+g.notas+'"';
+  }).join(NEWLINE);
+  var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([hdr+rows],{type:'text/csv;charset=utf-8;'}));
   a.download='gastos_wc2026_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click();
