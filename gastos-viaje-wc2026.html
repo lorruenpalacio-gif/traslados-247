@@ -698,7 +698,9 @@ td.td-notas{max-width:120px;}
         <table>
           <thead>
             <tr>
-              <th>Fecha</th><th>Ciudad</th><th>Categoria</th><th>Descripcion</th>
+              <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="toggleDateSort()">
+                Fecha <span id="dateSortIcon" style="font-size:10px;color:#9ca3af;">&#8597;</span>
+              </th><th>Ciudad</th><th>Categoria</th><th>Descripcion</th>
               <th>MXN</th><th>USD</th><th>Reembolsable</th><th>Proyecto</th>
               <th>Notas</th><th>Tipo Pago</th><th>Comprobante</th><th>Acciones</th>
             </tr>
@@ -865,6 +867,7 @@ let gastos = [];
 let editId = null;
 let cChart=null, catChrt=null, lChart=null;
 let _catFilter='', _cityFilter='', _viewFilter='';
+let _dateSort=''; // '' = ingreso order, 'asc' = oldest first, 'desc' = newest first
 
 const getTC = () => parseFloat(document.getElementById('tcInput').value)||19;
 const fMXN = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -956,7 +959,10 @@ function getFiltered(){
   else if(catf) list=list.filter(g=>g.categoria===catf);
   if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Si'||g.reembolsable==='S\u00ed');
   if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Si'&&g.reembolsable!=='S\u00ed');
-  return list.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  if(_dateSort==='asc')  list.sort((a,b)=>String(a.fecha).localeCompare(String(b.fecha)));
+  else if(_dateSort==='desc') list.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  // '' = keep original insertion order (as loaded from Supabase)
+  return list;
 }
 
 function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); updateLastTime(); }
@@ -1333,6 +1339,19 @@ async function deleteComprobante(id){
   } finally {
     showLoading(false);
   }
+}
+
+function toggleDateSort(){
+  if(_dateSort==='') _dateSort='desc';
+  else if(_dateSort==='desc') _dateSort='asc';
+  else _dateSort='';
+  const icon = document.getElementById('dateSortIcon');
+  if(icon){
+    if(_dateSort==='desc') icon.innerHTML='&#8595;'; // down arrow
+    else if(_dateSort==='asc') icon.innerHTML='&#8593;'; // up arrow
+    else icon.innerHTML='&#8597;'; // both arrows = no sort
+  }
+  renderTable();
 }
 
 function exportCSV(){
