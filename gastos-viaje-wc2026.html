@@ -738,15 +738,21 @@ td.td-notas{max-width:120px;}
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Categoría</label>
-        <select class="form-select" id="f-cat">
-          <option value="Comida Personal">Comida Personal</option>
-          <option value="Comida Equipo">Comida Equipo</option>
+        <select class="form-select" id="f-cat" onchange="toggleSubcat()">
+          <option value="Alimentacion">Alimentacion</option>
           <option value="Transporte">Transporte</option>
           <option value="Hospedaje">Hospedaje</option>
           <option value="Compras Operativas">Compras Operativas</option>
           <option value="Cliente / Hospitality">Cliente / Hospitality</option>
           <option value="Otros">Otros</option>
         </select>
+        <div id="subcat-wrap" style="margin-top:8px;">
+          <label class="form-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:#9ca3af;margin-bottom:5px;display:block;">Subcategoria</label>
+          <select class="form-select" id="f-subcat">
+            <option value="Comida Personal">Comida Personal</option>
+            <option value="Comida Equipo">Comida Equipo</option>
+          </select>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Reembolsable</label>
