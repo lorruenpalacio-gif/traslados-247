@@ -1202,12 +1202,14 @@ async function saveGasto(){
     tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
     comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':''
   };
+  // Save the id BEFORE closing modal (closeModal resets editId to null)
+  const savedEditId = editId;
   closeModal();
   showLoading(true);
   try {
     if(isEdit){
       await dbUpdate(g);
-      const idx=gastos.findIndex(x=>x.id===editId);
+      const idx=gastos.findIndex(x=>x.id===savedEditId);
       if(idx>-1) gastos[idx]=g;
       showToast('Gasto actualizado');
     } else {
