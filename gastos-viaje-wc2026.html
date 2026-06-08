@@ -804,6 +804,24 @@ td.td-notas{max-width:120px;}
         </select>
       </div>
     </div>
+    <div class="form-group" style="margin-top:12px;">
+      <label class="form-label">Comprobante (imagen o PDF)</label>
+      <div id="modal-comp-wrap">
+        <label style="display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:#f9fafb;border:1px dashed #d1d5db;border-radius:6px;color:#6b7280;font-size:12px;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='#f3f4f6'" onmouseout="this.style.background='#f9fafb'">
+          <i class="ti ti-upload" style="font-size:15px"></i> Seleccionar archivo
+          <input type="file" id="modal-comp-input" accept="image/*,.pdf" style="display:none" onchange="previewModalComp(event)">
+        </label>
+        <span id="modal-comp-name" style="margin-left:8px;font-size:11px;color:#6b7280;"></span>
+        <div id="modal-comp-preview" style="margin-top:8px;display:none;">
+          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+            <i class="ti ti-paperclip" style="color:#2563eb;font-size:15px"></i>
+            <span id="modal-comp-filename" style="font-size:12px;color:#2563eb;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+            <button onclick="clearModalComp()" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;padding:0;"><i class="ti ti-x"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-save" onclick="saveGasto()">Guardar Gasto</button>
@@ -1125,6 +1143,22 @@ function updateLastTime(){
 }
 
 /* -- MODAL -- */
+function previewModalComp(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){ showToast('Archivo muy grande (max 5MB)', true); event.target.value=''; return; }
+  document.getElementById('modal-comp-name').textContent = '';
+  document.getElementById('modal-comp-filename').textContent = file.name;
+  document.getElementById('modal-comp-preview').style.display = 'block';
+}
+
+function clearModalComp(){
+  const inp = document.getElementById('modal-comp-input');
+  if(inp) inp.value = '';
+  document.getElementById('modal-comp-preview').style.display = 'none';
+  document.getElementById('modal-comp-name').textContent = '';
+}
+
 function toggleSubcat(){
   const cat=document.getElementById('f-cat').value;
   const wrap=document.getElementById('subcat-wrap');
@@ -1175,6 +1209,7 @@ function openModal(id=null){
   toggleSubcat();
   toggleTarjeta();
   updateConv();
+  clearModalComp();
   document.getElementById('modalOverlay').classList.add('open');
 }
 
@@ -1208,6 +1243,22 @@ async function saveGasto(){
     tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
     comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':''
   };
+  // Upload comprobante if selected in modal
+  const compInput = document.getElementById('modal-comp-input');
+  if(compInput && compInput.files && compInput.files[0]){
+    const file = compInput.files[0];
+    const ext = file.name.split('.').pop();
+    const filename = 'comp_' + Date.now() + '.' + ext;
+    const uploadRes = await fetch(SUPABASE_URL+'/storage/v1/object/comprobantes/'+filename,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body: file
+    });
+    if(uploadRes.ok){
+      g.comprobante_url = SUPABASE_URL+'/storage/v1/object/public/comprobantes/'+filename;
+    }
+  }
+
   // Save the id BEFORE closing modal (closeModal resets editId to null)
   const savedEditId = editId;
   closeModal();
