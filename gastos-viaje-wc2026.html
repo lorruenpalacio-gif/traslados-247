@@ -948,8 +948,8 @@ function getFiltered(){
   if(cf) list=list.filter(g=>g.ciudad===cf);
   if(catf==='__alim__') list=list.filter(g=>g.categoria==='Comida Personal'||g.categoria==='Comida Equipo');
   else if(catf) list=list.filter(g=>g.categoria===catf);
-  if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Si'||g.reembolsable==='Si');
-  if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Si'&&g.reembolsable!=='Si');
+  if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Si'||g.reembolsable==='S\u00ed');
+  if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Si'&&g.reembolsable!=='S\u00ed');
   return list.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
 }
 
@@ -1082,7 +1082,7 @@ function renderTable(){
       <td class="td-primary">${g.descripcion}</td>
       <td class="td-mxn">${fMXN(g.mxn)}</td>
       <td class="td-usd">${fUSD(usd)}</td>
-      <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='Si')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
+      <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='S\u00ed')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
       <td class="td-proyecto">${g.proyecto}</td>
       <td class="td-notas">${g.notas||''}</td>
       <td><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:${pagoColor}15;color:${pagoColor};font-size:11px;white-space:nowrap;"><i class="ti ${pagoIcon}" style="font-size:11px"></i>${pagoLabel}</span></td>
@@ -1126,10 +1126,12 @@ function toggleTarjeta(){
 
 function openModal(id=null){
   editId=(id!==null)?parseInt(id,10):null;
+  console.log('[openModal] id=', id, 'editId=', editId, 'gastos.length=', gastos.length);
   const today=new Date().toISOString().split('T')[0];
   if(editId!==null){
     const g=gastos.find(x=>x.id===editId);
-    if(!g) return;
+    console.log('[openModal] found g=', g ? g.id : 'NOT FOUND', 'all ids=', gastos.map(x=>x.id));
+    if(!g){ showToast('Registro no encontrado (id='+editId+')', true); return; }
     document.getElementById('modalTitle').textContent='Editar Gasto';
     document.getElementById('f-fecha').value=g.fecha;
     document.getElementById('f-ciudad').value=g.ciudad;
@@ -1139,7 +1141,7 @@ function openModal(id=null){
     document.getElementById('f-subcat').value=isAlim?g.categoria:'Comida Personal';
     document.getElementById('f-desc').value=g.descripcion;
     document.getElementById('f-mxn').value=g.mxn;
-    document.getElementById('f-reemb').value=g.reembolsable;
+    document.getElementById('f-reemb').value=(g.reembolsable==='Si'?'S\u00ed':g.reembolsable);
     document.getElementById('f-proyecto').value=g.proyecto;
     document.getElementById('f-notas').value=g.notas||'';
     document.getElementById('f-tipo-pago').value=g.tipo_pago||'Efectivo';
@@ -1152,7 +1154,7 @@ function openModal(id=null){
     document.getElementById('f-subcat').value='Comida Personal';
     document.getElementById('f-desc').value='';
     document.getElementById('f-mxn').value='';
-    document.getElementById('f-reemb').value='Si';
+    document.getElementById('f-reemb').value='S\u00ed';
     document.getElementById('f-proyecto').value='';
     document.getElementById('f-notas').value='';
     document.getElementById('f-tipo-pago').value='Efectivo';
