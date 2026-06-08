@@ -548,13 +548,11 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 
   <div class="sidebar-section">
     <div class="sidebar-label">Categorías</div>
-    <div class="nav-item" onclick="filterByCat('Uber / Taxi',this)"><span class="cat-icon" style="background:#f97316"><i class="ti ti-car" style="font-size:10px"></i></span> Uber / Taxi</div>
-    <div class="nav-item" onclick="filterByCat('Comida',this)"><span class="cat-icon" style="background:#eab308"><i class="ti ti-tools-kitchen-2" style="font-size:10px"></i></span> Comida</div>
-    <div class="nav-item" onclick="filterByCat('Hospedaje',this)"><span class="cat-icon" style="background:#3b82f6"><i class="ti ti-building" style="font-size:10px"></i></span> Hospedaje</div>
-    <div class="nav-item" onclick="filterByCat('Estacionamiento',this)"><span class="cat-icon" style="background:#8b5cf6"><i class="ti ti-parking" style="font-size:10px"></i></span> Estacionamiento</div>
-    <div class="nav-item" onclick="filterByCat('Peajes',this)"><span class="cat-icon" style="background:#14b8a6"><i class="ti ti-road" style="font-size:10px"></i></span> Peajes</div>
-    <div class="nav-item" onclick="filterByCat('Propinas',this)"><span class="cat-icon" style="background:#ec4899"><i class="ti ti-coin" style="font-size:10px"></i></span> Propinas</div>
-    <div class="nav-item" onclick="filterByCat('Imprevistos',this)"><span class="cat-icon" style="background:#ef4444"><i class="ti ti-alert-triangle" style="font-size:10px"></i></span> Imprevistos</div>
+    <div class="sidebar-label" style="padding:6px 14px 2px;font-size:9px;color:#9ca3af">ALIMENTACION</div>
+    <div class="nav-item" onclick="filterByCat('Comida Personal',this)" style="padding-left:20px"><span class="cat-icon" style="background:#f97316"><i class="ti ti-user" style="font-size:10px"></i></span> Comida Personal</div>
+    <div class="nav-item" onclick="filterByCat('Comida Equipo',this)" style="padding-left:20px"><span class="cat-icon" style="background:#fb923c"><i class="ti ti-users" style="font-size:10px"></i></span> Comida Equipo</div>
+    <div class="nav-item" onclick="filterByCat('Transporte',this)"><span class="cat-icon" style="background:#3b82f6"><i class="ti ti-car" style="font-size:10px"></i></span> Transporte</div>
+    <div class="nav-item" onclick="filterByCat('Hospedaje',this)"><span class="cat-icon" style="background:#8b5cf6"><i class="ti ti-building" style="font-size:10px"></i></span> Hospedaje</div>
     <div class="nav-item" onclick="filterByCat('Compras Operativas',this)"><span class="cat-icon" style="background:#22c55e"><i class="ti ti-shopping-cart" style="font-size:10px"></i></span> Compras Operativas</div>
     <div class="nav-item" onclick="filterByCat('Cliente / Hospitality',this)"><span class="cat-icon" style="background:#f59e0b"><i class="ti ti-star" style="font-size:10px"></i></span> Cliente / Hospitality</div>
     <div class="nav-item" onclick="filterByCat('Otros',this)"><span class="cat-icon" style="background:#6b7280"><i class="ti ti-dots" style="font-size:10px"></i></span> Otros</div>
@@ -667,10 +665,9 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
         </select>
         <select class="filter-select" id="filterCatSel" onchange="renderTable()">
           <option value="">Todas las categorías</option>
-          <option>Uber / Taxi</option><option>Comida</option><option>Hospedaje</option>
-          <option>Estacionamiento</option><option>Peajes</option><option>Propinas</option>
-          <option>Imprevistos</option><option>Compras Operativas</option>
-          <option>Cliente / Hospitality</option><option>Otros</option>
+          <option>Comida Personal</option><option>Comida Equipo</option>
+          <option>Transporte</option><option>Hospedaje</option>
+          <option>Compras Operativas</option><option>Cliente / Hospitality</option><option>Otros</option>
         </select>
       </div>
 
@@ -680,7 +677,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
             <tr>
               <th>Fecha</th><th>Ciudad</th><th>Categoría</th><th>Descripción</th>
               <th>MXN</th><th>USD</th><th>Reembolsable</th><th>Proyecto</th>
-              <th>Notas</th><th>Acciones</th>
+              <th>Notas</th><th>Tipo Pago</th><th>Comprobante</th><th>Acciones</th>
             </tr>
           </thead>
           <tbody id="gastosBody"></tbody>
@@ -719,10 +716,9 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
       <div class="form-group">
         <label class="form-label">Categoría</label>
         <select class="form-select" id="f-cat">
-          <option>Uber / Taxi</option><option>Comida</option><option>Hospedaje</option>
-          <option>Estacionamiento</option><option>Peajes</option><option>Propinas</option>
-          <option>Imprevistos</option><option>Compras Operativas</option>
-          <option>Cliente / Hospitality</option><option>Otros</option>
+          <option>Comida Personal</option><option>Comida Equipo</option>
+          <option>Transporte</option><option>Hospedaje</option>
+          <option>Compras Operativas</option><option>Cliente / Hospitality</option><option>Otros</option>
         </select>
       </div>
       <div class="form-group">
@@ -759,6 +755,22 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
     <div class="form-group" style="margin-top:12px">
       <label class="form-label">Notas</label>
       <textarea class="form-textarea" id="f-notas" placeholder="Observaciones adicionales..."></textarea>
+    </div>
+    <div class="form-row" style="margin-top:12px">
+      <div class="form-group">
+        <label class="form-label">Tipo de Pago</label>
+        <select class="form-select" id="f-tipo-pago" onchange="toggleTarjeta()">
+          <option value="Efectivo">Efectivo</option>
+          <option value="Tarjeta de Credito">Tarjeta de Credito</option>
+        </select>
+      </div>
+      <div class="form-group" id="tarjeta-wrap" style="display:none">
+        <label class="form-label">Tarjeta</label>
+        <select class="form-select" id="f-tarjeta">
+          <option value="Tarjeta xx3706">Tarjeta xx3706</option>
+          <option value="Tarjeta xx2877">Tarjeta xx2877</option>
+        </select>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -805,34 +817,38 @@ function showLoading(on) {
 
 /* -- DATA -- */
 const CAT_COLORS = {
-  'Uber / Taxi':'#f97316','Comida':'#eab308','Hospedaje':'#3b82f6',
-  'Estacionamiento':'#8b5cf6','Peajes':'#14b8a6','Propinas':'#ec4899',
-  'Imprevistos':'#ef4444','Compras Operativas':'#22c55e',
-  'Cliente / Hospitality':'#f59e0b','Otros':'#6b7280'
+  'Comida Personal':'#f97316','Comida Equipo':'#fb923c',
+  'Transporte':'#3b82f6','Hospedaje':'#8b5cf6',
+  'Compras Operativas':'#22c55e','Cliente / Hospitality':'#f59e0b','Otros':'#6b7280'
 };
 const CAT_ICONS = {
-  'Uber / Taxi':'ti-car','Comida':'ti-tools-kitchen-2','Hospedaje':'ti-building',
-  'Estacionamiento':'ti-parking','Peajes':'ti-road','Propinas':'ti-coin',
-  'Imprevistos':'ti-alert-triangle','Compras Operativas':'ti-shopping-cart',
-  'Cliente / Hospitality':'ti-star','Otros':'ti-dots'
+  'Comida Personal':'ti-user','Comida Equipo':'ti-users',
+  'Transporte':'ti-car','Hospedaje':'ti-building',
+  'Compras Operativas':'ti-shopping-cart','Cliente / Hospitality':'ti-star','Otros':'ti-dots'
+};
+// Group for display
+const CAT_GROUP = {
+  'Comida Personal':'Alimentacion','Comida Equipo':'Alimentacion',
+  'Transporte':'Transporte','Hospedaje':'Hospedaje',
+  'Compras Operativas':'Compras Operativas','Cliente / Hospitality':'Cliente / Hospitality','Otros':'Otros'
 };
 const CITY_COLORS = {CDMX:'#f97316',GDL:'#22c55e',MTY:'#3b82f6',NY:'#8b5cf6'};
 const CITY_NAMES  = {CDMX:'CDMX',GDL:'Guadalajara',MTY:'Monterrey',NY:'New York'};
 
 const DEMO = [
-  {id:1,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Uber / Taxi',descripcion:'Aeropuerto → Hotel',mxn:580,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Llegada 08:30 AM'},
-  {id:2,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Comida',descripcion:'Almuerzo con cliente',mxn:420,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:"Restaurante Porfirio's"},
-  {id:3,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Imprevistos',descripcion:'Compra de cargador',mxn:650,reembolsable:'No',proyecto:'GASTO PERSONAL',notas:'Cargador portátil'},
-  {id:4,fecha:'2026-05-16',ciudad:'GDL',categoria:'Uber / Taxi',descripcion:'Hotel → Estadio',mxn:310,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Partido 20:00 hrs'},
-  {id:5,fecha:'2026-05-16',ciudad:'GDL',categoria:'Comida',descripcion:'Cena equipo',mxn:780,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'La Tequila Cocina'},
-  {id:6,fecha:'2026-05-15',ciudad:'MTY',categoria:'Uber / Taxi',descripcion:'Hotel → Aeropuerto',mxn:420,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Vuelo 14:30 PM'},
-  {id:7,fecha:'2026-05-15',ciudad:'MTY',categoria:'Estacionamiento',descripcion:'Estacionamiento aeropuerto',mxn:250,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Parking E2'},
+  {id:1,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Transporte',descripcion:'Aeropuerto → Hotel',mxn:580,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Llegada 08:30 AM'},
+  {id:2,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Comida Equipo',descripcion:'Almuerzo con cliente',mxn:420,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:"Restaurante Porfirio's"},
+  {id:3,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Otros',descripcion:'Compra de cargador',mxn:650,reembolsable:'No',proyecto:'GASTO PERSONAL',notas:'Cargador portátil'},
+  {id:4,fecha:'2026-05-16',ciudad:'GDL',categoria:'Transporte',descripcion:'Hotel → Estadio',mxn:310,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Partido 20:00 hrs'},
+  {id:5,fecha:'2026-05-16',ciudad:'GDL',categoria:'Comida Equipo',descripcion:'Cena equipo',mxn:780,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'La Tequila Cocina'},
+  {id:6,fecha:'2026-05-15',ciudad:'MTY',categoria:'Transporte',descripcion:'Hotel → Aeropuerto',mxn:420,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Vuelo 14:30 PM'},
+  {id:7,fecha:'2026-05-15',ciudad:'MTY',categoria:'Transporte',descripcion:'Estacionamiento aeropuerto',mxn:250,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Parking E2'},
   {id:8,fecha:'2026-05-14',ciudad:'NY',categoria:'Hospedaje',descripcion:'Hotel 1 noche',mxn:4800,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'Hotel Plaza'},
-  {id:9,fecha:'2026-05-14',ciudad:'NY',categoria:'Comida',descripcion:'Desayuno',mxn:350,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'Starbucks'},
-  {id:10,fecha:'2026-05-14',ciudad:'NY',categoria:'Uber / Taxi',descripcion:'Aeropuerto → Hotel',mxn:620,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'JFK → Hotel'},
+  {id:9,fecha:'2026-05-14',ciudad:'NY',categoria:'Comida Equipo',descripcion:'Desayuno',mxn:350,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'Starbucks'},
+  {id:10,fecha:'2026-05-14',ciudad:'NY',categoria:'Transporte',descripcion:'Aeropuerto → Hotel',mxn:620,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'JFK → Hotel'},
   {id:11,fecha:'2026-05-13',ciudad:'GDL',categoria:'Hospedaje',descripcion:'Hotel 2 noches',mxn:3200,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Hotel Presidente'},
   {id:12,fecha:'2026-05-12',ciudad:'CDMX',categoria:'Hospedaje',descripcion:'Hotel 1 noche',mxn:2400,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Camino Real'},
-  {id:13,fecha:'2026-05-12',ciudad:'CDMX',categoria:'Peajes',descripcion:'Autopista CDMX-GDL',mxn:680,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Cuota caseta'},
+  {id:13,fecha:'2026-05-12',ciudad:'CDMX',categoria:'Transporte',descripcion:'Autopista CDMX-GDL',mxn:680,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Cuota caseta'},
   {id:14,fecha:'2026-05-11',ciudad:'MTY',categoria:'Cliente / Hospitality',descripcion:'Cena ejecutiva Adidas',mxn:2200,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Corte de Carne MTY'},
   {id:15,fecha:'2026-05-11',ciudad:'MTY',categoria:'Compras Operativas',descripcion:'Material de oficina',mxn:380,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Papelería y folders'},
 ];
@@ -866,7 +882,10 @@ async function loadGastos() {
       mxn: parseFloat(r.mxn),
       reembolsable: r.reembolsable,
       proyecto: r.proyecto,
-      notas: r.notas || ''
+      notas: r.notas || '',
+      tipo_pago: r.tipo_pago || 'Efectivo',
+      tarjeta: r.tarjeta || '',
+      comprobante_url: r.comprobante_url || ''
     }));
     refreshAll();
   } catch(e) {
@@ -1093,6 +1112,9 @@ function openModal(id=null){
     document.getElementById('f-reemb').value=g.reembolsable;
     document.getElementById('f-proyecto').value=g.proyecto;
     document.getElementById('f-notas').value=g.notas;
+    document.getElementById('f-tipo-pago').value=g.tipo_pago||'Efectivo';
+    document.getElementById('f-tarjeta').value=g.tarjeta||'';
+    toggleTarjeta();
   } else {
     document.getElementById('modalTitle').textContent='Nuevo Gasto';
     document.getElementById('f-fecha').value=today;
@@ -1109,6 +1131,12 @@ function openModal(id=null){
 }
 
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); editId=null; }
+
+function toggleTarjeta(){
+  var tipo = document.getElementById('f-tipo-pago').value;
+  var wrap = document.getElementById('tarjeta-wrap');
+  if(wrap) wrap.style.display = tipo==='Tarjeta de Credito' ? 'block' : 'none';
+}
 
 function updateConv(){
   const tc=getTC();
@@ -1131,7 +1159,10 @@ async function saveGasto(){
     mxn,
     reembolsable: document.getElementById('f-reemb').value,
     proyecto: document.getElementById('f-proyecto').value||'GENERAL',
-    notas: document.getElementById('f-notas').value||''
+    notas: document.getElementById('f-notas').value||'',
+    tipo_pago: document.getElementById('f-tipo-pago').value||'Efectivo',
+    tarjeta: document.getElementById('f-tarjeta').value||'',
+    comprobante_url: (isEdit && gastos.find(x=>x.id===editId)) ? gastos.find(x=>x.id===editId).comprobante_url||'' : ''
   };
   closeModal();
   showLoading(true);
@@ -1199,6 +1230,41 @@ function delGasto(id, btn){
         btn.innerHTML='<i class="ti ti-trash"></i>';
       }
     },3000);
+  }
+}
+
+async function uploadComprobante(event, id){
+  var file = event.target.files[0];
+  if(!file) return;
+  var maxSize = 5 * 1024 * 1024; // 5MB
+  if(file.size > maxSize){ showToast('Archivo muy grande (max 5MB)', true); return; }
+  showLoading(true);
+  try {
+    // Upload to Supabase Storage
+    var ext = file.name.split('.').pop();
+    var filename = 'comprobante_' + id + '_' + Date.now() + '.' + ext;
+    var uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/comprobantes/' + filename, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if(!uploadRes.ok){ var e = await uploadRes.text(); throw new Error(e); }
+    var publicUrl = SUPABASE_URL + '/storage/v1/object/public/comprobantes/' + filename;
+    // Save URL to DB
+    await dbUpdate(Object.assign({}, gastos.find(g=>g.id===parseInt(id,10)), {comprobante_url: publicUrl}));
+    var g = gastos.find(x=>x.id===parseInt(id,10));
+    if(g) g.comprobante_url = publicUrl;
+    renderTable();
+    showToast('Comprobante subido correctamente');
+  } catch(e){
+    showToast('Error subiendo comprobante: ' + e.message, true);
+  } finally {
+    showLoading(false);
   }
 }
 
@@ -1307,5 +1373,10 @@ document.addEventListener('click', function(e){
 loadGastos();
 
 </script>
+<!-- SQL to run in Supabase:
+ALTER TABLE gastos_viaje ADD COLUMN IF NOT EXISTS tipo_pago text DEFAULT 'Efectivo';
+ALTER TABLE gastos_viaje ADD COLUMN IF NOT EXISTS tarjeta text DEFAULT '';
+ALTER TABLE gastos_viaje ADD COLUMN IF NOT EXISTS comprobante_url text DEFAULT '';
+-->
 </body>
 </html>
