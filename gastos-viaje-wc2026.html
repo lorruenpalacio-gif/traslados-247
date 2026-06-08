@@ -189,7 +189,7 @@ body {
 /* -- KPI GRID -- */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 10px;
   background: var(--white);
   border: 1px solid var(--border);
@@ -216,7 +216,7 @@ body {
 .kpi-icon-circle.gray   { background: #6b7280; }
 .kpi-info { flex: 1; min-width: 0; }
 .kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 3px; }
-.kpi-mxn { font-size: 22px; font-weight: 700; color: var(--text); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; line-height: 1.1; }
+.kpi-mxn { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 0.5px; line-height: 1.1; }
 .kpi-sub { font-size: 9px; color: var(--text3); text-transform: uppercase; margin-bottom: 2px; }
 .kpi-usd { font-size: 16px; font-weight: 700; line-height: 1.1; }
 .kpi-usd.orange { color: var(--orange); }
@@ -519,6 +519,27 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
   .tc-widget { display: none; }
 }
 
+
+.act-btn-e, .act-btn-d, .act-btn-x {
+  width:26px;height:26px;border-radius:5px;border:1px solid #d1d5db;
+  background:#f9fafb;cursor:pointer;display:inline-flex;align-items:center;
+  justify-content:center;color:#6b7280;font-size:12px;padding:0;
+  transition:all 0.12s;
+}
+.act-btn-e:hover{background:#eff6ff;color:#2563eb;border-color:#3b82f6;}
+.act-btn-d:hover{background:#f0fdf4;color:#059669;border-color:#10b981;}
+.act-btn-x:hover,.act-btn-confirm{background:#fef2f2;color:#dc2626;border-color:#ef4444;}
+.comp-btn-ver{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
+  background:#eff6ff;border:1px solid #bfdbfe;border-radius:4px;color:#2563eb;
+  font-size:10px;text-decoration:none;}
+.comp-btn-sub{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;
+  background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;color:#6b7280;
+  font-size:10px;cursor:pointer;}
+.comp-btn-sub:hover{background:#f3f4f6;}
+table{table-layout:auto;}
+td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
+td.td-primary{max-width:150px;}
+td.td-notas{max-width:120px;}
 </style>
 </head>
 <body>
@@ -548,9 +569,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 
   <div class="sidebar-section">
     <div class="sidebar-label">Categorías</div>
-    <div class="sidebar-label" style="padding:6px 14px 2px;font-size:9px;color:#9ca3af">ALIMENTACION</div>
-    <div class="nav-item" onclick="filterByCat('Comida Personal',this)" style="padding-left:20px"><span class="cat-icon" style="background:#f97316"><i class="ti ti-user" style="font-size:10px"></i></span> Comida Personal</div>
-    <div class="nav-item" onclick="filterByCat('Comida Equipo',this)" style="padding-left:20px"><span class="cat-icon" style="background:#fb923c"><i class="ti ti-users" style="font-size:10px"></i></span> Comida Equipo</div>
+    <div class="nav-item" onclick="filterAlim(this)"><span class="cat-icon" style="background:#f97316"><i class="ti ti-tools-kitchen-2" style="font-size:10px"></i></span> Alimentacion</div>
     <div class="nav-item" onclick="filterByCat('Transporte',this)"><span class="cat-icon" style="background:#3b82f6"><i class="ti ti-car" style="font-size:10px"></i></span> Transporte</div>
     <div class="nav-item" onclick="filterByCat('Hospedaje',this)"><span class="cat-icon" style="background:#8b5cf6"><i class="ti ti-building" style="font-size:10px"></i></span> Hospedaje</div>
     <div class="nav-item" onclick="filterByCat('Compras Operativas',this)"><span class="cat-icon" style="background:#22c55e"><i class="ti ti-shopping-cart" style="font-size:10px"></i></span> Compras Operativas</div>
@@ -665,9 +684,13 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
         </select>
         <select class="filter-select" id="filterCatSel" onchange="renderTable()">
           <option value="">Todas las categorías</option>
-          <option>Comida Personal</option><option>Comida Equipo</option>
-          <option>Transporte</option><option>Hospedaje</option>
-          <option>Compras Operativas</option><option>Cliente / Hospitality</option><option>Otros</option>
+          <option value="Comida Personal">Comida Personal</option>
+          <option value="Comida Equipo">Comida Equipo</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Hospedaje">Hospedaje</option>
+          <option value="Compras Operativas">Compras Operativas</option>
+          <option value="Cliente / Hospitality">Cliente / Hospitality</option>
+          <option value="Otros">Otros</option>
         </select>
       </div>
 
@@ -675,7 +698,7 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
         <table>
           <thead>
             <tr>
-              <th>Fecha</th><th>Ciudad</th><th>Categoría</th><th>Descripción</th>
+              <th>Fecha</th><th>Ciudad</th><th>Categoria</th><th>Descripcion</th>
               <th>MXN</th><th>USD</th><th>Reembolsable</th><th>Proyecto</th>
               <th>Notas</th><th>Tipo Pago</th><th>Comprobante</th><th>Acciones</th>
             </tr>
@@ -716,9 +739,13 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
       <div class="form-group">
         <label class="form-label">Categoría</label>
         <select class="form-select" id="f-cat">
-          <option>Comida Personal</option><option>Comida Equipo</option>
-          <option>Transporte</option><option>Hospedaje</option>
-          <option>Compras Operativas</option><option>Cliente / Hospitality</option><option>Otros</option>
+          <option value="Comida Personal">Comida Personal</option>
+          <option value="Comida Equipo">Comida Equipo</option>
+          <option value="Transporte">Transporte</option>
+          <option value="Hospedaje">Hospedaje</option>
+          <option value="Compras Operativas">Compras Operativas</option>
+          <option value="Cliente / Hospitality">Cliente / Hospitality</option>
+          <option value="Otros">Otros</option>
         </select>
       </div>
       <div class="form-group">
@@ -782,7 +809,6 @@ td.td-notas { font-size: 11px; max-width: 150px; overflow: hidden; text-overflow
 <div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg">Gasto guardado</span></div>
 
 <script>
-
 /* -- SUPABASE -- */
 const SUPABASE_URL = 'https://bekakdgvhcategibttuk.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJla2FrZGd2aGNhdGVnaWJ0dHVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQ1ODksImV4cCI6MjA5NTM5MDU4OX0.pouq5ATcMN5Zq9EonVRytPTukSTWowuY2kaYelrm_II';
@@ -805,7 +831,7 @@ function showLoading(on) {
   if (!el) {
     el = document.createElement('div');
     el.id = 'sbLoading';
-    el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;background:#fff;padding:16px 24px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.15);font-family:Inter,sans-serif;font-size:13px;color:#6b7280"><i class="ti ti-loader" style="font-size:20px;animation:sbspin 1s linear infinite;color:#f5a623"></i>Guardando en Supabase...</div>';
+    el.innerHTML = '<div style="display:flex;align-items:center;gap:10px;background:#fff;padding:16px 24px;border-radius:10px;box-shadow:0 4px 24px rgba(0,0,0,0.15);font-family:Inter,sans-serif;font-size:13px;color:#6b7280"><i class="ti ti-loader" style="font-size:20px;animation:sbspin 1s linear infinite;color:#f5a623"></i>Guardando...</div>';
     el.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.2);display:flex;align-items:center;justify-content:center;z-index:9999;';
     document.body.appendChild(el);
     const s = document.createElement('style');
@@ -826,32 +852,8 @@ const CAT_ICONS = {
   'Transporte':'ti-car','Hospedaje':'ti-building',
   'Compras Operativas':'ti-shopping-cart','Cliente / Hospitality':'ti-star','Otros':'ti-dots'
 };
-// Group for display
-const CAT_GROUP = {
-  'Comida Personal':'Alimentacion','Comida Equipo':'Alimentacion',
-  'Transporte':'Transporte','Hospedaje':'Hospedaje',
-  'Compras Operativas':'Compras Operativas','Cliente / Hospitality':'Cliente / Hospitality','Otros':'Otros'
-};
 const CITY_COLORS = {CDMX:'#f97316',GDL:'#22c55e',MTY:'#3b82f6',NY:'#8b5cf6'};
 const CITY_NAMES  = {CDMX:'CDMX',GDL:'Guadalajara',MTY:'Monterrey',NY:'New York'};
-
-const DEMO = [
-  {id:1,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Transporte',descripcion:'Aeropuerto → Hotel',mxn:580,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Llegada 08:30 AM'},
-  {id:2,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Comida Equipo',descripcion:'Almuerzo con cliente',mxn:420,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:"Restaurante Porfirio's"},
-  {id:3,fecha:'2026-05-17',ciudad:'CDMX',categoria:'Otros',descripcion:'Compra de cargador',mxn:650,reembolsable:'No',proyecto:'GASTO PERSONAL',notas:'Cargador portátil'},
-  {id:4,fecha:'2026-05-16',ciudad:'GDL',categoria:'Transporte',descripcion:'Hotel → Estadio',mxn:310,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Partido 20:00 hrs'},
-  {id:5,fecha:'2026-05-16',ciudad:'GDL',categoria:'Comida Equipo',descripcion:'Cena equipo',mxn:780,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'La Tequila Cocina'},
-  {id:6,fecha:'2026-05-15',ciudad:'MTY',categoria:'Transporte',descripcion:'Hotel → Aeropuerto',mxn:420,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Vuelo 14:30 PM'},
-  {id:7,fecha:'2026-05-15',ciudad:'MTY',categoria:'Transporte',descripcion:'Estacionamiento aeropuerto',mxn:250,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Parking E2'},
-  {id:8,fecha:'2026-05-14',ciudad:'NY',categoria:'Hospedaje',descripcion:'Hotel 1 noche',mxn:4800,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'Hotel Plaza'},
-  {id:9,fecha:'2026-05-14',ciudad:'NY',categoria:'Comida Equipo',descripcion:'Desayuno',mxn:350,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'Starbucks'},
-  {id:10,fecha:'2026-05-14',ciudad:'NY',categoria:'Transporte',descripcion:'Aeropuerto → Hotel',mxn:620,reembolsable:'Sí',proyecto:'FIFA-NY-004',notas:'JFK → Hotel'},
-  {id:11,fecha:'2026-05-13',ciudad:'GDL',categoria:'Hospedaje',descripcion:'Hotel 2 noches',mxn:3200,reembolsable:'Sí',proyecto:'FIFA-GDL-002',notas:'Hotel Presidente'},
-  {id:12,fecha:'2026-05-12',ciudad:'CDMX',categoria:'Hospedaje',descripcion:'Hotel 1 noche',mxn:2400,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Camino Real'},
-  {id:13,fecha:'2026-05-12',ciudad:'CDMX',categoria:'Transporte',descripcion:'Autopista CDMX-GDL',mxn:680,reembolsable:'Sí',proyecto:'FIFA-CDMX-001',notas:'Cuota caseta'},
-  {id:14,fecha:'2026-05-11',ciudad:'MTY',categoria:'Cliente / Hospitality',descripcion:'Cena ejecutiva Adidas',mxn:2200,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Corte de Carne MTY'},
-  {id:15,fecha:'2026-05-11',ciudad:'MTY',categoria:'Compras Operativas',descripcion:'Material de oficina',mxn:380,reembolsable:'Sí',proyecto:'FIFA-MTY-003',notas:'Papelería y folders'},
-];
 
 let gastos = [];
 let editId = null;
@@ -890,33 +892,31 @@ async function loadGastos() {
     refreshAll();
   } catch(e) {
     console.error('Supabase load failed:', e);
-    // Fallback to localStorage
     const local = localStorage.getItem('wc26_g');
-    gastos = local ? JSON.parse(local) : DEMO.map(function(d){ return Object.assign({}, d); });
+    gastos = local ? JSON.parse(local) : [];
     refreshAll();
     showToast('Sin conexion - usando datos locales', true);
   }
 }
 
+function buildPayload(g) {
+  return {
+    fecha: g.fecha, ciudad: g.ciudad, categoria: g.categoria,
+    descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
+    proyecto: g.proyecto, notas: g.notas,
+    tipo_pago: g.tipo_pago || 'Efectivo',
+    tarjeta: g.tarjeta || '',
+    comprobante_url: g.comprobante_url || ''
+  };
+}
+
 async function dbInsert(g) {
-  const payload = {
-    fecha: g.fecha, ciudad: g.ciudad, categoria: g.categoria,
-    descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
-    proyecto: g.proyecto, notas: g.notas
-  };
-  const result = await sbFetch('gastos_viaje', { method:'POST', body: JSON.stringify(payload) });
-  return result && result[0] ? result[0].id : null;
+  const result = await sbFetch('gastos_viaje', { method:'POST', body: JSON.stringify(buildPayload(g)) });
+  return result && result[0] ? parseInt(result[0].id, 10) : null;
 }
-
 async function dbUpdate(g) {
-  const payload = {
-    fecha: g.fecha, ciudad: g.ciudad, categoria: g.categoria,
-    descripcion: g.descripcion, mxn: g.mxn, reembolsable: g.reembolsable,
-    proyecto: g.proyecto, notas: g.notas
-  };
-  await sbFetch('gastos_viaje?id=eq.'+parseInt(g.id,10), { method:'PATCH', body: JSON.stringify(payload) });
+  await sbFetch('gastos_viaje?id=eq.'+parseInt(g.id,10), { method:'PATCH', body: JSON.stringify(buildPayload(g)) });
 }
-
 async function dbDelete(id) {
   await sbFetch('gastos_viaje?id=eq.'+parseInt(id,10), { method:'DELETE' });
 }
@@ -944,11 +944,12 @@ function getFiltered(){
   const s=document.getElementById('searchInput').value.toLowerCase();
   const cf=document.getElementById('filterCity').value||_cityFilter;
   const catf=document.getElementById('filterCatSel').value||_catFilter;
-  if(s) list=list.filter(g=>g.descripcion.toLowerCase().includes(s)||g.proyecto.toLowerCase().includes(s)||g.notas.toLowerCase().includes(s));
+  if(s) list=list.filter(g=>g.descripcion.toLowerCase().includes(s)||g.proyecto.toLowerCase().includes(s)||(g.notas||'').toLowerCase().includes(s));
   if(cf) list=list.filter(g=>g.ciudad===cf);
-  if(catf) list=list.filter(g=>g.categoria===catf);
-  if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Sí');
-  if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Sí');
+  if(catf==='__alim__') list=list.filter(g=>g.categoria==='Comida Personal'||g.categoria==='Comida Equipo');
+  else if(catf) list=list.filter(g=>g.categoria===catf);
+  if(_viewFilter==='reemb') list=list.filter(g=>g.reembolsable==='Si'||g.reembolsable==='Si');
+  if(_viewFilter==='noreemb') list=list.filter(g=>g.reembolsable!=='Si'&&g.reembolsable!=='Si');
   return list.sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
 }
 
@@ -957,26 +958,32 @@ function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); updateLastTi
 /* -- KPIs -- */
 function renderKPIs(){
   const tc=getTC();
-  const total=gastos.reduce((s,g)=>s+g.mxn,0);
-  const transp=gastos.filter(g=>['Uber / Taxi','Peajes'].includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
-  const alim=gastos.filter(g=>['Comida','Propinas','Cliente / Hospitality'].includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
-  const hosp=gastos.filter(g=>g.categoria==='Hospedaje').reduce((s,g)=>s+g.mxn,0);
-  const proy=gastos.filter(g=>!['Uber / Taxi','Peajes','Comida','Propinas','Cliente / Hospitality','Hospedaje'].includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
+  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():gastos;
+  const alim   =src.filter(g=>g.categoria==='Comida Personal'||g.categoria==='Comida Equipo').reduce((s,g)=>s+g.mxn,0);
+  const transp  =src.filter(g=>g.categoria==='Transporte').reduce((s,g)=>s+g.mxn,0);
+  const hosp    =src.filter(g=>g.categoria==='Hospedaje').reduce((s,g)=>s+g.mxn,0);
+  const compras =src.filter(g=>g.categoria==='Compras Operativas').reduce((s,g)=>s+g.mxn,0);
+  const hospcli =src.filter(g=>g.categoria==='Cliente / Hospitality').reduce((s,g)=>s+g.mxn,0);
+  const otros   =src.filter(g=>g.categoria==='Otros').reduce((s,g)=>s+g.mxn,0);
+  const total   =src.reduce((s,g)=>s+g.mxn,0);
   const cards=[
-    {label:'Transporte',mxn:transp,color:'orange',icon:'ti-car',cls:'orange'},
-    {label:'Alimentación',mxn:alim,color:'teal',icon:'ti-tools-kitchen-2',cls:'teal'},
-    {label:'Hospedaje',mxn:hosp,color:'blue',icon:'ti-building',cls:'blue'},
-    {label:'Proyectos',mxn:proy,color:'purple',icon:'ti-briefcase',cls:'purple'},
-    {label:'Total General',mxn:total,color:'gold',icon:'ti-chart-pie',cls:'gray'},
+    {label:'Alimentacion',mxn:alim,cls:'orange',icon:'ti-tools-kitchen-2'},
+    {label:'Transporte',mxn:transp,cls:'teal',icon:'ti-car'},
+    {label:'Hospedaje',mxn:hosp,cls:'blue',icon:'ti-building'},
+    {label:'Compras Op.',mxn:compras,cls:'purple',icon:'ti-shopping-cart'},
+    {label:'C/Hospitality',mxn:hospcli,cls:'gray',icon:'ti-star'},
+    {label:'Otros',mxn:otros,cls:'teal',icon:'ti-dots'},
+    {label:'Total General',mxn:total,cls:'gray',icon:'ti-chart-pie'},
   ];
-  document.getElementById('kpiGrid').innerHTML=cards.map(c=>`
+  const usdCls=['orange','teal','blue','purple','gold','teal','gold'];
+  document.getElementById('kpiGrid').innerHTML=cards.map((c,i)=>`
     <div class="kpi-card">
-      <div class="kpi-icon-circle ${c.cls}"><i class="ti ${c.icon}" style="font-size:20px"></i></div>
+      <div class="kpi-icon-circle ${c.cls}"><i class="ti ${c.icon}" style="font-size:16px"></i></div>
       <div class="kpi-info">
         <div class="kpi-label">${c.label}</div>
         <div class="kpi-mxn">${fMXN(c.mxn)}</div>
         <div class="kpi-sub">MXN</div>
-        <div class="kpi-usd ${c.color}">${fUSD(c.mxn/tc)}</div>
+        <div class="kpi-usd ${usdCls[i]}">${fUSD(c.mxn/tc)}</div>
         <div class="kpi-usd-sub">USD</div>
       </div>
     </div>`).join('');
@@ -985,8 +992,10 @@ function renderKPIs(){
 /* -- CHARTS -- */
 function renderCharts(){
   const tc=getTC();
+  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():gastos;
+
   const cityMap={};
-  gastos.forEach(g=>{ cityMap[g.ciudad]=(cityMap[g.ciudad]||0)+g.mxn/tc; });
+  src.forEach(g=>{ cityMap[g.ciudad]=(cityMap[g.ciudad]||0)+g.mxn/tc; });
   const cities=Object.keys(cityMap);
   const cityVals=cities.map(c=>cityMap[c]);
   const cityTotal=cityVals.reduce((a,b)=>a+b,0);
@@ -1007,8 +1016,8 @@ function renderCharts(){
     </div>`).join('');
 
   const catMap={};
-  gastos.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+g.mxn/tc; });
-  const cats=Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a]).slice(0,5);
+  src.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+g.mxn/tc; });
+  const cats=Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a]).slice(0,6);
   const catVals=cats.map(c=>catMap[c]);
   const catTotal=Object.values(catMap).reduce((a,b)=>a+b,0);
   const catColors=cats.map(c=>CAT_COLORS[c]||'#6b7280');
@@ -1028,7 +1037,7 @@ function renderCharts(){
     </div>`).join('');
 
   const dayMap={};
-  gastos.forEach(g=>{ dayMap[g.fecha]=(dayMap[g.fecha]||0)+g.mxn/tc; });
+  src.forEach(g=>{ dayMap[g.fecha]=(dayMap[g.fecha]||0)+g.mxn/tc; });
   const days=Object.keys(dayMap).sort();
   let cum=0;
   const cumVals=days.map(d=>{ cum+=dayMap[d]; return parseFloat(cum.toFixed(2)); });
@@ -1047,7 +1056,7 @@ function renderTable(){
   const tc=getTC();
   const tbody=document.getElementById('gastosBody');
   if(!filtered.length){
-    tbody.innerHTML='<tr class="empty-row"><td colspan="10"><i class="ti ti-mood-empty" style="font-size:18px;display:block;margin-bottom:4px"></i>Sin registros</td></tr>';
+    tbody.innerHTML='<tr class="empty-row"><td colspan="12" style="text-align:center;padding:28px;color:#9ca3af"><i class="ti ti-mood-empty" style="font-size:18px;display:block;margin-bottom:4px"></i>Sin registros</td></tr>';
     document.getElementById('tableCount').textContent='0 registros';
     document.getElementById('tableTotal').textContent='$0.00 USD';
     return;
@@ -1060,21 +1069,29 @@ function renderTable(){
     const cdot=`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${CITY_COLORS[g.ciudad]||'#6b7280'};margin-right:5px;"></span>`;
     const catColor=CAT_COLORS[g.categoria]||'#6b7280';
     const catIcon=CAT_ICONS[g.categoria]||'ti-tag';
+    const pagoColor=g.tipo_pago==='Efectivo'?'#16a34a':'#2563eb';
+    const pagoIcon=g.tipo_pago==='Efectivo'?'ti-cash':'ti-credit-card';
+    const pagoLabel=g.tipo_pago==='Efectivo'?'Efectivo':(g.tarjeta||'Tarjeta');
+    const compHtml=g.comprobante_url
+      ?`<a href="${g.comprobante_url}" target="_blank" class="comp-btn-ver"><i class="ti ti-paperclip"></i>Ver</a>`
+      :`<label class="comp-btn-sub"><i class="ti ti-upload"></i>Subir<input type="file" accept="image/*,.pdf" style="display:none" onchange="uploadComprobante(event,${g.id})"></label>`;
     return `<tr>
       <td class="td-date">${fmtDate(g.fecha)}</td>
-      <td><span class="city-pill">${cdot}${g.ciudad}</span></td>
-      <td><span class="cat-pill" style="background:${catColor}18;color:${catColor}"><i class="ti ${catIcon}" style="font-size:11px"></i>${g.categoria}</span></td>
-      <td class="td-primary" title="${g.descripcion}">${g.descripcion}</td>
+      <td>${cdot}${g.ciudad}</td>
+      <td><span class="cat-pill" style="background:${catColor}18;color:${catColor}"><i class="ti ${catIcon}"></i>${g.categoria}</span></td>
+      <td class="td-primary">${g.descripcion}</td>
       <td class="td-mxn">${fMXN(g.mxn)}</td>
       <td class="td-usd">${fUSD(usd)}</td>
-      <td><span class="badge ${g.reembolsable==='Sí'?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
+      <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='Si')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
       <td class="td-proyecto">${g.proyecto}</td>
-      <td class="td-notas" title="${g.notas}">${g.notas}</td>
+      <td class="td-notas">${g.notas||''}</td>
+      <td><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;background:${pagoColor}15;color:${pagoColor};font-size:11px;white-space:nowrap;"><i class="ti ${pagoIcon}" style="font-size:11px"></i>${pagoLabel}</span></td>
+      <td>${compHtml}</td>
       <td>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <button title="Editar" onclick="openModal(${g.id})" style="width:28px;height:28px;border-radius:5px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;" onmouseover="this.style.background='#eff6ff';this.style.color='#2563eb';this.style.borderColor='#3b82f6'" onmouseout="this.style.background='#f9fafb';this.style.color='#6b7280';this.style.borderColor='#d1d5db'"><i class="ti ti-pencil"></i></button>
-          <button title="Duplicar" onclick="dupGasto(${g.id})" style="width:28px;height:28px;border-radius:5px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;" onmouseover="this.style.background='#f0fdf4';this.style.color='#059669';this.style.borderColor='#10b981'" onmouseout="this.style.background='#f9fafb';this.style.color='#6b7280';this.style.borderColor='#d1d5db'"><i class="ti ti-copy"></i></button>
-          <button title="Eliminar" onclick="delGasto(${g.id},this)" style="width:28px;height:28px;border-radius:5px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;" onmouseover="this.style.background='#fef2f2';this.style.color='#dc2626';this.style.borderColor='#ef4444'" onmouseout="this.style.background='#f9fafb';this.style.color='#6b7280';this.style.borderColor='#d1d5db'"><i class="ti ti-trash"></i></button>
+        <div style="display:flex;align-items:center;gap:3px;">
+          <button class="act-btn-e" onclick="openModal(${g.id})" title="Editar"><i class="ti ti-pencil"></i></button>
+          <button class="act-btn-d" onclick="dupGasto(${g.id})" title="Duplicar"><i class="ti ti-copy"></i></button>
+          <button class="act-btn-x" onclick="delGasto(${g.id},this)" title="Eliminar"><i class="ti ti-trash"></i></button>
         </div>
       </td>
     </tr>`;
@@ -1096,47 +1113,58 @@ function updateLastTime(){
 }
 
 /* -- MODAL -- */
+function toggleSubcat(){
+  const cat=document.getElementById('f-cat').value;
+  const wrap=document.getElementById('subcat-wrap');
+  if(wrap) wrap.style.display=(cat==='Alimentacion')?'block':'none';
+}
+function toggleTarjeta(){
+  const tipo=document.getElementById('f-tipo-pago').value;
+  const wrap=document.getElementById('tarjeta-wrap');
+  if(wrap) wrap.style.display=(tipo==='Tarjeta de Credito')?'block':'none';
+}
+
 function openModal(id=null){
-  if(id !== null) id = parseInt(id, 10);
-  editId=id;
+  editId=(id!==null)?parseInt(id,10):null;
   const today=new Date().toISOString().split('T')[0];
-  if(id!==null){
-    const g=gastos.find(x=>x.id===id);
+  if(editId!==null){
+    const g=gastos.find(x=>x.id===editId);
     if(!g) return;
     document.getElementById('modalTitle').textContent='Editar Gasto';
     document.getElementById('f-fecha').value=g.fecha;
     document.getElementById('f-ciudad').value=g.ciudad;
-    document.getElementById('f-cat').value=g.categoria;
+    // set category select
+    const isAlim=g.categoria==='Comida Personal'||g.categoria==='Comida Equipo';
+    document.getElementById('f-cat').value=isAlim?'Alimentacion':g.categoria;
+    document.getElementById('f-subcat').value=isAlim?g.categoria:'Comida Personal';
     document.getElementById('f-desc').value=g.descripcion;
     document.getElementById('f-mxn').value=g.mxn;
     document.getElementById('f-reemb').value=g.reembolsable;
     document.getElementById('f-proyecto').value=g.proyecto;
-    document.getElementById('f-notas').value=g.notas;
+    document.getElementById('f-notas').value=g.notas||'';
     document.getElementById('f-tipo-pago').value=g.tipo_pago||'Efectivo';
-    document.getElementById('f-tarjeta').value=g.tarjeta||'';
-    toggleTarjeta();
+    document.getElementById('f-tarjeta').value=g.tarjeta||'Tarjeta xx3706';
   } else {
     document.getElementById('modalTitle').textContent='Nuevo Gasto';
     document.getElementById('f-fecha').value=today;
     document.getElementById('f-ciudad').value='CDMX';
-    document.getElementById('f-cat').value='Uber / Taxi';
+    document.getElementById('f-cat').value='Alimentacion';
+    document.getElementById('f-subcat').value='Comida Personal';
     document.getElementById('f-desc').value='';
     document.getElementById('f-mxn').value='';
-    document.getElementById('f-reemb').value='Sí';
+    document.getElementById('f-reemb').value='Si';
     document.getElementById('f-proyecto').value='';
     document.getElementById('f-notas').value='';
+    document.getElementById('f-tipo-pago').value='Efectivo';
+    document.getElementById('f-tarjeta').value='Tarjeta xx3706';
   }
+  toggleSubcat();
+  toggleTarjeta();
   updateConv();
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); editId=null; }
-
-function toggleTarjeta(){
-  var tipo = document.getElementById('f-tipo-pago').value;
-  var wrap = document.getElementById('tarjeta-wrap');
-  if(wrap) wrap.style.display = tipo==='Tarjeta de Credito' ? 'block' : 'none';
-}
 
 function updateConv(){
   const tc=getTC();
@@ -1147,22 +1175,24 @@ function updateConv(){
 
 async function saveGasto(){
   const mxn=parseFloat(document.getElementById('f-mxn').value);
-  if(!mxn||mxn<=0){ alert('Ingresa un monto válido en MXN'); return; }
+  if(!mxn||mxn<=0){ alert('Ingresa un monto valido en MXN'); return; }
   const isEdit=(editId!==null);
-  if(isEdit) editId=parseInt(editId,10);
+  const catVal=document.getElementById('f-cat').value;
+  const categoria=(catVal==='Alimentacion')?document.getElementById('f-subcat').value:catVal;
+  const tipoPago=document.getElementById('f-tipo-pago').value;
   const g={
     id: editId,
     fecha: document.getElementById('f-fecha').value,
     ciudad: document.getElementById('f-ciudad').value,
-    categoria: document.getElementById('f-cat').value,
-    descripcion: document.getElementById('f-desc').value||'-',
+    categoria: categoria,
+    descripcion: document.getElementById('f-desc').value||'--',
     mxn,
     reembolsable: document.getElementById('f-reemb').value,
     proyecto: document.getElementById('f-proyecto').value||'GENERAL',
     notas: document.getElementById('f-notas').value||'',
-    tipo_pago: document.getElementById('f-tipo-pago').value||'Efectivo',
-    tarjeta: document.getElementById('f-tarjeta').value||'',
-    comprobante_url: (isEdit && gastos.find(x=>x.id===editId)) ? gastos.find(x=>x.id===editId).comprobante_url||'' : ''
+    tipo_pago: tipoPago,
+    tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
+    comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':''
   };
   closeModal();
   showLoading(true);
@@ -1174,10 +1204,11 @@ async function saveGasto(){
       showToast('Gasto actualizado');
     } else {
       const newId=await dbInsert(g);
-      g.id=newId;
+      g.id=parseInt(newId,10);
       gastos.unshift(g);
       showToast('Gasto guardado exitosamente');
     }
+    localStorage.setItem('wc26_g',JSON.stringify(gastos));
     refreshAll();
   } catch(e){
     showToast('Error: '+e.message, true);
@@ -1188,14 +1219,15 @@ async function saveGasto(){
 }
 
 async function dupGasto(id){
-  const g=gastos.find(x=>x.id===id);
+  const g=gastos.find(x=>x.id===parseInt(id,10));
   if(!g) return;
-  const copy=Object.assign({}, g, {id:null, descripcion:'[Copia] '+g.descripcion});
+  const copy=Object.assign({},g,{id:null,descripcion:'[Copia] '+g.descripcion});
   showLoading(true);
   try {
     const newId=await dbInsert(copy);
     copy.id=parseInt(newId,10);
     gastos.unshift(copy);
+    localStorage.setItem('wc26_g',JSON.stringify(gastos));
     refreshAll();
     showToast('Gasto duplicado');
   } catch(e){
@@ -1212,6 +1244,7 @@ function delGasto(id, btn){
     showLoading(true);
     dbDelete(id).then(()=>{
       gastos=gastos.filter(g=>g.id!==id);
+      localStorage.setItem('wc26_g',JSON.stringify(gastos));
       refreshAll();
       showToast('Gasto eliminado');
     }).catch(e=>{
@@ -1220,13 +1253,13 @@ function delGasto(id, btn){
   } else {
     btn.dataset.confirm='1';
     btn.title='Click de nuevo para confirmar';
-    btn.style.cssText='width:auto;padding:0 6px;height:28px;border-radius:5px;border:1px solid #ef4444;background:#fef2f2;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#dc2626;font-size:11px;gap:3px;';
-    btn.innerHTML='<i class="ti ti-trash" style="font-size:11px"></i> ¿Seguro?';
+    btn.className='act-btn-x act-btn-confirm';
+    btn.innerHTML='<i class="ti ti-alert-triangle" style="font-size:11px"></i>';
     setTimeout(()=>{
       if(btn.dataset.confirm==='1'){
         btn.dataset.confirm='';
+        btn.className='act-btn-x';
         btn.title='Eliminar';
-        btn.style.cssText='width:28px;height:28px;border-radius:5px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6b7280;font-size:13px;';
         btn.innerHTML='<i class="ti ti-trash"></i>';
       }
     },3000);
@@ -1234,35 +1267,29 @@ function delGasto(id, btn){
 }
 
 async function uploadComprobante(event, id){
-  var file = event.target.files[0];
+  const file=event.target.files[0];
   if(!file) return;
-  var maxSize = 5 * 1024 * 1024; // 5MB
-  if(file.size > maxSize){ showToast('Archivo muy grande (max 5MB)', true); return; }
+  if(file.size>5*1024*1024){ showToast('Archivo muy grande (max 5MB)', true); return; }
   showLoading(true);
   try {
-    // Upload to Supabase Storage
-    var ext = file.name.split('.').pop();
-    var filename = 'comprobante_' + id + '_' + Date.now() + '.' + ext;
-    var uploadRes = await fetch(SUPABASE_URL + '/storage/v1/object/comprobantes/' + filename, {
-      method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': file.type,
-        'x-upsert': 'true'
-      },
-      body: file
+    const ext=file.name.split('.').pop();
+    const filename='comp_'+id+'_'+Date.now()+'.'+ext;
+    const uploadRes=await fetch(SUPABASE_URL+'/storage/v1/object/comprobantes/'+filename,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':file.type,'x-upsert':'true'},
+      body:file
     });
-    if(!uploadRes.ok){ var e = await uploadRes.text(); throw new Error(e); }
-    var publicUrl = SUPABASE_URL + '/storage/v1/object/public/comprobantes/' + filename;
-    // Save URL to DB
-    await dbUpdate(Object.assign({}, gastos.find(g=>g.id===parseInt(id,10)), {comprobante_url: publicUrl}));
-    var g = gastos.find(x=>x.id===parseInt(id,10));
-    if(g) g.comprobante_url = publicUrl;
+    if(!uploadRes.ok){ const e=await uploadRes.text(); throw new Error(e); }
+    const publicUrl=SUPABASE_URL+'/storage/v1/object/public/comprobantes/'+filename;
+    const g=gastos.find(x=>x.id===parseInt(id,10));
+    if(g){
+      g.comprobante_url=publicUrl;
+      await dbUpdate(g);
+    }
     renderTable();
     showToast('Comprobante subido correctamente');
   } catch(e){
-    showToast('Error subiendo comprobante: ' + e.message, true);
+    showToast('Error subiendo: '+e.message, true);
   } finally {
     showLoading(false);
   }
@@ -1270,13 +1297,13 @@ async function uploadComprobante(event, id){
 
 function exportCSV(){
   var tc=getTC();
-  var NEWLINE='\n';
-  var hdr='Fecha,Ciudad,Categoria,Descripcion,MXN,USD,Reembolsable,Proyecto,Notas'+NEWLINE;
+  var NL='\n';
+  var hdr='Fecha,Ciudad,Categoria,Descripcion,MXN,USD,Reembolsable,Proyecto,Notas,TipoPago,Tarjeta'+NL;
   var rows=gastos.map(function(g){
     return g.fecha+','+g.ciudad+','+g.categoria+',"'+g.descripcion+'",'+
            g.mxn.toFixed(2)+','+(g.mxn/tc).toFixed(2)+','+g.reembolsable+','+
-           g.proyecto+',"'+g.notas+'"';
-  }).join(NEWLINE);
+           g.proyecto+',"'+(g.notas||'')+'",'+g.tipo_pago+','+(g.tarjeta||'');
+  }).join(NL);
   var a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([hdr+rows],{type:'text/csv;charset=utf-8;'}));
   a.download='gastos_wc2026_'+new Date().toISOString().split('T')[0]+'.csv';
@@ -1290,21 +1317,30 @@ function setView(v,el){
   _viewFilter=v; _catFilter=''; _cityFilter='';
   document.getElementById('filterCity').value='';
   document.getElementById('filterCatSel').value='';
-  renderTable();
+  refreshAll();
 }
 function filterByCat(cat,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
   _catFilter=cat; _cityFilter=''; _viewFilter='';
-  document.getElementById('filterCatSel').value=cat;
-  renderTable();
+  document.getElementById('filterCatSel').value='';
+  refreshAll();
 }
 function filterByCity(city,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   el.classList.add('active');
   _cityFilter=city; _catFilter=''; _viewFilter='';
   document.getElementById('filterCity').value=city;
-  renderTable();
+  refreshAll();
+}
+
+function filterAlim(el){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+  _cityFilter=''; _viewFilter='';
+  _catFilter='__alim__';
+  document.getElementById('filterCatSel').value='';
+  refreshAll();
 }
 function openFilters(){ document.getElementById('searchInput').focus(); }
 
@@ -1316,58 +1352,50 @@ function showToast(msg, err=false){
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
-
 /* -- SIDEBAR TOGGLE -- */
-function isMobile(){ return window.innerWidth <= 768; }
-
+function isMobile(){ return window.innerWidth<=768; }
 function toggleSidebar(){
-  var sidebar = document.querySelector('.sidebar');
+  const sidebar=document.querySelector('.sidebar');
   if(isMobile()){
-    // Mobile: toggle overlay sidebar
-    var isOpen = sidebar.classList.toggle('open');
-    var overlay = document.getElementById('sidebarOverlay');
-    if(overlay) overlay.classList.toggle('show', isOpen);
-    var icon = document.getElementById('toggleIcon');
-    if(icon) icon.className = isOpen ? 'ti ti-x' : 'ti ti-menu-2';
+    const isOpen=sidebar.classList.toggle('open');
+    const overlay=document.getElementById('sidebarOverlay');
+    if(overlay) overlay.classList.toggle('show',isOpen);
+    const icon=document.getElementById('toggleIcon');
+    if(icon) icon.className=isOpen?'ti ti-x':'ti ti-menu-2';
   } else {
-    // Desktop: collapse sidebar in grid
-    var collapsed = sidebar.classList.toggle('collapsed');
-    localStorage.setItem('wc26_sidebar', collapsed ? '0' : '1');
-    var icon = document.getElementById('toggleIcon');
-    if(icon) icon.className = collapsed ? 'ti ti-layout-sidebar-right' : 'ti ti-layout-sidebar';
+    const collapsed=sidebar.classList.toggle('collapsed');
+    localStorage.setItem('wc26_sidebar',collapsed?'0':'1');
+    const icon=document.getElementById('toggleIcon');
+    if(icon) icon.className=collapsed?'ti ti-layout-sidebar-right':'ti ti-layout-sidebar';
   }
 }
-
 function closeSidebarMobile(){
-  var sidebar = document.querySelector('.sidebar');
+  const sidebar=document.querySelector('.sidebar');
   sidebar.classList.remove('open');
-  var overlay = document.getElementById('sidebarOverlay');
+  const overlay=document.getElementById('sidebarOverlay');
   if(overlay) overlay.classList.remove('show');
-  var icon = document.getElementById('toggleIcon');
-  if(icon) icon.className = 'ti ti-menu-2';
+  const icon=document.getElementById('toggleIcon');
+  if(icon) icon.className='ti ti-menu-2';
 }
-
-// Close sidebar when a nav item is clicked on mobile
-document.addEventListener('click', function(e){
-  if(isMobile() && e.target.closest('.nav-item')){
-    closeSidebarMobile();
-  }
+document.addEventListener('click',function(e){
+  if(isMobile()&&e.target.closest('.nav-item')) closeSidebarMobile();
 });
+
+document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.target===e.currentTarget) closeModal(); });
 
 /* -- INIT -- */
 (function(){
-  var saved = localStorage.getItem('wc26_tc');
-  if(saved) document.getElementById('tcInput').value = saved;
-  if(!isMobile() && localStorage.getItem('wc26_sidebar') === '0'){
-    var sidebar = document.querySelector('.sidebar');
+  const saved=localStorage.getItem('wc26_tc');
+  if(saved) document.getElementById('tcInput').value=saved;
+  if(!isMobile()&&localStorage.getItem('wc26_sidebar')==='0'){
+    const sidebar=document.querySelector('.sidebar');
     if(sidebar) sidebar.classList.add('collapsed');
-    var icon = document.getElementById('toggleIcon');
-    if(icon) icon.className = 'ti ti-layout-sidebar-right';
+    const icon=document.getElementById('toggleIcon');
+    if(icon) icon.className='ti ti-layout-sidebar-right';
   }
   if(isMobile()){
-    var icon = document.getElementById('toggleIcon');
-    if(icon) icon.className = 'ti ti-menu-2';
+    const icon=document.getElementById('toggleIcon');
+    if(icon) icon.className='ti ti-menu-2';
   }
 })();
 loadGastos();
