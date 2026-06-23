@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -613,9 +614,19 @@ td.td-notas{max-width:120px;}
       <button class="btn-topbar" onclick="openFilters()">
         <i class="ti ti-filter"></i><span>Filtros</span>
       </button>
-      <button class="btn-topbar" onclick="exportCSV()">
-        <i class="ti ti-download"></i><span>Exportar</span>
-      </button>
+      <div style="display:flex;flex-direction:column;gap:3px;position:relative;">
+        <button class="btn-topbar" onclick="toggleExportMenu()" id="exportMenuBtn">
+          <i class="ti ti-download"></i><span>Exportar</span>
+        </button>
+        <div id="exportMenu" style="display:none;position:absolute;top:68px;right:0;background:#fff;border:1px solid #e5e8ef;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,0.12);min-width:160px;z-index:200;overflow:hidden;">
+          <div onclick="exportCSV();closeExportMenu()" style="padding:10px 16px;font-size:13px;color:#374151;cursor:pointer;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+            <i class="ti ti-file-type-csv" style="color:#16a34a;font-size:16px"></i> CSV
+          </div>
+          <div onclick="exportXLSX();closeExportMenu()" style="padding:10px 16px;font-size:13px;color:#374151;cursor:pointer;display:flex;align-items:center;gap:8px;border-top:1px solid #f3f4f6;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+            <i class="ti ti-file-type-xls" style="color:#2563eb;font-size:16px"></i> Excel (.xlsx)
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -669,7 +680,10 @@ td.td-notas{max-width:120px;}
         <span class="table-header-title">Registro de Gastos</span>
         <div style="display:flex;align-items:center;gap:6px;margin-right:8px;">
           <button onclick="openModal()" style="display:flex;align-items:center;gap:5px;padding:6px 12px;background:var(--gold);border:none;border-radius:var(--radius-sm);color:#fff;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;" onmouseover="this.style.background='#e6950f'" onmouseout="this.style.background='var(--gold)'"><i class="ti ti-plus" style="font-size:13px"></i> Nuevo Gasto</button>
-          <button onclick="exportCSV()" style="display:flex;align-items:center;gap:5px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'"><i class="ti ti-download" style="font-size:13px"></i> Exportar</button>
+          <div style="display:flex;gap:4px;">
+            <button onclick="exportCSV()" style="display:flex;align-items:center;gap:4px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'"><i class="ti ti-file-type-csv" style="font-size:13px;color:#16a34a"></i> CSV</button>
+            <button onclick="exportXLSX()" style="display:flex;align-items:center;gap:4px;padding:6px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text2);font-size:12px;font-family:'Inter',sans-serif;cursor:pointer;" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='var(--bg)'"><i class="ti ti-file-type-xls" style="font-size:13px;color:#2563eb"></i> Excel</button>
+          </div>
         </div>
         <div class="search-wrap">
           <i class="ti ti-search"></i>
@@ -801,6 +815,7 @@ td.td-notas{max-width:120px;}
         <select class="form-select" id="f-tarjeta">
           <option value="Tarjeta xx3706">Tarjeta xx3706</option>
           <option value="Tarjeta xx2877">Tarjeta xx2877</option>
+          <option value="Tarjeta xx2568">Tarjeta xx2568</option>
         </select>
       </div>
     </div>
@@ -1400,6 +1415,96 @@ function toggleDateSort(){
     else icon.innerHTML='&#8597;'; // both arrows = no sort
   }
   renderTable();
+}
+
+function toggleExportMenu(){
+  var menu = document.getElementById('exportMenu');
+  if(menu) menu.style.display = menu.style.display==='none' ? 'block' : 'none';
+}
+function closeExportMenu(){
+  var menu = document.getElementById('exportMenu');
+  if(menu) menu.style.display = 'none';
+}
+document.addEventListener('click', function(e){
+  if(!e.target.closest('#exportMenuBtn') && !e.target.closest('#exportMenu')){
+    closeExportMenu();
+  }
+});
+
+function exportXLSX(){
+  if(typeof XLSX === 'undefined'){ showToast('Libreria Excel no cargada aun, intenta de nuevo', true); return; }
+  var tc = getTC();
+  var data = [['Fecha','Ciudad','Categoria','Descripcion','MXN','USD','Reembolsable','Proyecto','Notas','Tipo Pago','Tarjeta']];
+  gastos.forEach(function(g){
+    data.push([
+      g.fecha,
+      g.ciudad,
+      g.categoria,
+      g.descripcion,
+      g.mxn,
+      parseFloat((g.mxn/tc).toFixed(2)),
+      g.reembolsable,
+      g.proyecto,
+      g.notas||'',
+      g.tipo_pago||'',
+      g.tarjeta||''
+    ]);
+  });
+  var ws = XLSX.utils.aoa_to_sheet(data);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:12},{wch:10},{wch:20},{wch:30},{wch:12},{wch:12},
+    {wch:14},{wch:18},{wch:25},{wch:14},{wch:18}
+  ];
+
+  // Style header row
+  var range = XLSX.utils.decode_range(ws['!ref']);
+  for(var C = range.s.c; C <= range.e.c; C++){
+    var cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
+    if(cell){
+      cell.s = {
+        font:{bold:true,color:{rgb:'FFFFFF'}},
+        fill:{fgColor:{rgb:'1A1A2E'}},
+        alignment:{horizontal:'center'}
+      };
+    }
+  }
+
+  // Format MXN and USD columns as numbers
+  for(var R = 1; R <= range.e.r; R++){
+    var mxnCell = ws[XLSX.utils.encode_cell({r:R,c:4})];
+    var usdCell = ws[XLSX.utils.encode_cell({r:R,c:5})];
+    if(mxnCell){ mxnCell.t='n'; mxnCell.z='"$"#,##0.00'; }
+    if(usdCell){ usdCell.t='n'; usdCell.z='"$"#,##0.00'; }
+  }
+
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Gastos WC2026');
+
+  // Summary sheet
+  var tc2 = getTC();
+  var totalMXN = gastos.reduce(function(s,g){return s+g.mxn;},0);
+  var totalUSD = totalMXN/tc2;
+  var reembUSD = gastos.filter(function(g){return g.reembolsable==='Si'||g.reembolsable==='Si';}).reduce(function(s,g){return s+g.mxn/tc2;},0);
+  var summary = [
+    ['Resumen — Gastos de Viaje WC2026'],
+    [''],
+    ['Total MXN', totalMXN],
+    ['Total USD', totalUSD],
+    ['Reembolsables USD', reembUSD],
+    ['No Reembolsables USD', totalUSD - reembUSD],
+    ['Total Registros', gastos.length],
+    ['Tipo de Cambio', tc2],
+    ['Fecha Exportacion', new Date().toLocaleDateString('es-MX')]
+  ];
+  var ws2 = XLSX.utils.aoa_to_sheet(summary);
+  ws2['!cols'] = [{wch:25},{wch:18}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+
+  var fname = 'gastos_wc2026_'+new Date().toISOString().split('T')[0]+'.xlsx';
+  XLSX.writeFile(wb, fname);
+  showToast('Excel exportado correctamente');
 }
 
 function exportCSV(){
