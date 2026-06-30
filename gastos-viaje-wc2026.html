@@ -780,7 +780,13 @@ td.td-notas{max-width:120px;}
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label class="form-label">Monto en MXN</label>
+        <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Monto del Gasto</span>
+          <span style="display:flex;border:1px solid #d1d5db;border-radius:5px;overflow:hidden;">
+            <button type="button" id="curBtnMXN" onclick="setMontoCurrency('MXN')" style="padding:2px 8px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#f5a623;color:#fff;">MXN</button>
+            <button type="button" id="curBtnUSD" onclick="setMontoCurrency('USD')" style="padding:2px 8px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#6b7280;">USD</button>
+          </span>
+        </label>
         <input type="number" class="form-input" id="f-mxn" placeholder="0.00" step="0.01" min="0" oninput="updateConv()">
       </div>
       <div class="form-group">
@@ -790,11 +796,11 @@ td.td-notas{max-width:120px;}
     </div>
     <div class="conv-box">
       <div>
-        <div class="conv-left">Conversión automática MXN → USD</div>
+        <div class="conv-left" id="convLabel">Conversion automatica MXN -> USD</div>
         <div class="conv-tc">TC: $<span id="prevTC">19.00</span> MXN por 1 USD</div>
       </div>
       <div class="conv-right">
-        <div class="conv-label">Equivalente USD</div>
+        <div class="conv-label" id="convResultLabel">Equivalente USD</div>
         <div class="conv-val" id="prevUSD">$0.00</div>
       </div>
     </div>
@@ -899,6 +905,7 @@ let editId = null;
 let cChart=null, catChrt=null, lChart=null;
 let _catFilter='', _cityFilter='', _viewFilter='';
 let _dateSort=''; // '' = ingreso order, 'asc' = oldest first, 'desc' = newest first
+let _montoCurrency = 'MXN'; // 'MXN' or 'USD' -- which currency the user is typing the amount in
 
 const getTC = () => parseFloat(document.getElementById('tcInput').value)||19;
 const fMXN = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -1226,21 +1233,46 @@ function openModal(id=null){
   toggleTarjeta();
   updateConv();
   clearModalComp();
+  setMontoCurrency('MXN');
   document.getElementById('modalOverlay').classList.add('open');
 }
 
 function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); editId=null; }
 
+function setMontoCurrency(cur){
+  _montoCurrency = cur;
+  const btnMXN = document.getElementById('curBtnMXN');
+  const btnUSD = document.getElementById('curBtnUSD');
+  if(cur==='MXN'){
+    btnMXN.style.background='#f5a623'; btnMXN.style.color='#fff';
+    btnUSD.style.background='#fff'; btnUSD.style.color='#6b7280';
+  } else {
+    btnUSD.style.background='#f5a623'; btnUSD.style.color='#fff';
+    btnMXN.style.background='#fff'; btnMXN.style.color='#6b7280';
+  }
+  updateConv();
+}
+
 function updateConv(){
   const tc=getTC();
-  const mxn=parseFloat(document.getElementById('f-mxn').value)||0;
+  const amt=parseFloat(document.getElementById('f-mxn').value)||0;
   document.getElementById('prevTC').textContent=tc.toFixed(2);
-  document.getElementById('prevUSD').textContent=fUSD(mxn/tc);
+  if(_montoCurrency==='USD'){
+    document.getElementById('convLabel').textContent='Conversion automatica USD -> MXN';
+    document.getElementById('convResultLabel').textContent='Equivalente MXN';
+    document.getElementById('prevUSD').textContent=fMXN(amt*tc);
+  } else {
+    document.getElementById('convLabel').textContent='Conversion automatica MXN -> USD';
+    document.getElementById('convResultLabel').textContent='Equivalente USD';
+    document.getElementById('prevUSD').textContent=fUSD(amt/tc);
+  }
 }
 
 async function saveGasto(){
-  const mxn=parseFloat(document.getElementById('f-mxn').value);
-  if(!mxn||mxn<=0){ alert('Ingresa un monto valido en MXN'); return; }
+  let mxn=parseFloat(document.getElementById('f-mxn').value);
+  if(!mxn||mxn<=0){ alert('Ingresa un monto valido'); return; }
+  if(_montoCurrency==='USD'){ mxn = mxn * getTC(); }
+  mxn = parseFloat(mxn.toFixed(2));
   const isEdit=(editId!==null);
   const catVal=document.getElementById('f-cat').value;
   const categoria=(catVal==='Alimentacion')?document.getElementById('f-subcat').value:catVal;
