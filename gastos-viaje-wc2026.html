@@ -975,7 +975,7 @@ async function loadGastos() {
       tarjeta: r.tarjeta || '',
       comprobante_url: r.comprobante_url || '',
       moneda: r.moneda || 'MXN',
-      monto_orig: parseFloat(r.monto_orig||r.mxn||0)
+      monto_orig: parseFloat(r.monto_orig)||parseFloat(r.mxn)||0
     }));
     refreshAll();
   } catch(e) {
@@ -1283,13 +1283,13 @@ function renderTable(){
   const total=filtered.reduce((s,g)=>s+g.mxn,0)/tc;
   document.getElementById('tableCount').textContent=`${filtered.length} registros`;
   var tMXN=filtered.filter(g=>(g.moneda||'MXN')==='MXN').reduce((s,g)=>s+g.mxn,0);
-  var tUSD=filtered.filter(g=>g.moneda==='USD').reduce((s,g)=>s+g.mxn/tc,0);
-  var tEUR=filtered.filter(g=>g.moneda==='EUR').reduce((s,g)=>s+g.mxn/tc/getEURtoUSD(),0);
+  var tUSD=filtered.filter(g=>g.moneda==='USD').reduce((s,g)=>s+(g.monto_orig||g.mxn/tc),0);
+  var tEUR=filtered.filter(g=>g.moneda==='EUR').reduce((s,g)=>s+(g.monto_orig||g.mxn/tc/getEURtoUSD()),0);
   var parts=[];
   if(tMXN>0) parts.push(fMXN(tMXN)+' MXN');
   if(tUSD>0) parts.push(fUSD(tUSD)+' USD');
   if(tEUR>0) parts.push('€'+tEUR.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR');
-  document.getElementById('tableTotal').textContent=parts.join(' | ')||'$0.00';
+  document.getElementById('tableTotal').textContent=parts.length?parts.join(' │ '):'$0.00';
   tbody.innerHTML=filtered.map(g=>{
     const usd=g.mxn/tc;
     const cdot=`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${CITY_COLORS[g.ciudad]||'#6b7280'};margin-right:5px;"></span>`;
@@ -1310,8 +1310,8 @@ function renderTable(){
       <td><span class="cat-pill" style="background:${catColor}18;color:${catColor}"><i class="ti ${catIcon}"></i>${g.categoria}</span></td>
       <td class="td-primary">${g.descripcion}</td>
       <td class="td-mxn">${(g.moneda||'MXN')==='MXN' ? fMXN(g.mxn) : '-'}</td>
-      <td class="td-usd">${(g.moneda==='USD'||(!g.moneda||g.moneda==='MXN')) ? fUSD(usd) : '-'}</td>
-      <td style="color:#2563eb;font-weight:600;font-size:12px;">${g.moneda==='EUR' ? '€'+(g.mxn/getTC()/getEURtoUSD()).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-'}</td>
+      <td class="td-usd">${g.moneda==='USD' ? fUSD(g.monto_orig||usd) : ((!g.moneda||g.moneda==='MXN') ? fUSD(usd) : '-')}</td>
+      <td style="color:#2563eb;font-weight:600;font-size:12px;">${g.moneda==='EUR' ? '€'+(g.monto_orig||(g.mxn/getTC()/getEURtoUSD())).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-'}</td>
       <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='S\u00ed')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
       <td class="td-proyecto">${g.proyecto}</td>
       <td class="td-notas">${g.notas||''}</td>
@@ -1472,7 +1472,9 @@ async function saveGasto(){
     notas: document.getElementById('f-notas').value||'',
     tipo_pago: tipoPago,
     tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
-    comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':''
+    comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':'',
+    moneda: _montoCurrency,
+    monto_orig: parseFloat(document.getElementById('f-mxn').value)||0
   };
   // Upload comprobante if selected in modal
   const compInput = document.getElementById('modal-comp-input');
