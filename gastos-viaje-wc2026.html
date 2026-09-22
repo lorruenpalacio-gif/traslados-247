@@ -972,7 +972,10 @@ async function loadGastos() {
       tarjeta: r.tarjeta || '',
       comprobante_url: r.comprobante_url || '',
       moneda: r.moneda || 'MXN',
-      monto_orig: parseFloat(r.monto_orig)||parseFloat(r.mxn)||0
+      monto_orig: parseFloat(r.monto_orig)||parseFloat(r.mxn)||0,
+      equiv_mxn: r.equiv_mxn!=null?parseFloat(r.equiv_mxn):null,
+      equiv_usd: r.equiv_usd!=null?parseFloat(r.equiv_usd):null,
+      equiv_eur: r.equiv_eur!=null?parseFloat(r.equiv_eur):null
     }));
     refreshAll();
   } catch(e) {
@@ -997,7 +1000,10 @@ function buildPayload(g) {
     tarjeta: g.tarjeta || '',
     comprobante_url: g.comprobante_url || '',
     moneda: g.moneda || 'MXN',
-    monto_orig: g.monto_orig || g.mxn
+    monto_orig: g.monto_orig || g.mxn,
+    equiv_mxn: (g.equiv_mxn!=null)?g.equiv_mxn:null,
+    equiv_usd: (g.equiv_usd!=null)?g.equiv_usd:null,
+    equiv_eur: (g.equiv_eur!=null)?g.equiv_eur:null
   };
 }
 
@@ -1306,9 +1312,9 @@ function renderTable(){
       <td>${cdot}${g.ciudad}</td>
       <td><span class="cat-pill" style="background:${catColor}18;color:${catColor}"><i class="ti ${catIcon}"></i>${g.categoria}</span></td>
       <td class="td-primary">${g.descripcion}</td>
-      <td class="td-mxn">${(g.moneda||'MXN')==='MXN' ? fMXN(g.mxn) : '-'}</td>
-      <td class="td-usd">${g.moneda==='USD' ? fUSD(g.monto_orig||usd) : ((!g.moneda||g.moneda==='MXN') ? fUSD(usd) : '-')}</td>
-      <td style="color:#2563eb;font-weight:600;font-size:12px;">${g.moneda==='EUR' ? '€'+(g.monto_orig||(g.mxn/getTC()/getEURtoUSD())).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-'}</td>
+      <td class="td-mxn">${(g.moneda||'MXN')==='MXN'?fMXN(g.mxn):g.equiv_mxn!=null?fMXN(g.equiv_mxn):'-'}</td>
+      <td class="td-usd">${g.moneda==='USD'?fUSD(g.monto_orig||usd):g.equiv_usd!=null?fUSD(g.equiv_usd):(!g.moneda||g.moneda==='MXN')?fUSD(usd):'-'}</td>
+      <td style="color:#2563eb;font-weight:600;font-size:12px;">${g.moneda==='EUR'?('€'+(g.monto_orig||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):g.equiv_eur!=null?('€'+g.equiv_eur.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})):'-'}</td>
       <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='S\u00ed')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
       <td class="td-proyecto">${g.proyecto}</td>
       <td class="td-notas">${g.notas||''}</td>
@@ -1427,63 +1433,83 @@ function getEURtoUSD(){
 }
 
 function updateConv(){
-  var tc  = getTC();
-  var eu  = getEURtoUSD();
-  var amt = parseFloat(document.getElementById('f-mxn').value)||0;
-  var cur = _montoCurrency;
-
-  var mxnAmt, usdAmt, eurAmt;
-  if(cur==='USD'){
-    usdAmt = amt; mxnAmt = amt*tc; eurAmt = eu>0?amt/eu:0;
-  } else if(cur==='EUR'){
-    eurAmt = amt; usdAmt = amt*eu; mxnAmt = amt*eu*tc;
-  } else {
-    mxnAmt = amt; usdAmt = tc>0?amt/tc:0; eurAmt=(tc>0&&eu>0)?amt/tc/eu:0;
-  }
-
+  var tc=getTC(),eu=getEURtoUSD();
+  var amt=parseFloat(document.getElementById('f-mxn').value)||0;
+  var cur=_montoCurrency;
+  var mxnAmt,usdAmt,eurAmt;
+  if(cur==='USD'){usdAmt=amt;mxnAmt=amt*tc;eurAmt=eu>0?amt/eu:0;}
+  else if(cur==='EUR'){eurAmt=amt;usdAmt=amt*eu;mxnAmt=amt*eu*tc;}
+  else{mxnAmt=amt;usdAmt=tc>0?amt/tc:0;eurAmt=(tc>0&&eu>0)?amt/tc/eu:0;}
   var tcEl=document.getElementById('tcEquivLabel');
   var euEl=document.getElementById('eurEquivLabel');
   if(tcEl) tcEl.textContent=tc.toFixed(2);
   if(euEl) euEl.textContent=eu.toFixed(4);
-
+  var prev={};
+  ['saveMXN','saveUSD','saveEUR'].forEach(function(id){var el=document.getElementById(id);if(el)prev[id]=el.checked;});
   var cells=[
-    {label:'MXN', sym:'$',      val:mxnAmt, isCur:cur==='MXN', color:'#f97316'},
-    {label:'USD', sym:'$',      val:usdAmt, isCur:cur==='USD', color:'#16a34a'},
-    {label:'EUR', sym:'€', val:eurAmt, isCur:cur==='EUR', color:'#2563eb'},
+    {id:'saveMXN',label:'MXN',sym:'$',val:mxnAmt,isCur:cur==='MXN',color:'#f97316'},
+    {id:'saveUSD',label:'USD',sym:'$',val:usdAmt,isCur:cur==='USD',color:'#16a34a'},
+    {id:'saveEUR',label:'EUR',sym:'€',val:eurAmt,isCur:cur==='EUR',color:'#2563eb'},
   ];
-
   var grid=document.getElementById('equiv-grid');
-  if(grid){
-    grid.innerHTML=cells.map(function(c){
-      var fmt=c.val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-      if(c.isCur){
-        return '<div style="flex:1;min-width:0;background:'+c.color+'12;border:1.5px solid '+c.color+';border-radius:6px;padding:6px 8px;text-align:center;">'
-          +'<div style="font-size:9px;font-weight:700;color:'+c.color+';letter-spacing:0.5px;">'+c.label+' ✓</div>'
-          +'<div style="font-size:14px;font-weight:700;color:'+c.color+';white-space:nowrap;">'+c.sym+fmt+'</div>'
-          +'</div>';
-      } else {
-        return '<div style="flex:1;min-width:0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;text-align:center;">'
-          +'<div style="font-size:9px;font-weight:600;color:#9ca3af;letter-spacing:0.5px;">'+c.label+'</div>'
-          +'<div style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">'+c.sym+fmt+'</div>'
-          +'</div>';
-      }
-    }).join('');
-  }
+  if(!grid)return;
+  grid.innerHTML=cells.map(function(c){
+    var fmt=c.val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+    if(c.isCur){
+      var d='<div style="flex:1;min-width:0;background:'+c.color+'15;border:1.5px solid '+c.color+';border-radius:6px;padding:6px 8px;text-align:center;">';
+      d+='<div style="font-size:9px;font-weight:700;color:'+c.color+';">'+c.label+' ✓</div>';
+      d+='<div style="font-size:14px;font-weight:700;color:'+c.color+';">'+c.sym+fmt+'</div>';
+      d+='<div style="font-size:9px;color:'+c.color+';opacity:0.6;">Ingresado</div></div>';
+      return d;
+    }
+    var chk=(prev[c.id]!==undefined)?prev[c.id]:true;
+    var bord=chk?'#374151':'#e5e7eb';
+    var opa=chk?'1':'0.45';
+    var d='<div id="eqCard_'+c.id+'" style="flex:1;min-width:0;background:#fff;border:1px solid '+bord+';border-radius:6px;padding:6px 8px;text-align:center;cursor:pointer;opacity:'+opa+'" onclick="toggleEquiv(this.dataset.cid)" data-cid="'+c.id+'">';
+    d+='<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:2px;">';
+    d+='<input type="checkbox" id="'+c.id+'" '+(chk?'checked':'')+' onclick="event.stopPropagation();toggleEquiv(this.id)" style="cursor:pointer;accent-color:#374151;width:12px;height:12px;">';
+    d+='<span style="font-size:9px;font-weight:700;color:#6b7280;">'+c.label+'</span></div>';
+    d+='<div style="font-size:13px;font-weight:600;color:#374151;">'+c.sym+fmt+'</div>';
+    d+='<div style="font-size:9px;color:#9ca3af;">Guardar también</div></div>';
+    return d;
+  }).join('');
+  var ptc=document.getElementById('prevTC');if(ptc)ptc.textContent=tc.toFixed(2);
+}
 
-  var ptc=document.getElementById('prevTC');
-  if(ptc) ptc.textContent=tc.toFixed(2);
+function toggleEquiv(id){
+  var cb=document.getElementById(id);
+  var card=document.getElementById('eqCard_'+id);
+  if(!cb||!card)return;
+  cb.checked=!cb.checked;
+  card.style.borderColor=cb.checked?'#374151':'#e5e7eb';
+  card.style.opacity=cb.checked?'1':'0.45';
+}
+
+function getEquivAmounts(){
+  var tc=getTC(),eu=getEURtoUSD();
+  var amt=parseFloat(document.getElementById('f-mxn').value)||0;
+  var cur=_montoCurrency;
+  var mxnAmt,usdAmt,eurAmt;
+  if(cur==='USD'){usdAmt=amt;mxnAmt=amt*tc;eurAmt=eu>0?amt/eu:0;}
+  else if(cur==='EUR'){eurAmt=amt;usdAmt=amt*eu;mxnAmt=amt*eu*tc;}
+  else{mxnAmt=amt;usdAmt=tc>0?amt/tc:0;eurAmt=(tc>0&&eu>0)?amt/tc/eu:0;}
+  var chkMXN=cur==='MXN'||(document.getElementById('saveMXN')&&document.getElementById('saveMXN').checked);
+  var chkUSD=cur==='USD'||(document.getElementById('saveUSD')&&document.getElementById('saveUSD').checked);
+  var chkEUR=cur==='EUR'||(document.getElementById('saveEUR')&&document.getElementById('saveEUR').checked);
+  return {
+    mxnBase:parseFloat(mxnAmt.toFixed(2)),
+    equiv_mxn:chkMXN?parseFloat(mxnAmt.toFixed(2)):null,
+    equiv_usd:chkUSD?parseFloat(usdAmt.toFixed(4)):null,
+    equiv_eur:chkEUR?parseFloat(eurAmt.toFixed(4)):null,
+  };
 }
 
 
 async function saveGasto(){
-  var rawAmt = parseFloat(document.getElementById('f-mxn').value);
-  if(!rawAmt||rawAmt<=0){ alert('Ingresa un monto valido'); return; }
-  // Convert to MXN for storage (DB always stores MXN as base)
-  var mxn;
-  if(_montoCurrency==='USD')      mxn = rawAmt * getTC();
-  else if(_montoCurrency==='EUR') mxn = rawAmt * getEURtoUSD() * getTC();
-  else                             mxn = rawAmt;
-  mxn = parseFloat(mxn.toFixed(2));
+  var rawAmt=parseFloat(document.getElementById('f-mxn').value);
+  if(!rawAmt||rawAmt<=0){alert('Ingresa un monto valido');return;}
+  var equivs=getEquivAmounts();
+  var mxn=equivs.mxnBase;
   const isEdit=(editId!==null);
   const catVal=document.getElementById('f-cat').value;
   const categoria=(catVal==='Alimentacion')?document.getElementById('f-subcat').value:catVal;
@@ -1502,7 +1528,10 @@ async function saveGasto(){
     tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
     comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':'',
     moneda: _montoCurrency,
-    monto_orig: rawAmt
+    monto_orig: rawAmt,
+    equiv_mxn: equivs.equiv_mxn,
+    equiv_usd: equivs.equiv_usd,
+    equiv_eur: equivs.equiv_eur
   };
   // Upload comprobante if selected in modal
   const compInput = document.getElementById('modal-comp-input');
