@@ -541,6 +541,18 @@ table{table-layout:auto;}
 td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;}
 td.td-primary{max-width:150px;}
 td.td-notas{max-width:120px;}
+
+@media (max-width: 600px) {
+  .form-label { font-size: 10px; }
+  .form-label span[style*="display:flex"] { flex-wrap: wrap; gap: 4px; }
+  #curBtnMXN, #curBtnUSD, #curBtnEUR {
+    padding: 3px 10px !important;
+    font-size: 11px !important;
+  }
+  .modal { padding: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .conv-box { flex-direction: column; gap: 6px; }
+}
 </style>
 </head>
 <body>
@@ -635,13 +647,25 @@ td.td-notas{max-width:120px;}
   <!-- SCROLLABLE CONTENT -->
   <div class="content">
 
+    <!-- DB Status banner -->
+    <div id="dbStatus" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:6px;padding:8px 14px;font-size:12px;color:#dc2626;margin-bottom:8px;flex-shrink:0;">
+      ⚠️ No se pudo conectar a la base de datos. Verifica tu conexión o que la tabla existe en Supabase.
+    </div>
+    <!-- Currency filter -->
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-shrink:0;">
+      <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;">Ver en:</span>
+      <button id="dashCurBtnALL" onclick="setDashCurrency('ALL')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #1a1a2e;border-radius:5px;background:#1a1a2e;color:#fff;cursor:pointer;font-family:'Inter',sans-serif;">Todas</button>
+      <button id="dashCurBtnMXN" onclick="setDashCurrency('MXN')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #e5e8ef;border-radius:5px;background:#f4f6f9;color:#6b7280;cursor:pointer;font-family:'Inter',sans-serif;">MXN</button>
+      <button id="dashCurBtnUSD" onclick="setDashCurrency('USD')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #e5e8ef;border-radius:5px;background:#f4f6f9;color:#6b7280;cursor:pointer;font-family:'Inter',sans-serif;">USD</button>
+      <button id="dashCurBtnEUR" onclick="setDashCurrency('EUR')" style="padding:4px 12px;font-size:11px;font-weight:600;border:1px solid #e5e8ef;border-radius:5px;background:#f4f6f9;color:#6b7280;cursor:pointer;font-family:'Inter',sans-serif;">EUR</button>
+    </div>
     <!-- KPIs -->
     <div class="kpi-grid" id="kpiGrid"></div>
 
     <!-- CHARTS -->
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-section-title">GASTOS POR CIUDAD <span>(USD)</span></div>
+        <div class="chart-section-title">GASTOS POR CIUDAD <span id="chartCurrLabel">(USD)</span></div>
         <div class="donut-layout">
           <div class="donut-wrap">
             <canvas id="cityChart"></canvas>
@@ -655,7 +679,7 @@ td.td-notas{max-width:120px;}
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-section-title">GASTOS POR CATEGORÍA <span>(USD)</span></div>
+        <div class="chart-section-title">GASTOS POR CATEGORÍA <span id="chartCurrLabel2">(USD)</span></div>
         <div class="donut-layout">
           <div class="donut-wrap">
             <canvas id="catChart"></canvas>
@@ -669,7 +693,7 @@ td.td-notas{max-width:120px;}
         </div>
       </div>
       <div class="chart-card">
-        <div class="chart-section-title">EVOLUCIÓN DIARIA <span>(USD)</span></div>
+        <div class="chart-section-title">EVOLUCIÓN DIARIA <span id="chartCurrLabel3">(USD)</span></div>
         <div style="position:relative;height:140px;">
           <canvas id="lineChart"></canvas>
         </div>
@@ -714,7 +738,7 @@ td.td-notas{max-width:120px;}
               <th style="cursor:pointer;user-select:none;white-space:nowrap;" onclick="toggleDateSort()">
                 Fecha <span id="dateSortIcon" style="font-size:10px;color:#9ca3af;">&#8597;</span>
               </th><th>Ciudad</th><th>Categoria</th><th>Descripcion</th>
-              <th>MXN</th><th>USD</th><th>Reembolsable</th><th>Proyecto</th>
+              <th>MXN</th><th>USD</th><th>EUR</th><th>Reembolsable</th><th>Proyecto</th>
               <th>Notas</th><th>Tipo Pago</th><th>Comprobante</th><th>Acciones</th>
             </tr>
           </thead>
@@ -822,10 +846,10 @@ td.td-notas{max-width:120px;}
       <div class="form-group" id="tarjeta-wrap" style="display:none">
         <label class="form-label">Tarjeta</label>
         <select class="form-select" id="f-tarjeta">
-          <option value="Tarjeta xx3706">Tarjeta xx3706</option>
-          <option value="Tarjeta xx2877">Tarjeta xx2877</option>
-          <option value="Tarjeta xx2568">Tarjeta xx2568</option>
+          <option value="Tarjeta xx7606">Tarjeta xx7606</option>
+          <option value="Tarjeta xx2042">Tarjeta xx2042</option>
           <option value="Tarjeta xx6579">Tarjeta xx6579</option>
+          <option value="Tarjeta xx0361">Tarjeta xx0361</option>
         </select>
       </div>
     </div>
@@ -855,7 +879,7 @@ td.td-notas{max-width:120px;}
   </div>
 </div>
 
-<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg"></span></div>
+<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg">Gasto guardado</span></div>
 
 <script>
 /* -- SUPABASE -- */
@@ -909,17 +933,13 @@ let editId = null;
 let cChart=null, catChrt=null, lChart=null;
 let _catFilter='', _cityFilter='', _viewFilter='';
 let _dateSort=''; // '' = ingreso order, 'asc' = oldest first, 'desc' = newest first
+let _dashCurrency = 'ALL'; // 'ALL', 'MXN', 'USD', 'EUR' -- which currency gastos to show in dashboard
 let _montoCurrency = 'MXN'; // 'MXN' or 'USD' or 'EUR'
 let _tcMode = 'USD'; // which rate is shown in the widget: 'USD' or 'EUR'
 
 const getTC = () => {
-  // Always returns MXN per 1 USD regardless of which tab is active
-  if(_tcMode==='EUR'){
-    var eurUSD = parseFloat(localStorage.getItem('wc26_eur_usd')||'1.08');
-    var eurMXN = parseFloat(document.getElementById('tcInput').value)||19;
-    return eurMXN / eurUSD; // back to USD/MXN
-  }
-  return parseFloat(document.getElementById('tcInput').value)||19;
+  var r = parseFloat(localStorage.getItem('wc26_tc')) || parseFloat(document.getElementById('tcInput').value) || 19;
+  return (isNaN(r)||r<=0) ? 19 : r;
 };
 const fMXN = v => '$'+v.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
 const fUSD = v => '$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -940,6 +960,7 @@ document.getElementById('tcInput').addEventListener('input', function(){
 async function loadGastos() {
   try {
     const data = await sbFetch('gastos_viaje?order=fecha.desc');
+    document.getElementById('dbStatus')&&(document.getElementById('dbStatus').style.display='none');
     gastos = data.map(r => ({
       id: parseInt(r.id, 10),
       fecha: r.fecha,
@@ -952,15 +973,21 @@ async function loadGastos() {
       notas: r.notas || '',
       tipo_pago: r.tipo_pago || 'Efectivo',
       tarjeta: r.tarjeta || '',
-      comprobante_url: r.comprobante_url || ''
+      comprobante_url: r.comprobante_url || '',
+      moneda: r.moneda || 'MXN',
+      monto_orig: parseFloat(r.monto_orig||r.mxn||0)
     }));
     refreshAll();
   } catch(e) {
     console.error('Supabase load failed:', e);
     const local = localStorage.getItem('wc26_g');
-    gastos = local ? JSON.parse(local) : [];
+    if(local){
+      try { gastos = JSON.parse(local); } catch(e2){ gastos=[]; }
+    } else { gastos=[]; }
     refreshAll();
-    showToast('Sin conexion - usando datos locales', true);
+    showToast('Error Supabase: '+e.message, true);
+    var dbSt=document.getElementById('dbStatus');
+    if(dbSt){ dbSt.style.display='block'; dbSt.textContent='⚠️ Error: '+e.message; }
   }
 }
 
@@ -971,7 +998,9 @@ function buildPayload(g) {
     proyecto: g.proyecto, notas: g.notas,
     tipo_pago: g.tipo_pago || 'Efectivo',
     tarjeta: g.tarjeta || '',
-    comprobante_url: g.comprobante_url || ''
+    comprobante_url: g.comprobante_url || '',
+    moneda: g.moneda || 'MXN',
+    monto_orig: g.monto_orig || g.mxn
   };
 }
 
@@ -1054,49 +1083,134 @@ function getFiltered(){
   return list;
 }
 
+function getDashGastos(){
+  if(!_dashCurrency||_dashCurrency==='ALL') return gastos.slice();
+  return gastos.filter(function(g){
+    // If gasto has no moneda field yet, treat it as MXN
+    var m = g.moneda || 'MXN';
+    return m===_dashCurrency;
+  });
+}
+
+function getDisplayAmount(g){
+  // Returns amount in the display currency
+  var tc = getTC();
+  var eurUsd = getEURtoUSD();
+  if(_dashCurrency==='EUR'){
+    // Show in EUR
+    return g.mxn / tc / eurUsd;
+  } else if(_dashCurrency==='USD'){
+    return g.mxn / tc;
+  } else {
+    return g.mxn; // MXN
+  }
+}
+
+function getDisplaySymbol(){
+  if(_dashCurrency==='EUR') return '€';
+  if(_dashCurrency==='USD') return '$';
+  return '$';
+}
+
+function getDisplayLabel(){
+  if(_dashCurrency==='EUR') return 'EUR';
+  if(_dashCurrency==='USD') return 'USD';
+  if(_dashCurrency==='MXN') return 'MXN';
+  return 'MXN'; // ALL shows in MXN
+}
+
+function setDashCurrency(cur){
+  _dashCurrency = cur;
+  ['ALL','MXN','USD','EUR'].forEach(function(c){
+    var btn=document.getElementById('dashCurBtn'+c);
+    if(!btn) return;
+    var active=(c===cur);
+    btn.style.background=active?'#1a1a2e':'#fff';
+    btn.style.color=active?'#fff':'#6b7280';
+    btn.style.borderColor=active?'#1a1a2e':'#d1d5db';
+    btn.style.fontWeight=active?'700':'500';
+    btn.style.boxShadow=active?'0 2px 6px rgba(0,0,0,0.15)':'none';
+  });
+  refreshAll();
+}
+
 function refreshAll(){ renderKPIs(); renderCharts(); renderTable(); updateLastTime(); }
 
 /* -- KPIs -- */
+function getCatTotal(src, cats){
+  return src.filter(g=>cats.includes(g.categoria)).reduce((s,g)=>s+g.mxn,0);
+}
+function renderCurrencyBadges(mxn_total, usd_total, eur_total){
+  var parts=[];
+  if(mxn_total>0) parts.push('<span style="font-size:11px;color:#6b7280;">$'+mxn_total.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span style="font-size:9px;color:#9ca3af;">MXN</span></span>');
+  if(usd_total>0) parts.push('<span style="font-size:11px;color:#16a34a;font-weight:600;">$'+usd_total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span style="font-size:9px;color:#9ca3af;">USD</span></span>');
+  if(eur_total>0) parts.push('<span style="font-size:11px;color:#2563eb;font-weight:600;">€'+eur_total.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' <span style="font-size:9px;color:#9ca3af;">EUR</span></span>');
+  return parts.join('<br>');
+}
+function getMultiTotals(src){
+  var tc=getTC(), eu=getEURtoUSD();
+  var mxnG=src.filter(g=>(g.moneda||'MXN')==='MXN');
+  var usdG=src.filter(g=>g.moneda==='USD');
+  var eurG=src.filter(g=>g.moneda==='EUR');
+  return {
+    mxn: mxnG.reduce((s,g)=>s+g.mxn,0),
+    usd: usdG.reduce((s,g)=>s+g.mxn/tc,0),
+    eur: eurG.reduce((s,g)=>s+g.mxn/tc/eu,0)
+  };
+}
 function renderKPIs(){
   const tc=getTC();
-  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():gastos;
-  const alim   =src.filter(g=>g.categoria==='Comida Personal'||g.categoria==='Comida Equipo').reduce((s,g)=>s+g.mxn,0);
-  const transp  =src.filter(g=>g.categoria==='Transporte').reduce((s,g)=>s+g.mxn,0);
-  const hosp    =src.filter(g=>g.categoria==='Hospedaje').reduce((s,g)=>s+g.mxn,0);
-  const compras =src.filter(g=>g.categoria==='Compras Operativas').reduce((s,g)=>s+g.mxn,0);
-  const hospcli =src.filter(g=>g.categoria==='Cliente / Hospitality').reduce((s,g)=>s+g.mxn,0);
-  const otros   =src.filter(g=>g.categoria==='Otros').reduce((s,g)=>s+g.mxn,0);
-  const total   =src.reduce((s,g)=>s+g.mxn,0);
-  const cards=[
-    {label:'Alimentacion',mxn:alim,cls:'orange',icon:'ti-tools-kitchen-2'},
-    {label:'Transporte',mxn:transp,cls:'teal',icon:'ti-car'},
-    {label:'Hospedaje',mxn:hosp,cls:'blue',icon:'ti-building'},
-    {label:'Compras Op.',mxn:compras,cls:'purple',icon:'ti-shopping-cart'},
-    {label:'C/Hospitality',mxn:hospcli,cls:'gray',icon:'ti-star'},
-    {label:'Otros',mxn:otros,cls:'teal',icon:'ti-dots'},
-    {label:'Total General',mxn:total,cls:'gray',icon:'ti-chart-pie'},
-  ];
-  const usdCls=['orange','teal','blue','purple','gold','teal','gold'];
-  document.getElementById('kpiGrid').innerHTML=cards.map((c,i)=>`
-    <div class="kpi-card">
-      <div class="kpi-icon-circle ${c.cls}"><i class="ti ${c.icon}" style="font-size:16px"></i></div>
-      <div class="kpi-info">
-        <div class="kpi-label">${c.label}</div>
-        <div class="kpi-mxn">${fMXN(c.mxn)}</div>
-        <div class="kpi-sub">MXN</div>
-        <div class="kpi-usd ${usdCls[i]}">${fUSD(c.mxn/tc)}</div>
-        <div class="kpi-usd-sub">USD</div>
-      </div>
-    </div>`).join('');
+  const dashG=getDashGastos();
+  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():dashG;
+  const dispLabel=getDisplayLabel();
+  const isAll=(!_dashCurrency||_dashCurrency==='ALL');
+
+  const toDisp=function(mxnVal){
+    var v=parseFloat(mxnVal)||0;
+    if(_dashCurrency==='EUR'){var eu=getEURtoUSD();return(tc>0&&eu>0)?v/tc/eu:0;}
+    if(_dashCurrency==='USD'){return tc>0?v/tc:0;}
+    return v;
+  };
+
+  var CATS={
+    'Alimentacion':['Comida Personal','Comida Equipo'],
+    'Transporte':['Transporte'],
+    'Hospedaje':['Hospedaje'],
+    'Compras Op.':['Compras Operativas'],
+    'C/Hospitality':['Cliente / Hospitality'],
+    'Otros':['Otros']
+  };
+  var catIcons={'Alimentacion':'ti-tools-kitchen-2','Transporte':'ti-car','Hospedaje':'ti-building','Compras Op.':'ti-shopping-cart','C/Hospitality':'ti-star','Otros':'ti-dots'};
+  var catCls={'Alimentacion':'orange','Transporte':'teal','Hospedaje':'blue','Compras Op.':'purple','C/Hospitality':'gray','Otros':'teal'};
+
+  var totalMT=getMultiTotals(src);
+
+  document.getElementById('kpiGrid').innerHTML=Object.keys(CATS).map(function(label){
+    var cats=CATS[label];
+    var catSrc=src.filter(g=>cats.includes(g.categoria));
+    if(isAll){
+      var mt=getMultiTotals(catSrc);
+      return '<div class="kpi-card"><div class="kpi-icon-circle '+catCls[label]+'"><i class="ti '+catIcons[label]+'" style="font-size:16px"></i></div><div class="kpi-info"><div class="kpi-label">'+label+'</div>'+renderCurrencyBadges(mt.mxn,mt.usd,mt.eur)+'</div></div>';
+    } else {
+      var val=toDisp(catSrc.reduce((s,g)=>s+g.mxn,0));
+      var sym=_dashCurrency==='EUR'?'€':'$';
+      return '<div class="kpi-card"><div class="kpi-icon-circle '+catCls[label]+'"><i class="ti '+catIcons[label]+'" style="font-size:16px"></i></div><div class="kpi-info"><div class="kpi-label">'+label+'</div><div class="kpi-mxn">'+sym+val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div><div class="kpi-sub">'+dispLabel+'</div></div></div>';
+    }
+  }).join('')+'<div class="kpi-card"><div class="kpi-icon-circle gray"><i class="ti ti-chart-pie" style="font-size:16px"></i></div><div class="kpi-info"><div class="kpi-label">Total General</div>'+(isAll?renderCurrencyBadges(totalMT.mxn,totalMT.usd,totalMT.eur):'<div class="kpi-mxn">'+(_dashCurrency==='EUR'?'€':'$')+toDisp(src.reduce((s,g)=>s+g.mxn,0)).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+'</div><div class="kpi-sub">'+dispLabel+'</div>')+'</div></div>';
 }
 
 /* -- CHARTS -- */
 function renderCharts(){
   const tc=getTC();
-  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():gastos;
+  const isAll=(!_dashCurrency||_dashCurrency==='ALL');
+  const dashG2=getDashGastos();
+  const src=(_catFilter||_cityFilter||_viewFilter)?getFiltered():dashG2;
+  const dispLabel=getDisplayLabel();
+  const dispDiv=(_dashCurrency==='EUR')?(tc*getEURtoUSD()):(_dashCurrency==='USD')?tc:1;
+  function toChart(g){ return isAll ? g.mxn/tc : g.mxn/dispDiv; }
 
   const cityMap={};
-  src.forEach(g=>{ cityMap[g.ciudad]=(cityMap[g.ciudad]||0)+g.mxn/tc; });
+  src.forEach(g=>{ cityMap[g.ciudad]=(cityMap[g.ciudad]||0)+toChart(g); });
   const cities=Object.keys(cityMap);
   const cityVals=cities.map(c=>cityMap[c]);
   const cityTotal=cityVals.reduce((a,b)=>a+b,0);
@@ -1107,7 +1221,12 @@ function renderCharts(){
     data:{labels:cities,datasets:[{data:cityVals,backgroundColor:cityColors,borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
     options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fUSD(ctx.raw)}`}}}}
   });
-  document.getElementById('cityTotalVal').textContent='$'+Math.round(cityTotal).toLocaleString('en-US');
+  var sym=_dashCurrency==='EUR'?'€':'$';
+  var chartLbl=isAll?'USD':dispLabel;
+  ['chartCurrLabel','chartCurrLabel2','chartCurrLabel3'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.textContent='('+chartLbl+')';
+  });
+  document.getElementById('cityTotalVal').textContent=sym+Math.round(cityTotal).toLocaleString('en-US');
   document.getElementById('cityLegend').innerHTML=cities.map((c,i)=>`
     <div class="leg-item">
       <span class="leg-dot" style="background:${cityColors[i]}"></span>
@@ -1117,7 +1236,7 @@ function renderCharts(){
     </div>`).join('');
 
   const catMap={};
-  src.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+g.mxn/tc; });
+  src.forEach(g=>{ catMap[g.categoria]=(catMap[g.categoria]||0)+toChart(g); });
   const cats=Object.keys(catMap).sort((a,b)=>catMap[b]-catMap[a]).slice(0,6);
   const catVals=cats.map(c=>catMap[c]);
   const catTotal=Object.values(catMap).reduce((a,b)=>a+b,0);
@@ -1128,7 +1247,7 @@ function renderCharts(){
     data:{labels:cats,datasets:[{data:catVals,backgroundColor:catColors,borderWidth:2,borderColor:'#fff',hoverOffset:4}]},
     options:{responsive:true,maintainAspectRatio:true,cutout:'68%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fUSD(ctx.raw)}`}}}}
   });
-  document.getElementById('catTotalVal').textContent='$'+Math.round(catTotal).toLocaleString('en-US');
+  document.getElementById('catTotalVal').textContent=sym+Math.round(catTotal).toLocaleString('en-US');
   document.getElementById('catLegend').innerHTML=cats.map((c,i)=>`
     <div class="leg-item">
       <span class="leg-dot" style="background:${catColors[i]}"></span>
@@ -1138,7 +1257,7 @@ function renderCharts(){
     </div>`).join('');
 
   const dayMap={};
-  src.forEach(g=>{ dayMap[g.fecha]=(dayMap[g.fecha]||0)+g.mxn/tc; });
+  src.forEach(g=>{ dayMap[g.fecha]=(dayMap[g.fecha]||0)+toChart(g); });
   const days=Object.keys(dayMap).sort();
   let cum=0;
   const cumVals=days.map(d=>{ cum+=dayMap[d]; return parseFloat(cum.toFixed(2)); });
@@ -1147,11 +1266,10 @@ function renderCharts(){
   lChart=new Chart(document.getElementById('lineChart'),{
     type:'line',
     data:{labels:dayLabels,datasets:[{label:'Acumulado',data:cumVals,borderColor:'#22c55e',backgroundColor:'rgba(34,197,94,0.06)',borderWidth:2,fill:true,pointBackgroundColor:'#22c55e',pointRadius:4,tension:0.3}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.raw.toFixed(0)+' USD'}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},maxRotation:30}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>'$'+v.toFixed(0)}}}}
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.raw.toFixed(0)+' '+chartLbl}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},maxRotation:30}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{color:'#9ca3af',font:{size:10},callback:v=>'$'+v.toFixed(0)}}}}
   });
 }
 
-/* -- TABLE -- */
 function renderTable(){
   const filtered=getFiltered();
   const tc=getTC();
@@ -1164,7 +1282,14 @@ function renderTable(){
   }
   const total=filtered.reduce((s,g)=>s+g.mxn,0)/tc;
   document.getElementById('tableCount').textContent=`${filtered.length} registros`;
-  document.getElementById('tableTotal').textContent=fUSD(total)+' USD';
+  var tMXN=filtered.filter(g=>(g.moneda||'MXN')==='MXN').reduce((s,g)=>s+g.mxn,0);
+  var tUSD=filtered.filter(g=>g.moneda==='USD').reduce((s,g)=>s+g.mxn/tc,0);
+  var tEUR=filtered.filter(g=>g.moneda==='EUR').reduce((s,g)=>s+g.mxn/tc/getEURtoUSD(),0);
+  var parts=[];
+  if(tMXN>0) parts.push(fMXN(tMXN)+' MXN');
+  if(tUSD>0) parts.push(fUSD(tUSD)+' USD');
+  if(tEUR>0) parts.push('€'+tEUR.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})+' EUR');
+  document.getElementById('tableTotal').textContent=parts.join(' | ')||'$0.00';
   tbody.innerHTML=filtered.map(g=>{
     const usd=g.mxn/tc;
     const cdot=`<span style="display:inline-block;width:9px;height:9px;border-radius:50%;background:${CITY_COLORS[g.ciudad]||'#6b7280'};margin-right:5px;"></span>`;
@@ -1184,8 +1309,9 @@ function renderTable(){
       <td>${cdot}${g.ciudad}</td>
       <td><span class="cat-pill" style="background:${catColor}18;color:${catColor}"><i class="ti ${catIcon}"></i>${g.categoria}</span></td>
       <td class="td-primary">${g.descripcion}</td>
-      <td class="td-mxn">${fMXN(g.mxn)}</td>
-      <td class="td-usd">${fUSD(usd)}</td>
+      <td class="td-mxn">${(g.moneda||'MXN')==='MXN' ? fMXN(g.mxn) : '-'}</td>
+      <td class="td-usd">${(g.moneda==='USD'||(!g.moneda||g.moneda==='MXN')) ? fUSD(usd) : '-'}</td>
+      <td style="color:#2563eb;font-weight:600;font-size:12px;">${g.moneda==='EUR' ? '€'+(g.mxn/getTC()/getEURtoUSD()).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '-'}</td>
       <td><span class="badge ${(g.reembolsable==='Si'||g.reembolsable==='S\u00ed')?'badge-si':'badge-no'}">${g.reembolsable}</span></td>
       <td class="td-proyecto">${g.proyecto}</td>
       <td class="td-notas">${g.notas||''}</td>
@@ -1687,8 +1813,12 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.targe
 
 /* -- INIT -- */
 (function(){
-  const saved=localStorage.getItem('wc26_tc');
-  if(saved) document.getElementById('tcInput').value=saved;
+  var saved=localStorage.getItem('wc26_tc');
+  if(!saved||parseFloat(saved)<=0){
+    localStorage.setItem('wc26_tc','19.00');
+    saved='19.00';
+  }
+  document.getElementById('tcInput').value=parseFloat(saved).toFixed(2);
   if(!isMobile()&&localStorage.getItem('wc26_sidebar')==='0'){
     const sidebar=document.querySelector('.sidebar');
     if(sidebar) sidebar.classList.add('collapsed');
@@ -1702,6 +1832,7 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.targe
 })();
 loadGastos();
 </script>
+
 
 
 <!-- SQL to run in Supabase:
