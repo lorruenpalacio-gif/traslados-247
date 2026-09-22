@@ -804,33 +804,30 @@ td.td-notas{max-width:120px;}
       <label class="form-label">Descripción</label>
       <input type="text" class="form-input" id="f-desc" placeholder="Ej: Aeropuerto → Hotel">
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="form-group">
+        <label class="form-label" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
           <span>Monto del Gasto</span>
-          <span style="display:flex;border:1px solid #d1d5db;border-radius:5px;overflow:hidden;">
-            <button type="button" id="curBtnMXN" onclick="setMontoCurrency('MXN')" style="padding:2px 8px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#f5a623;color:#fff;">MXN</button>
-            <button type="button" id="curBtnUSD" onclick="setMontoCurrency('USD')" style="padding:2px 8px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#6b7280;">USD</button>
-            <button type="button" id="curBtnEUR" onclick="setMontoCurrency('EUR')" style="padding:2px 8px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#fff;color:#6b7280;">EUR</button>
+          <span style="display:flex;border:1px solid #d1d5db;border-radius:6px;overflow:hidden;">
+            <button type="button" id="curBtnMXN" onclick="setMontoCurrency('MXN')" style="padding:3px 9px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#f5a623;color:#fff;font-family:'Inter',sans-serif;">MXN</button>
+            <button type="button" id="curBtnUSD" onclick="setMontoCurrency('USD')" style="padding:3px 9px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#f4f6f9;color:#6b7280;font-family:'Inter',sans-serif;">USD</button>
+            <button type="button" id="curBtnEUR" onclick="setMontoCurrency('EUR')" style="padding:3px 9px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:#f4f6f9;color:#6b7280;font-family:'Inter',sans-serif;">EUR</button>
           </span>
         </label>
-        <input type="number" class="form-input" id="f-mxn" placeholder="0.00" step="0.01" min="0" oninput="updateConv()">
+        <input type="number" class="form-input" id="f-mxn" placeholder="0.00" step="0.01" min="0" oninput="updateConv()" style="width:100%;">
       </div>
+
+      <!-- Equivalencias automáticas -->
+      <div id="equiv-box" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:12px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;margin-bottom:8px;">Equivalencias automáticas</div>
+        <div style="display:flex;gap:6px;" id="equiv-grid"></div>
+        <div style="font-size:9px;color:#b0b8c8;margin-top:7px;">1 USD = <span id="tcEquivLabel">-</span> MXN &nbsp;&bull;&nbsp; 1 EUR = <span id="eurEquivLabel">-</span> USD</div>
+      </div>
+
       <div class="form-group">
         <label class="form-label">Proyecto</label>
         <input type="text" class="form-input" id="f-proyecto" placeholder="FIFA-CDMX-001">
       </div>
-    </div>
-    <div class="conv-box">
-      <div>
-        <div class="conv-left" id="convLabel">Conversion automatica MXN -> USD</div>
-        <div class="conv-tc">TC: $<span id="prevTC">19.00</span> MXN por 1 USD</div>
-      </div>
-      <div class="conv-right">
-        <div class="conv-label" id="convResultLabel">Equivalente USD</div>
-        <div class="conv-val" id="prevUSD">$0.00</div>
-      </div>
-    </div>
+
     <div class="form-group" style="margin-top:12px">
       <label class="form-label">Notas</label>
       <textarea class="form-textarea" id="f-notas" placeholder="Observaciones adicionales..."></textarea>
@@ -872,7 +869,7 @@ td.td-notas{max-width:120px;}
       </div>
     </div>
 
-    <div class="modal-footer">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
       <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
       <button class="btn-save" onclick="saveGasto()">Guardar Gasto</button>
     </div>
@@ -1430,31 +1427,62 @@ function getEURtoUSD(){
 }
 
 function updateConv(){
-  const tc=getTC();
-  const amt=parseFloat(document.getElementById('f-mxn').value)||0;
-  document.getElementById('prevTC').textContent=tc.toFixed(2);
-  if(_montoCurrency==='USD'){
-    document.getElementById('convLabel').textContent='Conversion USD -> MXN (TC: $'+tc.toFixed(2)+')';
-    document.getElementById('convResultLabel').textContent='Equiv. MXN / EUR';
-    var eurUSD2 = parseFloat(localStorage.getItem('wc26_eur_usd')||'1.08');
-    document.getElementById('prevUSD').textContent=fMXN(amt*tc)+' / €'+fUSD(amt/eurUSD2).replace('$','');
-  } else if(_montoCurrency==='EUR'){
-    var eurUSD = getEURtoUSD();
-    document.getElementById('convLabel').textContent='Conversion EUR -> USD (1 EUR = $'+eurUSD.toFixed(4)+' USD)';
-    document.getElementById('convResultLabel').textContent='Equivalente USD';
-    document.getElementById('prevUSD').textContent=fUSD(amt*eurUSD);
+  var tc  = getTC();
+  var eu  = getEURtoUSD();
+  var amt = parseFloat(document.getElementById('f-mxn').value)||0;
+  var cur = _montoCurrency;
+
+  var mxnAmt, usdAmt, eurAmt;
+  if(cur==='USD'){
+    usdAmt = amt; mxnAmt = amt*tc; eurAmt = eu>0?amt/eu:0;
+  } else if(cur==='EUR'){
+    eurAmt = amt; usdAmt = amt*eu; mxnAmt = amt*eu*tc;
   } else {
-    document.getElementById('convLabel').textContent='Conversion automatica MXN -> USD';
-    document.getElementById('convResultLabel').textContent='Equivalente USD';
-    document.getElementById('prevUSD').textContent=fUSD(amt/tc);
+    mxnAmt = amt; usdAmt = tc>0?amt/tc:0; eurAmt=(tc>0&&eu>0)?amt/tc/eu:0;
   }
+
+  var tcEl=document.getElementById('tcEquivLabel');
+  var euEl=document.getElementById('eurEquivLabel');
+  if(tcEl) tcEl.textContent=tc.toFixed(2);
+  if(euEl) euEl.textContent=eu.toFixed(4);
+
+  var cells=[
+    {label:'MXN', sym:'$',      val:mxnAmt, isCur:cur==='MXN', color:'#f97316'},
+    {label:'USD', sym:'$',      val:usdAmt, isCur:cur==='USD', color:'#16a34a'},
+    {label:'EUR', sym:'€', val:eurAmt, isCur:cur==='EUR', color:'#2563eb'},
+  ];
+
+  var grid=document.getElementById('equiv-grid');
+  if(grid){
+    grid.innerHTML=cells.map(function(c){
+      var fmt=c.val.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+      if(c.isCur){
+        return '<div style="flex:1;min-width:0;background:'+c.color+'12;border:1.5px solid '+c.color+';border-radius:6px;padding:6px 8px;text-align:center;">'
+          +'<div style="font-size:9px;font-weight:700;color:'+c.color+';letter-spacing:0.5px;">'+c.label+' ✓</div>'
+          +'<div style="font-size:14px;font-weight:700;color:'+c.color+';white-space:nowrap;">'+c.sym+fmt+'</div>'
+          +'</div>';
+      } else {
+        return '<div style="flex:1;min-width:0;background:#fff;border:1px solid #e5e7eb;border-radius:6px;padding:6px 8px;text-align:center;">'
+          +'<div style="font-size:9px;font-weight:600;color:#9ca3af;letter-spacing:0.5px;">'+c.label+'</div>'
+          +'<div style="font-size:13px;font-weight:600;color:#374151;white-space:nowrap;">'+c.sym+fmt+'</div>'
+          +'</div>';
+      }
+    }).join('');
+  }
+
+  var ptc=document.getElementById('prevTC');
+  if(ptc) ptc.textContent=tc.toFixed(2);
 }
 
+
 async function saveGasto(){
-  let mxn=parseFloat(document.getElementById('f-mxn').value);
-  if(!mxn||mxn<=0){ alert('Ingresa un monto valido'); return; }
-  if(_montoCurrency==='USD'){ mxn = mxn * getTC(); }
-  else if(_montoCurrency==='EUR'){ mxn = mxn * getEURtoUSD() * getTC(); }
+  var rawAmt = parseFloat(document.getElementById('f-mxn').value);
+  if(!rawAmt||rawAmt<=0){ alert('Ingresa un monto valido'); return; }
+  // Convert to MXN for storage (DB always stores MXN as base)
+  var mxn;
+  if(_montoCurrency==='USD')      mxn = rawAmt * getTC();
+  else if(_montoCurrency==='EUR') mxn = rawAmt * getEURtoUSD() * getTC();
+  else                             mxn = rawAmt;
   mxn = parseFloat(mxn.toFixed(2));
   const isEdit=(editId!==null);
   const catVal=document.getElementById('f-cat').value;
@@ -1474,7 +1502,7 @@ async function saveGasto(){
     tarjeta: tipoPago==='Tarjeta de Credito'?document.getElementById('f-tarjeta').value:'',
     comprobante_url: (isEdit&&gastos.find(x=>x.id===editId))?gastos.find(x=>x.id===editId).comprobante_url||'':'',
     moneda: _montoCurrency,
-    monto_orig: parseFloat(document.getElementById('f-mxn').value)||0
+    monto_orig: rawAmt
   };
   // Upload comprobante if selected in modal
   const compInput = document.getElementById('modal-comp-input');
@@ -1834,6 +1862,8 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.targe
 })();
 loadGastos();
 </script>
+
+
 
 
 
