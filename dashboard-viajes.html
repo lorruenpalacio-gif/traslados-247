@@ -250,17 +250,15 @@ const TYPES={
       {k:"tipo",l:"Tipo",t:"select",o:["Llegada","Salida","Conexión"]},
       {k:"localizador",l:"Localizador (PNR)"},
       {k:"aerolinea",l:"Aerolínea",ph:"American, Delta, Copa…"},
-      {k:"numero",l:"Número de vuelo",req:1,ph:"AA 1234"},
       {k:"origen",l:"Origen",ph:"MEX"},
       {k:"destino",l:"Destino",ph:"CVG"},
       {k:"hora_salida",l:"Hora de salida",t:"time"},
-      {k:"hora_llegada",l:"Hora de llegada",t:"time"},
-      {k:"aeropuerto",l:"Aeropuerto en Cincinnati",def:"CVG Cincinnati/Northern Kentucky"},
-      {k:"terminal",l:"Terminal o puerta"}
+      {k:"hora_llegada",l:"Hora de llegada",t:"time"}
     ],
+    omit:["pax","estado"],
     time:f=>f.tipo==="Salida"?(f.hora_salida||""):(f.hora_llegada||f.hora_salida||""),
-    title:f=>[f.aerolinea,f.numero].filter(Boolean).join(" ")||"Vuelo",
-    sub:f=>[(f.origen||"?")+" → "+(f.destino||"?"),f.tipo].filter(Boolean).join(", ")},
+    title:f=>f.aerolinea||"Vuelo",
+    sub:f=>[(f.origen||"?")+" → "+(f.destino||"?"),f.tipo,f.localizador?"PNR "+f.localizador:""].filter(Boolean).join(", ")},
   traslado:{label:"Traslado",plural:"Traslados",color:"var(--c-traslado)",
     fields:[
       {k:"servicio",l:"Servicio",t:"select",o:["Llegada (Arrival)","Salida (Departure)","Punto a punto","A disposición (Full day)"]},
@@ -343,7 +341,8 @@ function monthEvents(){
   const p=cur.y+"-"+pad(cur.m+1);
   return events.filter(e=>e.date&&e.date.startsWith(p));
 }
-const visible=e=>typeOn.has(e.type)&&statusOn.has(e.f.estado||"Pendiente");
+const hasStatus=e=>!(TYPES[e.type].omit||[]).includes("estado");
+const visible=e=>typeOn.has(e.type)&&(!hasStatus(e)||statusOn.has(e.f.estado||"Pendiente"));
 const sortEv=(a,b)=>(a.date+(a.time||"99:99")).localeCompare(b.date+(b.time||"99:99"));
 
 function renderSidebar(){
@@ -353,16 +352,16 @@ function renderSidebar(){
     return '<button class="filter" data-type="'+k+'" aria-pressed="'+typeOn.has(k)+'"><span class="sw" style="background:'+t.color+'">'+ICON[k]+'</span>'+t.plural+'<span class="n">'+n+'</span></button>';
   }).join("");
   $("#statusFilters").innerHTML=ESTADOS.map(s=>{
-    const n=me.filter(e=>(e.f.estado||"Pendiente")===s).length;
+    const n=me.filter(e=>hasStatus(e)&&(e.f.estado||"Pendiente")===s).length;
     return '<button class="filter" data-status="'+s+'" aria-pressed="'+statusOn.has(s)+'"><span class="dot" style="background:'+STATUS_VAR[s]+'"></span>'+s+'<span class="n">'+n+'</span></button>';
   }).join("");
-  const active=me.filter(e=>e.f.estado!=="Cancelado");
+  const active=me.filter(e=>!hasStatus(e)||e.f.estado!=="Cancelado");
   const pax=active.reduce((a,e)=>a+(Number(e.f.pax)||0),0);
   const cost=active.reduce((a,e)=>a+(Number(e.f.costo)||0),0);
   $("#stats").innerHTML=
     '<div><span>Servicios</span><b>'+me.length+'</b></div>'+
-    '<div><span>Confirmados</span><b>'+me.filter(e=>e.f.estado==="Confirmado").length+'</b></div>'+
-    '<div><span>Pendientes</span><b>'+me.filter(e=>(e.f.estado||"Pendiente")==="Pendiente").length+'</b></div>'+
+    '<div><span>Confirmados</span><b>'+me.filter(e=>hasStatus(e)&&e.f.estado==="Confirmado").length+'</b></div>'+
+    '<div><span>Pendientes</span><b>'+me.filter(e=>hasStatus(e)&&(e.f.estado||"Pendiente")==="Pendiente").length+'</b></div>'+
     '<div><span>Pax movilizados</span><b>'+pax+'</b></div>'+
     '<div><span>Costo total</span><b>$'+cost.toLocaleString("es-PA",{minimumFractionDigits:2,maximumFractionDigits:2})+'</b></div>';
 }
@@ -401,7 +400,7 @@ function evCard(e){
   const t=TYPES[e.type], s=e.f.estado||"Pendiente";
   const meta=[e.f.cliente,e.f.pax?e.f.pax+" pax":""].filter(Boolean).join(", ");
   const sub=[t.sub(e.f),meta].filter(Boolean).join(" | ");
-  return '<button class="ev" style="--c:'+t.color+'" data-ev="'+esc(e.id)+'"><span class="sw">'+ICON[e.type]+'</span><span class="time">'+(esc(e.time)||"--:--")+'</span><span class="body"><div class="ti">'+esc(t.title(e.f))+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':"")+'</span><span class="pill" style="--s:'+STATUS_VAR[s]+'">'+s+'</span></button>';
+  return '<button class="ev" style="--c:'+t.color+'" data-ev="'+esc(e.id)+'"><span class="sw">'+ICON[e.type]+'</span><span class="time">'+(esc(e.time)||"--:--")+'</span><span class="body"><div class="ti">'+esc(t.title(e.f))+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':"")+'</span>'+(hasStatus(e)?'<span class="pill" style="--s:'+STATUS_VAR[s]+'">'+s+'</span>':'<span></span>')+'</button>';
 }
 
 function renderAgenda(){
@@ -459,7 +458,7 @@ function renderForm(type,prefill){
   h+=field({k:"fecha",l:"Fecha",t:"date",req:1},date);
   t.fields.forEach(d=>{h+=field(d,f[d.k]!=null?f[d.k]:(d.def||""))});
   h+='<hr class="f-sep">';
-  COMMON.forEach(d=>{h+=field(d,f[d.k]!=null?f[d.k]:(d.k==="estado"?"Pendiente":""))});
+  COMMON.filter(d=>!(t.omit||[]).includes(d.k)).forEach(d=>{h+=field(d,f[d.k]!=null?f[d.k]:(d.k==="estado"?"Pendiente":""))});
   if(readOnly)h+='<p class="ro-note">Tienes acceso de solo lectura a este calendario.</p>';
   else{
     h+='<div class="f-actions"><button class="btn primary" type="submit">'+(isEdit?"Guardar cambios":"Agregar "+t.label.toLowerCase())+'</button><button class="btn" type="button" data-tab="dia">Cancelar</button>';
@@ -476,7 +475,7 @@ function renderForm(type,prefill){
     const v=editing.f, llegada=v.tipo!=="Salida";
     const pre={fecha:editing.date,servicio:llegada?"Llegada (Arrival)":"Salida (Departure)",
       origen:llegada?"CVG":"",destino:llegada?"":"CVG",hora:llegada?(v.hora_llegada||""):"",
-      vuelo_ref:[v.aerolinea,v.numero].filter(Boolean).join(" "),cliente:v.cliente||"",pax:v.pax||"",estado:"Pendiente"};
+      vuelo_ref:[v.aerolinea,v.localizador].filter(Boolean).join(" "),cliente:v.cliente||"",pax:v.pax||"",estado:"Pendiente"};
     modalDate=editing.date; editing=null; activeTab="traslado"; renderModal(pre);
   });
   const firstReq=form.querySelector("[required]:not([name=fecha])")||form.querySelector("input,select");
