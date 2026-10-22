@@ -769,9 +769,13 @@ td.td-notas{max-width:120px;}
       </div>
       <div class="form-group">
         <label class="form-label">Ciudad</label>
-        <select class="form-select" id="f-ciudad">
+        <select class="form-select" id="f-ciudad" onchange="toggleNewCity()">
           <option>CDMX</option><option>GDL</option><option>MTY</option><option>NY</option><option>Berlin</option>
+          <option value="__nueva__">+ Agregar ciudad...</option>
         </select>
+        <div id="nueva-ciudad-wrap" style="display:none;margin-top:6px;display:none;">
+          <input type="text" class="form-input" id="f-ciudad-nueva" placeholder="Nombre de la ciudad" oninput="syncNewCity()" style="width:100%;">
+        </div>
       </div>
     </div>
     <div class="form-row">
@@ -847,6 +851,7 @@ td.td-notas{max-width:120px;}
           <option value="Tarjeta xx2042">Tarjeta xx2042</option>
           <option value="Tarjeta xx6579">Tarjeta xx6579</option>
           <option value="Tarjeta xx0361">Tarjeta xx0361</option>
+          <option value="Tarjeta xx3104">Tarjeta xx3104</option>
         </select>
       </div>
     </div>
@@ -867,16 +872,7 @@ td.td-notas{max-width:120px;}
           </div>
         </div>
       </div>
-    </div>
-
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
-      <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
-      <button class="btn-save" onclick="saveGasto()">Guardar Gasto</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg">Gasto guardado</span></div>
+    </div><span id="toastMsg">Gasto guardado</span></div>
 
 <script>
 /* -- SUPABASE -- */
@@ -1362,6 +1358,30 @@ function clearModalComp(){
   document.getElementById('modal-comp-name').textContent = '';
 }
 
+function toggleNewCity(){
+  var sel = document.getElementById('f-ciudad');
+  var wrap = document.getElementById('nueva-ciudad-wrap');
+  if(sel.value === '__nueva__'){
+    wrap.style.display = 'block';
+    document.getElementById('f-ciudad-nueva').focus();
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+function syncNewCity(){
+  // The actual city value is read in saveGasto via getCiudadValue()
+}
+
+function getCiudadValue(){
+  var sel = document.getElementById('f-ciudad');
+  if(sel.value === '__nueva__'){
+    var newVal = (document.getElementById('f-ciudad-nueva').value||'').trim();
+    return newVal || 'Nueva Ciudad';
+  }
+  return sel.value;
+}
+
 function toggleSubcat(){
   const cat=document.getElementById('f-cat').value;
   const wrap=document.getElementById('subcat-wrap');
@@ -1383,7 +1403,15 @@ function openModal(id=null){
     if(!g){ showToast('Registro no encontrado (id='+editId+')', true); return; }
     document.getElementById('modalTitle').textContent='Editar Gasto';
     document.getElementById('f-fecha').value=g.fecha;
-    document.getElementById('f-ciudad').value=g.ciudad;
+    var ciudadSel = document.getElementById('f-ciudad');
+    var ciudadOpts = Array.from(ciudadSel.options).map(o=>o.value);
+    if(ciudadOpts.includes(g.ciudad)){
+      ciudadSel.value = g.ciudad;
+    } else {
+      ciudadSel.value = '__nueva__';
+      document.getElementById('f-ciudad-nueva').value = g.ciudad;
+      document.getElementById('nueva-ciudad-wrap').style.display = 'block';
+    }
     // set category select
     const isAlim=g.categoria==='Comida Personal'||g.categoria==='Comida Equipo';
     document.getElementById('f-cat').value=isAlim?'Alimentacion':g.categoria;
@@ -1412,6 +1440,11 @@ function openModal(id=null){
   toggleSubcat();
   toggleTarjeta();
   updateConv();
+  // Reset nueva ciudad
+  var wrap = document.getElementById('nueva-ciudad-wrap');
+  if(wrap) wrap.style.display='none';
+  var nc = document.getElementById('f-ciudad-nueva');
+  if(nc) nc.value='';
   clearModalComp();
   setMontoCurrency('MXN');
   document.getElementById('modalOverlay').classList.add('open');
@@ -1517,7 +1550,7 @@ async function saveGasto(){
   const g={
     id: editId,
     fecha: document.getElementById('f-fecha').value,
-    ciudad: document.getElementById('f-ciudad').value,
+    ciudad: getCiudadValue(),
     categoria: categoria,
     descripcion: document.getElementById('f-desc').value||'--',
     mxn,
@@ -1891,6 +1924,7 @@ document.getElementById('modalOverlay').addEventListener('click',e=>{ if(e.targe
 })();
 loadGastos();
 </script>
+
 
 
 
