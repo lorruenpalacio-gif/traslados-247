@@ -864,15 +864,23 @@ td.td-notas{max-width:120px;}
         </label>
         <span id="modal-comp-name" style="margin-left:8px;font-size:11px;color:#6b7280;"></span>
         <div id="modal-comp-preview" style="margin-top:8px;display:none;">
-          <div style="dis
-          <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:6px;">
             <i class="ti ti-paperclip" style="color:#2563eb;font-size:15px"></i>
             <span id="modal-comp-filename" style="font-size:12px;color:#2563eb;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
             <button onclick="clearModalComp()" style="background:none;border:none;cursor:pointer;color:#dc2626;font-size:14px;padding:0;"><i class="ti ti-x"></i></button>
           </div>
         </div>
       </div>
-    </div><span id="toastMsg">Gasto guardado</span></div>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button type="button" class="btn-save" onclick="saveGasto()">Guardar Gasto</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check"></i><span id="toastMsg">Gasto guardado</span></div>
 
 <script>
 /* -- SUPABASE -- */
